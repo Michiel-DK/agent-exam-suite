@@ -1,0 +1,329 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>agent-sandbox scoreboard</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --pass: #2e7d32; --fail: #c62828; --line: #8883; --dim: #8888;
+    --rung1: #4a8fd4; --rung2: #4aa88f; --rung3: #c99a3e; --rung4: #b0603f;
+    --champ: #9a7412;
+  }
+  /* light-tuned greens/reds go dim on a dark canvas — brighten them there */
+  @media (prefers-color-scheme: dark) {
+    :root { --pass: #5cbf62; --fail: #f2776e; --champ: #d9ac3d; }
+  }
+  * { box-sizing: border-box; }
+  body { font: 15px/1.55 -apple-system, system-ui, sans-serif; max-width: 940px;
+         margin: 2rem auto 4rem; padding: 0 1rem; overflow-x: hidden; }
+  h1 { font-size: 1.3rem; margin-bottom: .2rem; }
+  h2 { font-size: 1.1rem; margin: 2.4rem 0 .1rem; display: flex;
+       align-items: center; gap: .6rem; flex-wrap: wrap; overflow-wrap: anywhere; }
+  .muted { opacity: .6; font-size: .85em; }
+  .pass { color: var(--pass); } .fail { color: var(--fail); }
+
+  /* mode ladder badge */
+  .mode { font-size: .72rem; font-weight: 600; letter-spacing: .04em;
+          text-transform: uppercase; padding: .15rem .5rem; border-radius: 3px;
+          color: #fff; }
+  .rung-labels     { background: var(--rung1); }
+  .rung-fields     { background: var(--rung2); }
+  .rung-properties { background: var(--rung3); }
+  .rung-trajectory { background: var(--rung4); }
+  .rungdots { letter-spacing: .12em; font-size: .8rem; opacity: .55; }
+
+  /* not_verified banner */
+  .notverified { font-size: .82rem; opacity: .7; margin: .15rem 0 .7rem;
+                 max-width: 74ch; overflow-wrap: anywhere; }
+  .notverified b { opacity: .85; }
+
+  /* badges: champion marker / drift warning / partial-metrics flag */
+  .badge { font-size: .68rem; font-weight: 700; letter-spacing: .02em;
+           padding: .15rem .45rem; border-radius: 3px; color: #fff;
+           margin-left: .5rem; white-space: nowrap; display: inline-block;
+           vertical-align: middle; }
+  .badge.champion { background: var(--champ); color: #1a1200; }
+  .badge.drift { background: var(--fail); }
+  /* muted, not alarming: a stale duplicate is untidy data, not a failing gate */
+  .badge.dup { background: transparent; color: var(--dim); border: 1px solid var(--line); }
+  .badge.metricflag { background: none; color: var(--fail); font-weight: 700;
+                       cursor: help; padding: 0 0 0 .15rem; margin-left: .15rem; }
+
+  /* score table */
+  .tablewrap { overflow-x: auto; margin: .9rem 0 1.4rem; }
+  table { border-collapse: collapse; width: 100%; min-width: 480px; margin: 0; }
+  th, td { text-align: left; padding: .35rem .6rem; border-bottom: 1px solid var(--line); }
+  th { font-weight: 600; font-size: .8rem; text-transform: uppercase;
+       letter-spacing: .04em; opacity: .65; white-space: nowrap; }
+  td.num { white-space: nowrap; font-variant-numeric: tabular-nums; }
+  tr.champrow td:first-child { border-left: 2px solid var(--champ); }
+  .bar { display: inline-block; vertical-align: middle; width: 90px; height: 7px;
+         border-radius: 4px; background: var(--line); margin-left: .5rem; }
+  .bar > i { display: block; height: 100%; border-radius: 4px; background: var(--pass); }
+  .bar > i.part { background: #c99a3e; }
+  .bar > i.bad  { background: var(--fail); }
+
+  /* case list */
+  .splithead { font-size: .78rem; text-transform: uppercase; letter-spacing: .05em;
+               opacity: .55; margin: 1.1rem 0 .3rem; }
+  .dotkey { font-size: .78rem; opacity: .65; margin: .1rem 0 .2rem .2rem;
+            display: flex; gap: .5rem 1rem; align-items: baseline; flex-wrap: wrap; }
+  .dotkey span.entry { display: inline-flex; align-items: baseline; gap: .3rem;
+                        max-width: 100%; overflow-wrap: anywhere; }
+  details.case { border-bottom: 1px solid var(--line); }
+  details.case > summary { cursor: pointer; padding: .4rem .2rem;
+                           display: flex; gap: .6rem; align-items: baseline; flex-wrap: wrap; }
+  details.case > summary::-webkit-details-marker { display: none; }
+  .dots { font-family: ui-monospace, monospace; letter-spacing: .1em; }
+  .dots .dot.missing { opacity: .35; }
+  .cid { font-weight: 600; overflow-wrap: anywhere; }
+  .checks { color: var(--dim); font-size: .85em; margin-left: auto;
+            text-align: right; overflow-wrap: anywhere; max-width: 60%; }
+  .casebody { padding: .2rem .2rem 1rem 1.6rem; font-size: .9em; overflow-wrap: anywhere; }
+  .casebody h4 { margin: .8rem 0 .2rem; font-size: .85em; font-weight: 600; }
+  .casebody h4.modelhead { overflow-wrap: anywhere; }
+  code, pre { font-family: ui-monospace, SFMono-Regular, monospace; font-size: .88em; }
+  pre { white-space: pre-wrap; overflow-wrap: anywhere; margin: .2rem 0; padding: .5rem .7rem;
+        background: #8881; border-radius: 4px; overflow-x: auto; }
+  ul.fails { margin: .2rem 0; padding-left: 1.1rem; }
+  ul.fails li { color: var(--fail); }
+  ul.checklist { margin: .15rem 0; padding-left: 1.1rem; }
+  ul.checklist li { overflow-wrap: anywhere; }
+  ul.checklist code { opacity: .85; }
+  .legend { font-size: .82rem; opacity: .7; margin: .6rem 0 0; }
+  .legend span { margin-right: 1rem; white-space: nowrap; }
+</style>
+
+<h1>agent-sandbox scoreboard</h1>
+<p class="muted">Heldout is the real score — train cases are what prompts get tuned on.</p>
+<p class="legend">
+  <span><b>Complexity ladder:</b></span>
+  <span><b class="mode rung-labels">labels</b> exact match</span>
+  <span><b class="mode rung-fields">fields</b> partial credit</span>
+  <span><b class="mode rung-properties">properties</b> checks + judge</span>
+  <span><b class="mode rung-trajectory">trajectory</b> tools + grounding</span>
+</p>
+<div id="app">loading…</div>
+
+<script>
+const MODES = {
+  labels:     { rung: 1, blurb: 'exact match on expected fields' },
+  fields:     { rung: 2, blurb: 'per-field partial credit' },
+  properties: { rung: 3, blurb: 'properties.py checks + judge rubric, no golden answers' },
+  trajectory: { rung: 4, blurb: 'tools called, step budget, grounded answer' },
+};
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// What a case actually verifies — read off `expected` / the exam's declared checks,
+// never an invented score. `exam` is this agent's /api/exams entry (may be undefined
+// for a stale result file whose agent no longer has an exam on disk).
+function checksOf(c, mode, exam) {
+  const e = c.expected || {};
+  if (mode === 'trajectory') {
+    const bits = [];
+    if (e.tools_called?.length)   bits.push(`tools: ${e.tools_called.join(', ')}`);
+    if (e.answer_contains?.length) bits.push(`answer ⊃ ${e.answer_contains.map(s => `"${s}"`).join(', ')}`);
+    if (e.max_steps != null)      bits.push(`≤${e.max_steps} steps`);
+    return esc(bits.join(' · '));
+  }
+  if (mode === 'properties') {
+    const fns = exam?.check_functions || [];
+    const rubric = exam?.rubric || [];
+    const bits = [];
+    if (fns.length) bits.push(fns.join(', '));
+    if (rubric.length) bits.push(`judge: ${rubric.length} rubric bullet${rubric.length === 1 ? '' : 's'}`);
+    return bits.length ? esc(bits.join(' · ')) : 'properties.py + judge rubric';
+  }
+  const ks = Object.keys(e);
+  if (!ks.length) return '';
+  return esc(ks.map(k => `${k}=${JSON.stringify(e[k])}`).join(' · '));
+}
+
+function bar(passed, total) {
+  const pct = total ? (passed / total) * 100 : 0;
+  const cls = pct === 100 ? '' : pct >= 50 ? 'part' : 'bad';
+  return `<span class="bar"><i class="${cls}" style="width:${pct}%"></i></span>`;
+}
+
+// Per-case tokens + wall-clock, derived from metrics_totals so models with different
+// case counts stay comparable. metrics_totals is null on result files predating
+// Stage 5 (metrics), and `complete:false` when some case errored before it could be
+// metered — surface both honestly. Never invent a number, never zero-fill.
+function metricsCols(r) {
+  const totals = r.metrics_totals;
+  const n = (r.train?.total || 0) + (r.heldout?.total || 0);
+  if (!totals || !n) return { tok: 'n/a', ms: 'n/a', flag: '' };
+  // Plain integers, not toLocaleString(): its default-locale grouping separator
+  // (e.g. "." in nl/de locales) reads as a decimal point and misrepresents a
+  // millisecond count as a fraction of one.
+  const tok = totals.total_tokens != null ? String(Math.round(totals.total_tokens / n)) : 'n/a';
+  const ms = totals.wall_ms != null ? `${Math.round(totals.wall_ms / n)}ms` : 'n/a';
+  let flag = '';
+  if (totals.complete === false) {
+    const n_um = totals.unmetered_cases;
+    flag = `<span class="badge metricflag" title="${n_um} case(s) errored before a model call completed — this total is a floor, not the true spend">*</span>`;
+  }
+  return { tok, ms, flag };
+}
+
+Promise.all([
+  fetch('/api/results').then(r => r.json()),
+  fetch('/api/exams').then(r => r.json()),
+  fetch('/api/snapshots').then(r => r.json()),
+]).then(([results, exams, snapshots]) => {
+  const byAgent = {};
+  for (const r of results) (byAgent[r.agent] ||= []).push(r);
+  let html = '';
+
+  for (const [agent, rows] of Object.entries(byAgent)) {
+    rows.sort((a, b) => (b.heldout.score ?? 0) - (a.heldout.score ?? 0));
+    // mode is per-exam, not per-model; older result files predate the field.
+    const mode = rows.map(r => r.mode).find(Boolean) || 'labels';
+    const m = MODES[mode] || { rung: '?', blurb: '' };
+    const exam = exams[agent];
+    const snap = snapshots[agent];
+    // Case id -> its actual input text, from the live exam definition. A stale
+    // result file can carry a case id the current exam no longer has; that's fine,
+    // we just render no input for it rather than "undefined".
+    const examCaseById = new Map((exam?.cases || []).map(c => [c.id, c]));
+
+    html += `<h2>${esc(agent)}
+      <b class="mode rung-${esc(mode)}">${esc(mode)}</b>
+      <span class="rungdots" title="complexity rung ${m.rung} of 4">${
+        '●'.repeat(m.rung) + '○'.repeat(4 - m.rung)}</span>
+      <span class="muted" style="font-weight:400">${esc(m.blurb)}</span></h2>`;
+
+    if (exam?.not_verified) {
+      // not_verified may be a string or a list (runner.py print_not_verified
+      // supports both; crm-followup is a list since E10 v2) — join lists
+      // readably instead of relying on String()'s comma-join.
+      const nv = Array.isArray(exam.not_verified)
+        ? exam.not_verified.join(' — ') : exam.not_verified;
+      html += `<p class="notverified"><b>not verified by this exam:</b> ${esc(nv)}</p>`;
+    }
+
+    html += `<div class="tablewrap"><table><tr><th>model</th><th>provider</th>
+      <th>train</th><th>heldout</th><th>tokens/case</th><th>time/case</th></tr>`;
+    // Exactly ONE row may wear the champion badge. `results/` can hold two files for
+    // the same provider+model (a pre-Stage-1 `agent__model.json` and the newer
+    // `agent__provider__model.json`), and badging both made two rows each claim to be
+    // "the" champion — and left drift undefined, since drift is derived from isChamp.
+    // Pick the first match in the already-sorted rows, and mark the rest as stale
+    // duplicates rather than silently hiding them: the ambiguity is real data about
+    // a dirty results/ dir, and `run-all` is what clears it.
+    const champIdx = !!snap
+      ? rows.findIndex((r) => r.provider === snap.provider && r.model === snap.model)
+      : -1;
+    rows.forEach((r, i) => {
+      r._isChamp = i === champIdx;
+      r._dupOfChamp = champIdx !== -1 && i !== champIdx &&
+        r.provider === snap.provider && r.model === snap.model;
+    });
+    for (const r of rows) {
+      // Champion = the row whose provider+model matches this agent's committed
+      // snapshot.json. Drift = that row's current heldout score fell below the
+      // score recorded at snapshot time (same strict "<" runner.py's cmd_check
+      // uses with tolerance 0.0).
+      const isChamp = r._isChamp;
+      const drifted = isChamp && snap.heldout_score != null &&
+        r.heldout.score != null && r.heldout.score < snap.heldout_score;
+      const { tok, ms, flag } = metricsCols(r);
+      html += `<tr class="${isChamp ? 'champrow' : ''}"><td>${esc(r.model)}${
+          isChamp ? `<span class="badge champion" title="champion — matches evals/${esc(agent)}/snapshot.json">★ champion</span>` : ''}${
+          drifted ? `<span class="badge drift" title="current heldout ${r.heldout.score} is below the snapshot's recorded ${snap.heldout_score}">⚠ drifted from snapshot</span>` : ''}${
+          r._dupOfChamp ? `<span class="badge dup" title="another result file has the same provider+model as the champion — a stale pre-provider-filename run. results/ is disposable: run-all regenerates it.">stale duplicate</span>` : ''}</td>
+        <td class="muted">${esc(r.provider)}</td>
+        <td class="num">${r.train.passed}/${r.train.total}${bar(r.train.passed, r.train.total)}</td>
+        <td class="num"><b>${r.heldout.passed}/${r.heldout.total}</b>${bar(r.heldout.passed, r.heldout.total)}</td>
+        <td class="num">${tok}${flag}</td>
+        <td class="num">${ms}</td></tr>`;
+    }
+    html += '</table></div>';
+
+    // Case × model matrix: one row per case, a pass/fail dot per model.
+    const caseIds = [];
+    for (const r of rows) for (const c of r.cases)
+      if (!caseIds.some(x => x.id === c.id)) caseIds.push({ id: c.id, split: c.split });
+
+    // Dot key: each dot occupies a FIXED slot (rows[i]) and carries a data-model /
+    // title attribute naming the model it belongs to — never inferred from position.
+    // Two rows can legitimately share a model name (Stage 1 added provider to result
+    // filenames, so an agent can show both an old `agent__model` file and a new
+    // `agent__provider__model` file for the same model — distinct runs, not a dupe
+    // to collapse), so the key can't be the bare model name either: that would merge
+    // their dots and reintroduce the double-count Stage 1 was fixing. A model with no
+    // entry for a given case renders an explicit "–" in its slot rather than being
+    // omitted, so a missing case can never shift a later model's dot into view.
+    html += `<div class="dotkey"><span>per-case dots, in table order:</span>${
+      rows.map(r => `<span class="entry"><b>●</b> ${esc(r.model)}<span class="muted">(${esc(r.provider)})</span></span>`).join('')}</div>`;
+
+    for (const split of ['train', 'heldout']) {
+      const ids = caseIds.filter(c => c.split === split);
+      if (!ids.length) continue;
+      html += `<div class="splithead">${split}${
+        split === 'heldout' ? ' — the reported score' : ' — tunable'}</div>`;
+
+      for (const { id } of ids) {
+        const slots = rows.map(r => r.cases.find(c => c.id === id) || null);
+        const dots = slots.map((c, i) => {
+          const model = rows[i].model;
+          if (!c) return `<span class="dot missing" title="${esc(model)}: case not run">–</span>`;
+          return `<span class="dot ${c.passed ? 'pass' : 'fail'}" title="${esc(model)}: ${c.passed ? 'pass' : 'fail'}">${
+            c.passed ? '●' : '✕'}</span>`;
+        }).join(' ');
+        const any = slots.find(Boolean);
+        const input = examCaseById.get(id)?.input;
+
+        html += `<details class="case"><summary>
+          <span class="dots">${dots}</span>
+          <span class="cid">${esc(id)}</span>
+          <span class="checks">${checksOf(any, mode, exam)}</span></summary>
+          <div class="casebody">`;
+
+        if (input != null) {
+          html += `<h4>input</h4><pre>${esc(input)}</pre>`;
+        }
+        if (mode === 'properties' && (exam?.check_functions?.length || exam?.rubric?.length)) {
+          if (exam.check_functions?.length) {
+            html += `<h4>check_* functions</h4><ul class="checklist">${
+              exam.check_functions.map(f => `<li><code>${esc(f)}</code></li>`).join('')}</ul>`;
+          }
+          if (exam.rubric?.length) {
+            html += `<h4>judge rubric</h4><ul class="checklist">${
+              exam.rubric.map(b => `<li>${esc(b)}</li>`).join('')}</ul>`;
+          }
+        }
+
+        for (let i = 0; i < rows.length; i++) {
+          const c = slots[i];
+          if (!c) continue; // this model didn't run this case — already shown as "–" above
+          const model = rows[i].model;
+          html += `<h4 class="modelhead">${esc(model)} — <span class="${c.passed ? 'pass' : 'fail'}">${
+            c.passed ? 'pass' : 'fail'}</span></h4>`;
+          if (c.detail?.fields_matched != null)
+            html += `<div class="muted">fields matched ${c.detail.fields_matched}/${c.detail.fields_total}</div>`;
+          if (c.detail?.tools_called)
+            html += `<div class="muted">tools called: ${
+              esc(c.detail.tools_called.join(', ') || '—')} · ${c.detail.steps} step(s)</div>`;
+          if (c.detail?.metrics) {
+            const dm = c.detail.metrics;
+            const tokStr = dm.total_tokens != null ? `${dm.total_tokens} tokens` : 'tokens n/a';
+            html += `<div class="muted">${tokStr} · ${dm.wall_ms}ms${dm.retries ? ` · ${dm.retries} retr${dm.retries === 1 ? 'y' : 'ies'}` : ''}</div>`;
+          }
+          if (c.failures?.length)
+            html += `<ul class="fails">${c.failures.map(f => `<li>${esc(f)}</li>`).join('')}</ul>`;
+          html += `<pre>${esc(JSON.stringify(c.got, null, 1))}</pre>`;
+        }
+        html += '</div></details>';
+      }
+    }
+  }
+  document.getElementById('app').innerHTML = html || 'no results yet — run an exam first';
+}).catch(err => {
+  document.getElementById('app').textContent = `failed to load scoreboard data: ${err}`;
+  console.error(err);
+});
+</script>

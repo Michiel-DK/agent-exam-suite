@@ -1,0 +1,148 @@
+{
+  "agent": "expense-categorization",
+  "mode": "fields",
+  "note": "Field-level scoring: partial credit per field, case passes only if all fields match.",
+  "not_verified": "Field values are matched by case-insensitive exact string (category) or exact equality (recurring boolean). It does not check that 'category' is the most specific correct label from a real taxonomy — a plausible synonym or a coarser-but-defensible category counts as wrong with no credit for being close — and it cannot detect a case where the correct category is genuinely ambiguous from the transaction line alone.",
+  "cases": [
+    {
+      "id": "railway-subscription",
+      "split": "train",
+      "input": "RAILWAY.APP SUBSCRIPTION 20.00 USD - card 4412",
+      "expected": {
+        "category": "software",
+        "recurring": true
+      }
+    },
+    {
+      "id": "client-lunch",
+      "split": "train",
+      "input": "RESTAURANT THE GLASSHOUSE GHENT 86.50 EUR - card 4412",
+      "expected": {
+        "category": "meals",
+        "recurring": false
+      }
+    },
+    {
+      "id": "nmbs-ticket",
+      "split": "train",
+      "input": "TRAINLINE RAIL TICKET BRUSSELS 22.40 EUR",
+      "expected": {
+        "category": "travel",
+        "recurring": false
+      }
+    },
+    {
+      "id": "proximus-monthly",
+      "split": "train",
+      "input": "PROXIMUS TELECOM DIRECT DEBIT MONTHLY PLAN 54.99 EUR",
+      "expected": {
+        "category": "telecom",
+        "recurring": true
+      }
+    },
+    {
+      "id": "coolblue-monitor",
+      "split": "train",
+      "input": "COOLBLUE ELECTRONICS ANTWERP 329.00 EUR - card 4412",
+      "expected": {
+        "category": "hardware",
+        "recurring": false
+      }
+    },
+    {
+      "id": "anthropic-api",
+      "split": "heldout",
+      "input": "ANTHROPIC PBC API CREDITS 50.00 USD - card 4412",
+      "expected": {
+        "category": "software",
+        "recurring": false
+      }
+    },
+    {
+      "id": "hotel-lisbon",
+      "split": "heldout",
+      "input": "HOTEL MUNDIAL LISBOA 2 NIGHTS 218.00 EUR - card 4412",
+      "expected": {
+        "category": "travel",
+        "recurring": false
+      }
+    },
+    {
+      "id": "google-ads",
+      "split": "heldout",
+      "input": "GOOGLE ADS BE-BE 150.00 EUR AUTOMATIC PAYMENT",
+      "expected": {
+        "category": "marketing",
+        "recurring": true
+      }
+    },
+    {
+      "id": "paypal-cryptic",
+      "split": "heldout",
+      "input": "PAYPAL *8837462X 41.00 EUR - card 4412",
+      "expected": {
+        "category": "other",
+        "recurring": false
+      }
+    },
+    {
+      "id": "bank-transfer-savings",
+      "split": "heldout",
+      "input": "TFR TO SAVINGS BE68 5390 0754 7034 250.00 EUR",
+      "expected": {
+        "category": "other",
+        "recurring": false
+      }
+    },
+    {
+      "id": "godaddy-domain-renewal",
+      "split": "train",
+      "note": "PR2/D2: domains are 'marketing' per the prompt's taxonomy (ads, domains, design) — the pull is 'software'. 12M renewal = recurring.",
+      "input": "GODADDY.COM DOMAIN RENEWAL 12M ROGER3000.COM 19.99 EUR - card 4412",
+      "expected": {
+        "category": "marketing",
+        "recurring": true
+      }
+    },
+    {
+      "id": "paypal-adobe-subscription",
+      "split": "heldout",
+      "note": "PR2/D2: paypal-cryptic's twin that is NOT 'other' — the merchant is visible behind the PAYPAL * prefix. A subscription that LOOKS one-off.",
+      "input": "PAYPAL *ADOBE CC SUBSCR 26.62 EUR - card 4412",
+      "expected": {
+        "category": "software",
+        "recurring": true
+      }
+    },
+    {
+      "id": "square-cafe-cryptic",
+      "split": "heldout",
+      "note": "PR2/D2: SQ * processor prefix obscures a cafe purchase; small amount pulls toward 'other'.",
+      "input": "SQ *CORNER CAFE BRUSSELS 4.80 EUR - card 4412",
+      "expected": {
+        "category": "meals",
+        "recurring": false
+      }
+    },
+    {
+      "id": "uber-trip-cryptic",
+      "split": "heldout",
+      "note": "PR2/D2: UBER *TRIP is transport (travel per the prompt), but the Uber Eats association pulls toward 'meals'.",
+      "input": "UBER *TRIP HELP.UBER.COM 23.40 EUR - card 4412",
+      "expected": {
+        "category": "travel",
+        "recurring": false
+      }
+    },
+    {
+      "id": "telenet-daypass",
+      "split": "heldout",
+      "note": "PR2/D2: a one-off that LOOKS recurring — telecom brand, but a 24h day pass is not a subscription.",
+      "input": "TELENET WIFREE DAYPASS 24H 9.00 EUR - card 4412",
+      "expected": {
+        "category": "telecom",
+        "recurring": false
+      }
+    }
+  ]
+}

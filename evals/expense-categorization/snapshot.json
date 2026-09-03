@@ -1,0 +1,94 @@
+{
+  "provider": "ollama",
+  "model": "gemma4:e2b-it-qat",
+  "train_score": 1.0,
+  "heldout_score": 0.8889,
+  "temperature": 0.0,
+  "max_tokens": 2048,
+  "judge": null,
+  "date": "2026-07-26T14:36:32",
+  "harness_sha": "abdc20547309ea745d997d86c7d83fb9dce715e1",
+  "cases": [
+    {
+      "id": "railway-subscription",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "client-lunch",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "nmbs-ticket",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "proximus-monthly",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "coolblue-monitor",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "anthropic-api",
+      "split": "heldout",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "fields"
+        }
+      ]
+    },
+    {
+      "id": "hotel-lisbon",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "google-ads",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "paypal-cryptic",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "bank-transfer-savings",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "godaddy-domain-renewal",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "paypal-adobe-subscription",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "square-cafe-cryptic",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "uber-trip-cryptic",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "telenet-daypass",
+      "split": "heldout",
+      "passed": true
+    }
+  ]
+}

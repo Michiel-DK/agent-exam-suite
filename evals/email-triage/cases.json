@@ -1,0 +1,168 @@
+{
+  "agent": "email-triage",
+  "note": "train = cases you may iterate the prompt against; heldout = reported score. Never tune on heldout (rlvr-codegen docs/04-reward-hacking.md).",
+  "not_verified": "Exact-match on the predicted 'label' field only, with no partial credit. It does not check the model's reasoning or justification for the label, does not weight ambiguous/borderline emails differently from clear-cut ones, and cannot tell a confident-but-wrong classification from one that was a coin flip.",
+  "cases": [
+    {
+      "id": "client-quote-request",
+      "split": "train",
+      "input": "From: sofie@janssens-bakery.com\nSubject: quote for AI chatbot\n\nHi, we saw your work for restaurants. Could you call us this week about a chatbot for our webshop? We want to go live before September. Thanks, Sofie",
+      "expected": {
+        "label": "reply_now"
+      }
+    },
+    {
+      "id": "overdue-invoice",
+      "split": "train",
+      "input": "From: accounting@hostpro.eu\nSubject: Payment reminder - invoice #4482 overdue\n\nDear customer, our records show invoice #4482 (EUR 214.50) is 14 days overdue. Please settle within 7 days to avoid service interruption.",
+      "expected": {
+        "label": "reply_now"
+      }
+    },
+    {
+      "id": "newsletter-substack",
+      "split": "train",
+      "input": "From: newsletter@benedictevans.substack.com\nSubject: AI eats the world, week 29\n\nThis week: model releases, chip export rules, and why agents are still mostly demos. Read the full post online.",
+      "expected": {
+        "label": "ignore"
+      }
+    },
+    {
+      "id": "recruiter-linkedin",
+      "split": "train",
+      "input": "From: talent@techrecruit.io\nSubject: Senior ML Engineer role - Ghent, hybrid\n\nHi! Your profile stood out. A scale-up in Ghent is hiring a senior ML engineer, 90-110k package. Open to a quick intro call next week?",
+      "expected": {
+        "label": "reply_later"
+      }
+    },
+    {
+      "id": "seo-cold-spam",
+      "split": "train",
+      "input": "From: growth@rankboosters.net\nSubject: Your website is losing traffic!!\n\nHi, I analyzed roger3000.com and found 47 SEO issues. Our team can fix them for $299/month. Limited slots available this month only!",
+      "expected": {
+        "label": "ignore"
+      }
+    },
+    {
+      "id": "friend-dinner",
+      "split": "train",
+      "input": "From: thomas.dv@gmail.com\nSubject: padel + dinner next week?\n\nYo! Been a while. Padel on Tuesday or Thursday, then grab dinner in town? Let me know what works.",
+      "expected": {
+        "label": "reply_later"
+      }
+    },
+    {
+      "id": "production-down",
+      "split": "heldout",
+      "input": "From: alerts@railway.app\nSubject: [mast-production] Service crashed - restart loop detected\n\nYour service mast-production has crashed 5 times in the last 10 minutes and is now in a restart loop. Last exit code: 137.",
+      "expected": {
+        "label": "reply_now"
+      }
+    },
+    {
+      "id": "gdpr-data-request",
+      "split": "heldout",
+      "input": "From: j.peeters@outlook.com\nSubject: personal data access request\n\nDear sir, under GDPR I request access to all personal data you process about me. Please respond within the legal 30-day deadline.",
+      "expected": {
+        "label": "reply_now"
+      }
+    },
+    {
+      "id": "conference-invite",
+      "split": "heldout",
+      "input": "From: program@aiconf.brussels\nSubject: Invitation to speak - AI in Practice, November\n\nDear speaker, based on your restaurant AI case study we would love to have you present a 25-minute talk at AI in Practice Brussels this November. Could you let us know your availability by end of next month?",
+      "expected": {
+        "label": "reply_later"
+      }
+    },
+    {
+      "id": "promo-code",
+      "split": "heldout",
+      "input": "From: deals@techstore.com\nSubject: -20% on laptops, this weekend only\n\nDon't miss out: 20% off all laptops. Use code WEEKEND20 at checkout. Offer valid through Sunday.",
+      "expected": {
+        "label": "ignore"
+      }
+    },
+    {
+      "id": "client-question-no-rush",
+      "split": "train",
+      "note": "PR2/D1 borderline-but-decidable: 'no rush at all' pulls reply_later, but the policy enumerates client requests under reply_now and nowhere else — the sender is an existing client (Devos Garage) asking a question.",
+      "input": "From: jan@devos-garage.com\nSubject: quick question about the assistant\n\nHi Michiel, no rush at all, but a customer asked whether the scheduling assistant could also handle appointments in French. Could you let me know what's possible? Cheers, Jan",
+      "expected": {
+        "label": "reply_now"
+      }
+    },
+    {
+      "id": "agency-whitelabel-offer",
+      "split": "train",
+      "note": "PR2/D1 borderline-but-decidable: smells like new business (money pull toward reply_now), but no client relationship and no money matter exists — this is networking ('just exploring'), which the policy puts under reply_later.",
+      "input": "From: partnerships@codeandco.agency\nSubject: white-label collaboration?\n\nHi, we're a 25-person dev agency in Antwerp with overflow AI chatbot requests from our clients. Would you be open to a call about taking some of that work on a white-label basis? No timeline pressure, just exploring. Best, Kasper",
+      "expected": {
+        "label": "reply_later"
+      }
+    },
+    {
+      "id": "invoice-error-client",
+      "split": "heldout",
+      "note": "PR2/D1 borderline-but-decidable: mild phrasing ('no stress', 'when you get a chance') pulls reply_later, but a billing error on an issued invoice is a money matter from a client — both enumerated under reply_now.",
+      "input": "From: sofie@janssens-bakery.com\nSubject: small thing on invoice 2026-031\n\nHi Michiel, no stress, but I think invoice 2026-031 counts the training session twice. Could you have a look when you get a chance? Thanks! Sofie",
+      "expected": {
+        "label": "reply_now"
+      }
+    },
+    {
+      "id": "dpa-signature-compliance",
+      "split": "heldout",
+      "note": "PR2/D1 borderline-but-decidable: reads as boring vendor admin (reply_later pull), but it is a legal/compliance request AND a money matter (payments blocked until signed) — reply_now per the policy's enumeration.",
+      "input": "From: legal@vandamme-logistics.be\nSubject: countersigned DPA needed for vendor onboarding\n\nDear supplier, to complete vendor onboarding our compliance team still needs the countersigned data processing agreement. Vendor payments cannot be released until this document is on file. Regards, Legal & Compliance",
+      "expected": {
+        "label": "reply_now"
+      }
+    },
+    {
+      "id": "recruiter-fake-urgency",
+      "split": "heldout",
+      "note": "PR2/D1 borderline-but-decidable: manufactured urgency ('TODAY', 'tonight') pulls reply_now, but the policy places recruiter outreach under reply_later unconditionally — urgency claimed by the sender does not move the category.",
+      "input": "From: ella@toptalent.eu\nSubject: need your answer TODAY - AI lead role\n\nHi Michiel, the client closes the shortlist tonight and I'd hate for you to miss out - 130k package, full remote, AI lead. Can you confirm your interest today? Ella",
+      "expected": {
+        "label": "reply_later"
+      }
+    },
+    {
+      "id": "paid-workshop-invite",
+      "split": "heldout",
+      "note": "PR2/D1 borderline-but-decidable: the 1500 EUR figure pulls toward 'money matters' / reply_now, but nothing is owed or disputed — it is an invitation with a two-week window, enumerated under reply_later.",
+      "input": "From: events@digitalfirst.be\nSubject: paid workshop slot - 1500 EUR honorarium\n\nHi Michiel, we'd love you to run your AI-for-SMEs workshop at our members day in Leuven. We pay a 1500 EUR honorarium plus travel. Could you confirm within the next two weeks? Best, Nathalie",
+      "expected": {
+        "label": "reply_later"
+      }
+    },
+    {
+      "id": "intro-no-ask",
+      "split": "heldout",
+      "note": "PR2/D1 borderline-but-decidable: a potential future client pulls reply_now, but no one is requesting anything and no client relationship exists — a networking intro, enumerated under reply_later.",
+      "input": "From: thomas.dv@gmail.com\nSubject: intro: Anna from Retail United\n\nHey! Connecting you with Anna (cc'd), innovation manager at Retail United. She's mapping AI vendors for next year and I mentioned your restaurant work. I'll let you two take it from here. Thomas",
+      "expected": {
+        "label": "reply_later"
+      }
+    },
+    {
+      "id": "disk-warning-no-action",
+      "split": "heldout",
+      "note": "PR2/D1 borderline-but-decidable: alert-shaped (the production-down sender) pulls reply_now, but the body states 'No action is required at this time' — an automated notification requiring no action, enumerated under ignore.",
+      "input": "From: alerts@railway.app\nSubject: [mast-production] Disk usage at 82%\n\nHeads up: disk usage on mast-production has reached 82% of quota. No action is required at this time; we will alert you again if usage reaches 95%.",
+      "expected": {
+        "label": "ignore"
+      }
+    },
+    {
+      "id": "long-ramble-buried-incident",
+      "split": "heldout",
+      "note": "PR2/D4 (long input): 1329 chars, rambling multi-topic client mail; the decision-relevant fact (checkout assistant down since this morning, losing orders = production incident + client + money) is buried mid-body between smalltalk and a non-urgent platform question.",
+      "input": "From: peter@casteleyn-kitchens.be\nSubject: catching up + a few things\n\nHi Michiel, hope the summer is treating you well. It has been hectic here since the trade fair - we had record footfall in the showroom and Rita still talks about how many visitors asked whether we were 'the kitchen people with the chatbot', so the marketing effect alone was worth it. I also finally read that book you recommended about service design, good stuff, though I skimmed the middle chapters. Anyway, a few loose ends from my side. We are still thinking about the phase-two ideas you sketched, no decision yet, the board wants to see this year's numbers first. Oh, and before I forget - since this morning the webshop assistant answers every single customer question with an error message, and the web orders that normally come in via that flow have basically stopped, so we are losing sales as we speak. Rita tried turning the widget off and on again but no luck. Also, on a completely different note, our webshop supplier mentioned they are moving everyone to a new platform next year, I have no clue if that affects anything on your side, no rush on that one at all. And if you are ever near Deinze, drop by the showroom, the new espresso machine alone is worth the detour. We should also plan that lunch we keep postponing. Kind regards, Peter",
+      "expected": {
+        "label": "reply_now"
+      }
+    }
+  ]
+}

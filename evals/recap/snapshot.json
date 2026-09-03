@@ -1,0 +1,148 @@
+{
+  "provider": "ollama",
+  "model": "gemma4:e4b-it-qat",
+  "train_score": 0.4286,
+  "heldout_score": 0.7,
+  "temperature": 0.0,
+  "max_tokens": 2048,
+  "judge": null,
+  "date": "2026-07-29T13:11:11",
+  "harness_sha": "d491d517b2b10d472989beea05b7ba782972f59f",
+  "cases": [
+    {
+      "id": "busy-day-standard",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "quiet-day-automated",
+      "split": "train",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "check_abstention"
+        }
+      ]
+    },
+    {
+      "id": "compression-heavy",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "amounts-and-dates",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "buried-critical",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "quiet-day-newsletters",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "quiet-day-with-receipt",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "rounding-bait",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "two-urgent-among-noise",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "long-day-train-xl",
+      "split": "train",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "check_compression"
+        },
+        {
+          "bucket": "quality",
+          "check": "check_coverage"
+        }
+      ]
+    },
+    {
+      "id": "very-long-day",
+      "split": "heldout",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "check_compression"
+        },
+        {
+          "bucket": "quality",
+          "check": "check_coverage"
+        }
+      ]
+    },
+    {
+      "id": "long-day-heldout-xl",
+      "split": "heldout",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "error"
+        }
+      ]
+    },
+    {
+      "id": "long-quiet-day",
+      "split": "heldout",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "check_abstention"
+        }
+      ]
+    },
+    {
+      "id": "buried-critical-xl",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "amounts-at-length",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "long-day-train-2",
+      "split": "train",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "check_compression"
+        }
+      ]
+    },
+    {
+      "id": "long-day-train-3",
+      "split": "train",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "check_compression"
+        }
+      ]
+    }
+  ]
+}

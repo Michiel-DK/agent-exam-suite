@@ -1,0 +1,26 @@
+name: crm-followup
+description: Answer questions about clients using CRM lookup tools
+provider: ollama
+model: gemma4:e2b-it-qat
+# CHAMPION CHANGE 2026-08-31 — decided by the committed production-payload exam (PR #59),
+# per the pre-registered protocol in docs/sprint-map.md: `runner.py diff` on all 28
+# committed cases at temp 0:
+#   gemma4:e2b-it-qat 14/16 heldout, 8/12 train
+#   gemma4:e4b-it-qat  8/16 heldout, 5/12 train  <- previous champion
+# A 6-heldout-case lead on n=16, far outside the noise band. The 4B side reproduced its
+# committed snapshot with 0/28 verdict flips across three same-day runs; the 2B passes
+# 2 of the 4 new heavy-band cases and every old case the 4B protocol-breaks on at fat
+# payloads (probe canon: docs/probes/crm-realism-2026-08-30/RESULTS.md — 2B held 19/24
+# slim->fat while the 4B dropped 19->13). Operator-signed 2026-08-31.
+# CHAMPION CHANGE 2026-07-28 — the first champion in this repo chosen by MEASUREMENT
+# rather than by hand. `runner.py route` (E12, PR #25) on the current 15-case exam:
+#   gemma4:e4b-it-qat 9/9 heldout, 6/6 train
+#   llama3.1:latest   6/9 heldout, 5/6 train  <- previous champion
+# A 3-heldout-case lead, wider than the 1-case noise band (11%/case), so this is a
+# decidable swap and not noise. The incumbent was picked on 2026-07-18 from a TWO-case
+# heldout ('1/2 vs 0/2') — exactly the measurement-power problem E7 describes; that
+# comparison could not have distinguished these models at all.
+# E8 corroborates: e4b was the ONLY model to pass `two-tool-combo`, a champion hard-fail.
+tier: local
+temperature: 0.0
+max_tokens: 2048

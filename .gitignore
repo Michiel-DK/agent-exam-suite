@@ -1,0 +1,11 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
+results/
+
+# harness build worktrees (scratch, recreated per run)
+.claude/worktrees/
+e8_*.log
+sweep_*.log

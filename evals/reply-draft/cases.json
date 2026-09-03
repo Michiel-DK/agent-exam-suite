@@ -1,0 +1,120 @@
+{
+  "agent": "reply-draft",
+  "mode": "properties",
+  "note": "Generation task: no golden answers; properties.py alone carries every case (F3'', 2026-07-24: the LLM judge was removed — a small local judge waved through invented dates 3/3 and could not be trusted; see docs/sprint-map.md DECISION LOG). GATE runs deterministic (samples=1, temp 0). For a capability probe, temporarily set \"samples\": 3, \"sample_temperature\": 0.7 — gemma4 measured flaky there (signoff drops); verified 2026-07-18 that sampled runs are NOT reproducible enough to gate on locally.",
+  "not_verified": "properties.py checks surface features (reply present, word limit, language match, signoff, no invented digits, no invented weekday/date) but not whether the reply is factually helpful, persuasive, on-topic, or professional in tone — those were the judge's job and are now UNCHECKED by design (de-judge, not de-quality: a generic 'thanks, I'll follow up' now passes). An invented claim stated in words rather than digits (e.g. a false capability claim) is not caught by check_no_invented_numbers or check_no_invented_dates.",
+  "cases": [
+    {
+      "id": "quote-request",
+      "split": "train",
+      "input": "From: sofie@janssens-bakery.com\nSubject: chatbot quote\n\nHi, roughly what would a chatbot for our webshop cost? And how fast could it go live? Regards, Sofie",
+      "expected": {}
+    },
+    {
+      "id": "intro-call-en",
+      "split": "train",
+      "input": "From: mark@nordicventures.io\nSubject: intro call?\n\nHi Michiel, saw your restaurant AI case study. Would you be open to a 30-minute intro call about a portfolio company that needs similar help? Best, Mark",
+      "expected": {}
+    },
+    {
+      "id": "scope-question",
+      "split": "train",
+      "input": "From: jan@devos-garage.com\nSubject: question about your services\n\nHello, we run a garage with 12 employees. Could AI help us with appointment scheduling and answering customer questions? Best, Jan De Vos",
+      "expected": {}
+    },
+    {
+      "id": "followup-en",
+      "split": "train",
+      "input": "From: laura@eventix.com\nSubject: following up\n\nHi, just following up on my email from last week about the workshop. Are you still interested in running it in October? Thanks, Laura",
+      "expected": {}
+    },
+    {
+      "id": "price-push",
+      "split": "heldout",
+      "input": "From: tom@peeters-construction.com\nSubject: price\n\nHi, can you give me an exact price today for a quotation assistant? I need to decide this week. Tom",
+      "expected": {}
+    },
+    {
+      "id": "conference-heldout-en",
+      "split": "heldout",
+      "input": "From: program@aiconf.brussels\nSubject: speaker slot confirmation\n\nDear Michiel, could you confirm whether you accept the 25-minute speaker slot in November? We need an answer by Friday. Kind regards, the program team",
+      "expected": {}
+    },
+    {
+      "id": "budget-figure-demand",
+      "split": "heldout",
+      "input": "From: kris@vandamme-logistics.be\nSubject: budget confirmation\n\nHi Michiel, our board meets tomorrow morning. Can you confirm the total budget figure and the exact go-live date for the chatbot project? We need concrete numbers today. Kris",
+      "expected": {}
+    },
+    {
+      "id": "prijs-exact-nl",
+      "split": "heldout",
+      "input": "Van: pieter@bakkerij-peeters.be\nOnderwerp: exacte prijs\n\nDag Michiel, wat kost zo'n chatbot nu precies? Graag een exact bedrag, dan kan ik het budget vrijdag laten goedkeuren. Groeten, Pieter",
+      "expected": {}
+    },
+    {
+      "id": "suivi-boutique-fr",
+      "split": "train",
+      "note": "PR2/D8 (French, capability): input verified to detect as 'fr' via _lang() before commit. Exercises check_language_match's third language.",
+      "input": "De: claire@maisonduval.fr\nObjet: assistant pour notre boutique en ligne\n\nBonjour Michiel, merci pour votre presentation de la semaine derniere. Nous serions interesses par un assistant qui repond aux questions des clients de notre boutique en ligne. Pourriez-vous nous expliquer les prochaines etapes, et ce dont vous auriez besoin de notre part pour commencer ? Cordialement, Claire",
+      "expected": {}
+    },
+    {
+      "id": "devis-exact-fr",
+      "split": "heldout",
+      "note": "PR2/D8 (French, capability): a French client demanding an exact quote — the price-push register in the third language. Input verified to detect as 'fr' via _lang() before commit.",
+      "input": "De: laurent@transports-moreau.fr\nObjet: devis chatbot - montant exact\n\nBonjour Michiel, notre comite budgetaire se reunit cette semaine et il me faut un devis avec le montant exact pour le chatbot. Pouvez-vous me confirmer le prix aujourd'hui ? Merci d'avance. Cordialement, Laurent",
+      "expected": {}
+    },
+    {
+      "id": "long-thread-buried-ask-en",
+      "split": "heldout",
+      "note": "PR2/D4 (long input, capability): 1795 chars, forwarded thread, the decision-relevant ask (fixed price + firm go-live date in writing) buried mid-body. Retires 'nothing over 294 chars has ever been tested'. Real long-context coverage is E13's job.",
+      "input": "From: peter@casteleyn-kitchens.be\nSubject: Fwd: Fwd: chatbot project - several things\n\nHi Michiel, forwarding the thread below so you have the full context, sorry for the mess. A few things have piled up on my desk. First of all thanks again for the demo last month, the team keeps talking about it. Our showroom manager Rita has been collecting questions from the floor staff and honestly most of them are the same three questions about delivery times over and over, which is exactly what you said would happen. Second thing, our webshop supplier is migrating us to a new platform at some point later this year and I have no idea yet whether that changes anything for the integration you proposed. Now the important part, and the reason I am writing today rather than next month: our board approved a budget envelope for the chatbot project in yesterday's meeting, but they will only release it if you can commit in writing to a fixed total price and a firm go-live date. Without those two numbers on paper the whole thing goes back on the shelf until next year. Everything else below is older context. Kind regards, Peter\n\n---------- Forwarded message ----------\nFrom: rita@casteleyn-kitchens.be\nTo: peter@casteleyn-kitchens.be\nSubject: chatbot questions from the floor\n\nPeter, the floor staff mostly get asked about delivery times, assembly service and whether quotes are free. If the chatbot could answer those we would already save hours every week. Also the phone keeps ringing during lunch when nobody is at the desk. Rita\n\n---------- Forwarded message ----------\nFrom: peter@casteleyn-kitchens.be\nTo: rita@casteleyn-kitchens.be\nSubject: RE: showroom weekend\n\nRita, thanks. Let's also ask whether the assistant can hand over to a human when someone asks for a custom design consult. Peter",
+      "expected": {}
+    },
+    {
+      "id": "refund-demand-en",
+      "split": "heldout",
+      "note": "PR2 (capability): angry refund demand with a real invoice amount in the input — pressure to invent concessions, amounts, or deadlines. Echoing 1800 / 2026-014 is allowed; any new figure is caught.",
+      "input": "From: victor@hendriks-consult.com\nSubject: refund - invoice 2026-014\n\nHi Michiel, the workshop did not cover what we agreed and my colleagues share that view. We paid 1800 EUR on invoice 2026-014 and I want a refund, or at minimum a serious proposal from you, before the end of this week. Victor",
+      "expected": {}
+    },
+    {
+      "id": "multipart-request-en",
+      "split": "train",
+      "note": "PR2 (capability): five asks in one mail — word-limit pressure (120) against completeness, plus a price/timeline ask that must be deferred, not invented.",
+      "input": "From: ines@blooma-plants.com\nSubject: three questions\n\nHi Michiel, three things: can your chatbot connect to our Shopify store, could you handle the tone-of-voice guidelines our brand agency wrote, and would you be open to a call with our marketing lead? Also, roughly what does a project like this cost and how long does it take? Thanks, Ines",
+      "expected": {}
+    },
+    {
+      "id": "refund-angry-nl",
+      "split": "train",
+      "note": "PR2 (capability): Dutch angry-client register — language match under emotional pressure, no invented commitments about the deposit.",
+      "input": "Van: karel@meubelen-verstraete.be\nOnderwerp: dit klopt niet\n\nDag Michiel, ik ben niet tevreden. De demo die we vorige week zagen werkte niet zoals beloofd en mijn team heeft er tijd in gestoken. Ik wil weten hoe je dit gaat rechtzetten, en of we een deel van het voorschot kunnen terugkrijgen. Graag een duidelijk antwoord. Groeten, Karel",
+      "expected": {}
+    },
+    {
+      "id": "september-firm-day-en",
+      "split": "heldout",
+      "note": "PR2 CAUGHT-CLASS REGRESSION PROBE (properties.py:149-162): bare-month input pressing for a firm day. An invented 'September 3rd' is exactly what the (day, month) tuple check SHOULD catch — if the champion invents and this case does not fail, the checker regressed. Diagnostic input; expected {} — the case cannot assert an invention happens.",
+      "input": "From: dirk@morren-interiors.com\nSubject: September go-live\n\nHi Michiel, are we still on for September? My operations team is planning the quarter and they will not accept 'sometime in September' - I need you to name the exact day today so we can plan around it. Thanks, Dirk",
+      "expected": {}
+    },
+    {
+      "id": "may-delivery-date-en",
+      "split": "heldout",
+      "note": "PR2 INSTRUMENT-PROBE (declared gap, properties.py:152-154): 'may' is excluded from the month set, so an invented '5 May' passes check_no_invented_dates UNCAUGHT (and a single-digit day also passes check_no_invented_numbers' <10 allowance). If this case passes while the reply names a day in May, that is the declared gap firing in the wild — triage checker-gap vs capability BEFORE reading the result as capability signal. Report, do not fix here.",
+      "input": "From: sandra@delrue-fashion.com\nSubject: May delivery\n\nHi Michiel, our shop refit is happening early in May and the integration has to be delivered in May as well. Which day in May will you deliver? I need the exact date for the planning. Best, Sandra",
+      "expected": {}
+    },
+    {
+      "id": "weekday-call-nl",
+      "split": "heldout",
+      "note": "PR2 INSTRUMENT-PROBE (declared gap, properties.py:159-162): NL weekday COMPOUNDS ('vrijdagmiddag') pass uncaught — the word boundary never fires inside the compound. Input mentions bare 'vrijdag' (echoing it is a legitimate pass); a reply committing to 'vrijdagmiddag'/'vrijdagochtend' invents a daypart the check cannot see. Triage checker-gap vs capability BEFORE reading the result as capability signal. Report, do not fix here.",
+      "input": "Van: els@kapsalon-mertens.be\nOnderwerp: telefonisch overleg\n\nDag Michiel, ik wil graag even bellen over de chatbot voor ons kapsalon. Vrijdag ben ik de hele dag vrij. Wanneer kunnen we bellen? Groeten, Els",
+      "expected": {}
+    }
+  ],
+  "samples": 1
+}

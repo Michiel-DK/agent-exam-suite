@@ -1,0 +1,98 @@
+{
+  "provider": "ollama",
+  "model": "gemma4:e2b-it-qat",
+  "train_score": 1.0,
+  "heldout_score": 1.0,
+  "temperature": 0.0,
+  "max_tokens": 2048,
+  "judge": null,
+  "date": "2026-07-26T14:38:58",
+  "harness_sha": "abdc20547309ea745d997d86c7d83fb9dce715e1",
+  "cases": [
+    {
+      "id": "quote-request",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "intro-call-en",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "scope-question",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "followup-en",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "price-push",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "conference-heldout-en",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "budget-figure-demand",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "prijs-exact-nl",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "suivi-boutique-fr",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "devis-exact-fr",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "long-thread-buried-ask-en",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "refund-demand-en",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "multipart-request-en",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "refund-angry-nl",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "september-firm-day-en",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "may-delivery-date-en",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "weekday-call-nl",
+      "split": "heldout",
+      "passed": true
+    }
+  ]
+}

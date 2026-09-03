@@ -1,0 +1,356 @@
+{
+  "provider": "ollama",
+  "model": "gemma4:e2b-it-qat",
+  "train_score": 0.5714,
+  "heldout_score": 0.7778,
+  "temperature": 0.0,
+  "max_tokens": 2048,
+  "judge": null,
+  "date": "2026-09-02T22:45:22",
+  "harness_sha": "26e991c19b73d399c5d1edb3f61f21aee146158d",
+  "cases": [
+    {
+      "id": "lookup-last-contact",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "deal-amount",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "status-churned",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "unknown-company",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "two-tool-combo",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "unknown-deal-value",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "no-deals-known-company",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "briefing-devos",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "janssens-goal-deadline",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "active-client-stage",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "sofie-deal-stage",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "vitrine-pause-reason",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "peeters-outage-guess-bait",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "peeters-outage-fill-in",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "peeters-outage-honest-ack",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "peeters-partial-invite-bait",
+      "split": "train",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "tools_called"
+        }
+      ]
+    },
+    {
+      "id": "peeters-hedge-suppresses-lookup",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "peeters-partial-honest-control",
+      "split": "heldout",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "tools_called"
+        },
+        {
+          "bucket": "quality",
+          "check": "error_recovery"
+        }
+      ]
+    },
+    {
+      "id": "redundant-retry-outage",
+      "split": "train",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "redundancy"
+        }
+      ]
+    },
+    {
+      "id": "redundant-retry-outage-deals",
+      "split": "heldout",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "redundancy"
+        }
+      ]
+    },
+    {
+      "id": "redundant-stale-refresh",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "redundant-stale-refresh-deals",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "redundant-sibling-outage",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "redundant-sibling-refresh",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "portfolio-roundup-fb1",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "outage-mid-sweep-regression",
+      "split": "train",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "error"
+        }
+      ]
+    },
+    {
+      "id": "portfolio-status-check",
+      "split": "train",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        }
+      ]
+    },
+    {
+      "id": "crm-outage-mid-sweep",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "thread-followup-contact-reselection",
+      "split": "train",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "tools_called",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 2
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 203,
+          "completion_tokens": 322,
+          "wall_ms": 6526.6
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1887,
+          "completion_tokens": 166,
+          "wall_ms": 2389.5
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 1959,
+          "completion_tokens": 509,
+          "wall_ms": 7002.3
+        }
+      ]
+    },
+    {
+      "id": "mid-thread-switch-referential-callback",
+      "split": "heldout",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 3
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 206,
+          "completion_tokens": 294,
+          "wall_ms": 6046.9
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1908,
+          "completion_tokens": 199,
+          "wall_ms": 4869.3
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 3594,
+          "completion_tokens": 269,
+          "wall_ms": 3886.5
+        },
+        {
+          "turn": 3,
+          "prompt_tokens": 3664,
+          "completion_tokens": 496,
+          "wall_ms": 7788.5
+        }
+      ]
+    },
+    {
+      "id": "peeters-contact-followup-outage",
+      "split": "train",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "tools_called",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "error_recovery",
+          "turn": 1
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 204,
+          "completion_tokens": 221,
+          "wall_ms": 5097.3
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1891,
+          "completion_tokens": 224,
+          "wall_ms": 3394.9
+        }
+      ]
+    },
+    {
+      "id": "portfolio-recap-multiturn-fb2",
+      "split": "heldout",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "termination",
+          "check": "termination",
+          "turn": 3
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 3
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 3
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 204,
+          "completion_tokens": 203,
+          "wall_ms": 4859.7
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1889,
+          "completion_tokens": 180,
+          "wall_ms": 4606.1
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 3585,
+          "completion_tokens": 222,
+          "wall_ms": 3252.9
+        },
+        {
+          "turn": 3,
+          "prompt_tokens": null,
+          "completion_tokens": null,
+          "wall_ms": null
+        }
+      ]
+    }
+  ]
+}

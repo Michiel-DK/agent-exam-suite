@@ -1,0 +1,10 @@
+name: email-triage
+description: Triage incoming email into reply_now / reply_later / ignore
+provider: ollama          # ollama | scaleway | ovh | nebius | openrouter | stub
+                          # openrouter is PROBE-GRADE: it load-balances one model id
+                          # across backends per call, so temp-0 does not reproduce.
+                          # Never --snapshot an openrouter run.
+model: gemma4:e2b-it-qat  # the current champion; the diff table challenges this
+tier: local               # local | eu | frontier — data may not leave this tier
+temperature: 0.0
+max_tokens: 2048   # reasoning models spend most of this thinking before the JSON

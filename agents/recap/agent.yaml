@@ -1,0 +1,7 @@
+name: recap
+description: Compress one day of incoming messages into a short grounded recap for the owner
+provider: ollama
+model: gemma4:e4b-it-qat
+tier: local
+temperature: 0.0
+max_tokens: 2048

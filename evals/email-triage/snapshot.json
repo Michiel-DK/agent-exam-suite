@@ -1,0 +1,132 @@
+{
+  "provider": "ollama",
+  "model": "gemma4:e2b-it-qat",
+  "train_score": 0.875,
+  "heldout_score": 0.7273,
+  "temperature": 0.0,
+  "max_tokens": 2048,
+  "judge": null,
+  "date": "2026-07-26T14:35:26",
+  "harness_sha": "abdc20547309ea745d997d86c7d83fb9dce715e1",
+  "cases": [
+    {
+      "id": "client-quote-request",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "overdue-invoice",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "newsletter-substack",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "recruiter-linkedin",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "seo-cold-spam",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "friend-dinner",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "production-down",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "gdpr-data-request",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "conference-invite",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "promo-code",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "client-question-no-rush",
+      "split": "train",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "labels"
+        }
+      ]
+    },
+    {
+      "id": "agency-whitelabel-offer",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "invoice-error-client",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "dpa-signature-compliance",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "recruiter-fake-urgency",
+      "split": "heldout",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "labels"
+        }
+      ]
+    },
+    {
+      "id": "paid-workshop-invite",
+      "split": "heldout",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "labels"
+        }
+      ]
+    },
+    {
+      "id": "intro-no-ask",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "disk-warning-no-action",
+      "split": "heldout",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "labels"
+        }
+      ]
+    },
+    {
+      "id": "long-ramble-buried-incident",
+      "split": "heldout",
+      "passed": true
+    }
+  ]
+}

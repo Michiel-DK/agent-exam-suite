@@ -1,0 +1,7 @@
+name: expense-categorization
+description: Categorize bank/card transaction lines for bookkeeping
+provider: ollama
+model: gemma4:e2b-it-qat
+tier: local
+temperature: 0.0
+max_tokens: 2048

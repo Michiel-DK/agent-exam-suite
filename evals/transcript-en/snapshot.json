@@ -1,0 +1,171 @@
+{
+  "provider": "ollama",
+  "model": "gemma4:e4b-it-qat",
+  "train_score": 0.6667,
+  "heldout_score": 0.6154,
+  "temperature": 0.0,
+  "max_tokens": 2048,
+  "judge": null,
+  "date": "2026-08-26T17:12:19",
+  "harness_sha": "936e07983fdcc388c3555eb27161706fdac1f695",
+  "cases": [
+    {
+      "id": "discovery-short-train",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "renewal-medium-train",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "support-long-train",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "quiet-checkin-short-train",
+      "split": "train",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "check_abstention"
+        }
+      ]
+    },
+    {
+      "id": "pricing-objection-medium-train",
+      "split": "train",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "check_action_items"
+        }
+      ]
+    },
+    {
+      "id": "discovery-long-train",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "renewal-short-train",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "support-medium-train",
+      "split": "train",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "check_coverage"
+        }
+      ]
+    },
+    {
+      "id": "quiet-checkin-medium-train",
+      "split": "train",
+      "passed": true
+    },
+    {
+      "id": "discovery-heldout-easy",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "discovery-heldout-hard",
+      "split": "heldout",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "check_coverage"
+        }
+      ]
+    },
+    {
+      "id": "discovery-heldout-long",
+      "split": "heldout",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "check_coverage"
+        }
+      ]
+    },
+    {
+      "id": "renewal-heldout-medium",
+      "split": "heldout",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "check_coverage"
+        }
+      ]
+    },
+    {
+      "id": "renewal-heldout-digits",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "renewal-heldout-short",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "support-heldout-short",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "support-heldout-long",
+      "split": "heldout",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "check_coverage"
+        }
+      ]
+    },
+    {
+      "id": "pricing-objection-heldout-medium",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "pricing-objection-heldout-short",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "quiet-checkin-heldout-short",
+      "split": "heldout",
+      "passed": true
+    },
+    {
+      "id": "quiet-checkin-heldout-medium",
+      "split": "heldout",
+      "passed": false,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "check_abstention"
+        }
+      ]
+    },
+    {
+      "id": "mixed-heldout-dense",
+      "split": "heldout",
+      "passed": true
+    }
+  ]
+}

@@ -1,0 +1,1313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>agent-sandbox — the eval suite is the asset · a visual walkthrough</title>
+<meta name="description" content="You changed the model. Did anything break? A visual walkthrough of agent-sandbox: five small office agents on local models, and the deterministic exam suite that decides which model ships. Every figure traces to a committed file in the repo; the failures stay on the page.">
+<meta name="robots" content="noindex">
+
+
+<style>
+  :root {
+    color-scheme: light;
+    --paper: #F7F3EC; --paper-deep: #EFE9DE; --card: #FDFBF7; --hairline: #E5DDCF;
+    --ink: #241F1B; --ink-muted: #6B6157;
+    /* palette faint is #9C9187 (2.8:1 on this paper) — darkened to clear AA for
+       this page's small mono captions, same as the violet sibling did */
+    --ink-faint: #746A5E;
+    --accent: #A9527C; --accent-deep: #7E3A5C; --accent-soft: #A9527C1a; --accent-line: #DEC0D0;
+    --red: #7D2A20; --red-soft: #7D2A2014; --red-line: #7D2A2038;
+    --amber: #876a1e; --amber-soft: #876a1e14; --amber-deep: #6b5417; --amber-line: #876a1e40;
+    --serif: "Charter", "Iowan Old Style", Georgia, serif;
+    --sans: ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--sans); margin: 0; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; } }
+  a { color: var(--accent-deep); }
+  :is(a, button):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .hero { min-height: 94vh; display: grid; place-content: center; text-align: center; padding: 3rem 1.5rem 2rem; }
+  .eyebrow { font-family: var(--mono); font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-faint); }
+  .hero .eyebrow { font-size: 1.05rem; letter-spacing: .1em; color: var(--accent); }
+  .hero h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(2rem, 5vw, 3.1rem); letter-spacing: -.01em; margin: .6rem auto .5rem; text-wrap: balance; max-width: 22ch; }
+  .hero .thesis { font-family: var(--serif); font-size: clamp(1.05rem, 2.4vw, 1.35rem); color: var(--accent-deep); margin: 0 auto .8rem; font-style: italic; }
+  .hero .sub { color: var(--ink-muted); max-width: 56ch; margin: 0 auto; font-size: 1.02rem; }
+  .hero .taglines { font-family: var(--mono); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--accent-deep); line-height: 2; margin: 1rem auto 0; }
+  .cta { display: flex; gap: .6rem; justify-content: center; margin-top: 1.7rem; flex-wrap: wrap; }
+  .cta .cap { width: 100%; font-family: var(--mono); font-size: .6rem; color: var(--ink-faint); margin-top: .9rem; }
+  .hero .hint { margin-top: 2.4rem; font-family: var(--mono); font-size: .76rem; font-weight: 600; letter-spacing: .02em; color: var(--accent-deep); animation: bob 2.4s ease infinite; }
+  @keyframes bob { 50% { transform: translateY(5px); } }
+
+  .row { min-height: 86vh; display: grid; grid-template-columns: 1.05fr .95fr; gap: 3rem; align-items: center; max-width: 1060px; margin: 0 auto; padding: 3rem 2rem; }
+  .row.sl .stagecell { order: 1; } .row.sl .txt { order: 2; }
+  .row.sr .stagecell { order: 2; } .row.sr .txt { order: 1; }
+  .stagecell, .txt { min-width: 0; }
+
+  /* ── DESKTOP: SCALE THE TALL ILLUSTRATIONS TO FIT ────────────────────────────
+     Beats 01 and 03 carry the page's two big tables and have ALWAYS been taller
+     than a laptop window — 1174px and 981px against 900px before this session's
+     copy pass, 1225 and 1076 after it. A section taller than the viewport with
+     scroll-snap clips at both ends, which is the failure styling-rules §2 names.
+
+     Same answer as mobile, one step milder: shrink the illustration rather than
+     cut what is inside it. Every row of the results table and all seven models
+     stay on the page at full desktop detail — the card is simply rendered smaller.
+
+     ⚠ `zoom`, NOT `transform: scale()`. transform does not affect layout, so the
+     parent would keep reserving the original height and the section would stay
+     exactly as tall. zoom reflows, so the section actually shrinks.
+
+     Height-banded because the fix depends on the WINDOW, not the width: a tall
+     display needs no scaling at all, a 1280x800 laptop needs more than a 1440x900.
+
+     ⚠ Do NOT try to win the width back with `width: 1/zoom`. Tried it: the element
+     becomes wider than its grid column, grid does not clip, and the card spills over
+     the prose in the next column. The card sitting smaller inside its own column is
+     the correct trade. */
+  @media (min-width: 761px) and (max-height: 1149px) {
+    #b1 .stage.frame { zoom: .72; }
+    #b3 .stage.frame { zoom: .82; }
+    /* b7 stacks two frames (952px measured at 1440×900) — same fix, mildest step */
+    #b7 .stage.frame { zoom: .85; }
+  }
+  @media (min-width: 761px) and (max-height: 850px) {
+    #b1 .stage.frame { zoom: .63; }
+    #b3 .stage.frame { zoom: .72; }
+    #b7 .stage.frame { zoom: .75; }
+  }
+  @media (max-width: 760px) {
+    .row { grid-template-columns: 1fr; min-height: auto; gap: 1.6rem; }
+    .row.sl .stagecell, .row.sr .stagecell { order: 0; } .row.sl .txt, .row.sr .txt { order: 1; }
+  }
+  .txt .kicker { font-family: var(--mono); font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--accent-deep); }
+  .txt h2 { font-family: var(--serif); font-weight: 500; font-size: 1.7rem; margin: .45rem 0 .3rem; text-wrap: balance; }
+  .txt .subhead { font-family: var(--serif); font-style: italic; color: var(--accent-deep); font-size: .98rem; margin: 0 0 .75rem; }
+  .txt .who { display: inline-block; font-family: var(--mono); font-size: .6rem; letter-spacing: .05em; text-transform: none; padding: .12rem .5rem; border-radius: 999px; border: 1px solid var(--accent-deep); background: var(--accent); color: #FDFBF7; margin-left: .45rem; vertical-align: .1em; }
+  .txt .who.pill { color: var(--accent-deep); background: var(--accent-soft); border-color: var(--accent-line); }
+  .txt p { color: var(--ink-muted); font-size: .93rem; max-width: 48ch; }
+  .txt p + p { margin-top: .55rem; }
+  .txt .fine { font-family: var(--mono); font-size: .67rem; color: var(--ink-faint); border-top: 1px solid var(--hairline); padding-top: .6rem; margin-top: 1.1rem; max-width: 48ch; }
+
+  /* THE PAYOFF PILL — one plain-language result per beat, so the point survives being
+     scrolled past. The highest-value change of brain's reframe; ported here.
+     --accent-deep, not --accent: the pill sits on --accent-soft, where --accent misses
+     the contrast floor (color-system.md §6). `.txt .insights-pill` and not
+     `.insights-pill`, because `.txt p` is (0,2,0) and would otherwise win.
+     On phones it stays behind the "read more" fold: it matches p:not(.kicker). Surfacing
+     it was tried on brain and reverted — 2–3 lines at the top of every beat pushed the
+     stage, the thing the beat exists to show, off the bottom. */
+  .insights-pill { display: inline-block; font-size: .84rem; line-height: 1.4; background: var(--accent-soft);
+    border: 1px solid var(--accent-line); border-radius: 10px; padding: .5rem .8rem; margin-top: 1rem;
+    opacity: 0; transform: translateY(6px); transition: opacity .6s ease, transform .6s ease; }
+  .txt .insights-pill { color: var(--accent-deep); max-width: 48ch; }
+  /* --accent-deep, not --accent: the mark sits on --accent-soft, where this page's
+     --accent is 4.00:1. brain can use --accent here because its teal is 5.87 on paper;
+     mauve at 4.54 has no room to lose. */
+  .insights-pill .ip-mark { color: var(--accent-deep); }
+  .row:has(.stage.on) .insights-pill { opacity: 1; transform: none; transition-delay: 1.8s; }
+
+  /* C4: the per-beat truth-marking moved out of the prose column and into the
+     illustration it marks — same facts, no mono footnote under every paragraph.
+     Hidden on phones, which is exactly where .fine already sat (behind the fold), so
+     this does not add a pixel to the stages that are already the tallest thing here. */
+  .mfine { font-family: var(--mono); font-size: .6rem; color: var(--ink-muted); border-top: 1px dashed var(--hairline);
+    padding-top: .5rem; margin-top: .7rem; line-height: 1.5; }
+
+  /* generic staged reveals: [data-r] rides the shared .stage.on toggle; .rv is
+     machine-driven (a phase function adds .in). Same motion grammar as the siblings. */
+  .stage [data-r] { opacity: 0; transform: translateY(10px); transition: opacity .5s, transform .5s; }
+  .stage.on [data-r] { opacity: 1; transform: none; }
+  .stage.on [data-r="2"] { transition-delay: .2s; } .stage.on [data-r="3"] { transition-delay: .4s; }
+  .stage.on [data-r="4"] { transition-delay: .6s; } .stage.on [data-r="5"] { transition-delay: .8s; }
+  .rv { opacity: 0; transform: translateY(8px); transition: opacity .5s, transform .5s; }
+  .rv.in { opacity: 1; transform: none; }
+
+  .frame { background: var(--card); border: 1px solid var(--hairline); border-radius: 14px; box-shadow: 0 1px 2px #241F1B0a, 0 12px 32px -18px #241F1B2e; overflow: hidden; }
+  .frame + .frame { margin-top: 1.1rem; }
+  .chrome { display: flex; align-items: center; gap: .5rem; padding: .55rem .85rem; border-bottom: 1px solid var(--hairline); font-family: var(--mono); font-size: .68rem; color: var(--ink-muted); flex-wrap: wrap; }
+  .chrome b { color: var(--ink); font-weight: 600; }
+  .chrome .right { margin-left: auto; font-variant-numeric: tabular-nums; }
+  .dot { width: 13px; height: 13px; border-radius: 50%; background: var(--accent); flex: none; }
+  .canvas { padding: 1.3rem 1.3rem 1.2rem; }
+  .lead { font-family: var(--mono); font-size: .66rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); text-align: center; margin: 0 0 .1rem; }
+  .lead.left { text-align: left; }
+  .chip { font-family: var(--mono); font-size: .68rem; padding: .34rem .6rem; border: 1px solid var(--hairline); border-radius: 8px; background: var(--paper); color: var(--ink-muted); }
+  .mfoot { font-family: var(--mono); font-size: .62rem; color: var(--ink-faint); margin-top: .85rem; border-top: 1px solid var(--hairline); padding-top: .55rem; }
+
+  /* band grammar for this page: a .band always carries a VERDICT or SCORE — .g =
+     pass (the MAUVE accent — on this page the brand hue IS "measured good"), .y =
+     caution (amber), .o = fail (OXBLOOD, shifted down from the family's brick so it
+     never reads as the accent). Labels that are just names use .chip or plain text. */
+  .band { font-family: var(--mono); font-size: .64rem; font-weight: 600; letter-spacing: .02em; padding: .14rem .5rem; border-radius: 999px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .band.g { color: var(--accent-deep); background: var(--accent-soft); border: 1px solid #A9527C38; }
+  .band.y { color: var(--amber-deep); background: var(--amber-soft); border: 1px solid var(--amber-line); }
+  .band.o { color: var(--red); background: var(--red-soft); border: 1px solid var(--red-line); }
+
+  /* 01 the exam — the agent's three parts land as tiles, then the exam wraps them
+     into existence (the family's groupwrap idiom); below, the per-case results
+     table: every train/heldout verdict, the two real failures visually distinct. */
+  .bigstat { display: flex; align-items: baseline; gap: .6rem; margin: 0 0 .8rem; }
+  .bignum { font-family: var(--serif); font-size: 2.1rem; font-weight: 500; color: var(--accent-deep); line-height: 1; font-variant-numeric: tabular-nums; }
+  /* 22ch forced a 58-character label into four stacked lines beside the numeral, which
+     read as a broken column rather than a caption. It only ever needed to not run the
+     full card width. */
+  .biglab { font-family: var(--mono); font-size: .64rem; color: var(--ink-muted); line-height: 1.35; max-width: 46ch; }
+  .rulewrap { border: 1px solid transparent; border-radius: 12px; padding: 0; transition: border-color .55s, background .55s, padding .55s; }
+  .rulewrap.in { border-color: var(--accent); background: var(--accent-soft); padding: .6rem; }
+  .rulewrap .gt { max-height: 0; opacity: 0; overflow: hidden; transition: max-height .55s, opacity .55s, margin .55s; font-weight: 600; font-size: .8rem; color: var(--accent-deep); }
+  .rulewrap.in .gt { max-height: 3.4rem; opacity: 1; margin: 0 0 .55rem; }
+  .rulewrap .gt .d { color: var(--accent); }
+  .rulewrap .gt .gs { font-family: var(--mono); font-size: .6rem; color: var(--ink-muted); font-weight: 400; }
+  .dtiles { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .55rem; }
+  .dtile { border: 1px solid var(--hairline); border-radius: 10px; background: var(--paper); padding: .6rem .7rem; }
+  .dtile .tl, .dtile .tv, .dtile .ts { display: block; }
+  .dtile .tl { font-family: var(--mono); font-size: .56rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); }
+  .dtile .tv { font-family: var(--mono); font-size: .78rem; color: var(--ink); margin-top: .15rem; font-weight: 600; word-break: break-word; }
+  .dtile .ts { font-family: var(--mono); font-size: .58rem; color: var(--ink-muted); margin-top: .1rem; }
+  .caseblock { border-top: 1px dashed var(--hairline); margin-top: 1rem; padding-top: .9rem; }
+  /* the per-case results table — one row per case: split tag, case name, verdict
+     band. The two failing rows are visually distinct on purpose: they are real
+     committed failures, left in. Group headers carry the exam mode (the ladder). */
+  .ext { font-family: var(--mono); font-variant-numeric: tabular-nums; display: grid; gap: .5rem; }
+  .exg { border: 1px solid var(--hairline); border-radius: 10px; background: var(--paper); padding: .4rem .55rem .45rem; }
+  .exh { display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem; font-size: .62rem; color: var(--ink-muted); padding: .1rem .1rem .2rem; }
+  .exh b { color: var(--ink); font-size: .7rem; }
+  .exh .exmode { color: var(--accent-deep); font-weight: 700; }
+  .exh .exscore { margin-left: auto; color: var(--ink-muted); }
+  .exrow { display: grid; grid-template-columns: 3.6rem minmax(0,1fr) auto; gap: .5rem; align-items: center; font-size: .66rem; padding: .2rem .3rem; border-top: 1px dashed var(--hairline); }
+  /* --ink-muted, not --ink-faint: these rows carry a tint, and --ink-faint is 4.19:1
+     on it (5.71 for --ink-muted). Same class of bug as brain's tinted cards. */
+  .exrow .split { font-size: .54rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-muted); }
+  .exrow .case { color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .exrow.fail { background: var(--red-soft); border: 1px solid var(--red-line); border-radius: 7px; margin-top: .15rem; }
+  .exrow.fail .case { color: var(--red); font-weight: 700; }
+  .exmore { font-size: .6rem; color: var(--ink-faint); border-top: 1px dashed var(--hairline); padding: .25rem .1rem 0; }
+  .exnote { font-family: var(--mono); font-size: .6rem; color: var(--ink-faint); margin-top: .6rem; }
+  @media (max-width: 480px) { .exrow { grid-template-columns: 3rem minmax(0,1fr) auto; } }
+
+  /* 02 the gate — snapshots hold row by row; then a deliberately poisoned prompt
+     drifts, and the exit line goes oxblood. Terminal state = the red gate. */
+  .grows { display: grid; gap: .4rem; }
+  .grow { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem; border: 1px solid var(--hairline); border-radius: 9px; background: var(--paper); padding: .45rem .6rem; }
+  .grow .gname { font-family: var(--mono); font-weight: 600; font-size: .74rem; color: var(--ink); }
+  .grow .gsnap { font-family: var(--mono); font-size: .62rem; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+  .grow .band { margin-left: auto; }
+  .grow.bad { border-color: var(--red-line); background: var(--red-soft); }
+  .gdivider { font-family: var(--mono); font-size: .62rem; color: var(--ink-faint); text-align: center; margin: .7rem 0 .5rem; }
+  .gexit { font-family: var(--mono); font-size: .7rem; font-weight: 600; border: 1px solid var(--hairline); border-left: 3px solid var(--accent); border-radius: 8px; background: var(--paper); color: var(--ink); padding: .5rem .6rem; margin-top: .7rem; }
+  .gexit.bad { border-left-color: var(--red); color: var(--red); background: var(--red-soft); }
+
+  /* 03 the sweep — the E8 table fills row by row (standout inked in mauve), then the
+     noise-band reading lands on top of it: one delta dismissed, one counted */
+  .swt { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  /* The score columns were sized for the DIGITS (2.6rem) and the header row carries full
+     words, so "customer follow-up" hyphen-broke across three lines — "CUSTOMER / FOLLOW- /
+     UP" — and dragged the header to three times the height of a data row. Size the columns
+     for the widest thing in them, which is the heading, not the number. */
+  .swhead, .swrow { display: grid; grid-template-columns: minmax(0,1fr) 5.4rem 4.6rem 4.4rem 3.8rem; gap: .45rem; align-items: baseline; }
+  .swhead { font-size: .56rem; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-faint); padding: 0 .55rem .3rem; }
+  .swhead span:not(:first-child), .swrow span:not(:first-child) { text-align: right; }
+  .swrow { font-size: .68rem; color: var(--ink-muted); border: 1px solid var(--hairline); border-radius: 8px; background: var(--paper); padding: .4rem .55rem; margin-top: .3rem; }
+  .swrow .swm { color: var(--ink); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .swrow b { color: var(--accent-deep); font-weight: 700; }
+  .swrow.win { border-color: var(--accent); background: var(--accent-soft); }
+  .swrow.win .swm { color: var(--accent-deep); }
+  .swnote { font-family: var(--mono); font-size: .6rem; color: var(--ink-faint); margin-top: .5rem; }
+
+  .nrows { display: grid; gap: .5rem; margin-top: .6rem; }
+  .nrow { border: 1px solid var(--hairline); border-radius: 9px; background: var(--paper); padding: .5rem .65rem; }
+  .nrow .ncase { font-family: var(--mono); font-weight: 700; font-size: .74rem; color: var(--ink); }
+  .nrow .nsub { font-family: var(--mono); font-size: .62rem; color: var(--ink-muted); margin-top: .15rem; }
+  .nrow .nchip { display: inline-block; margin-top: .45rem;
+    /* an inline-block sizes to its content, and "gemma4:e4b-it-qat passes — outside
+       the band" is wider than a 350px phone frame, so it was being clipped. */
+    max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+  .ochip { font-family: var(--mono); font-size: .62rem; color: var(--amber-deep); background: var(--amber-soft); border: 1px solid var(--amber-line); border-radius: 999px; padding: .14rem .5rem; opacity: 0; transform: scale(1.3); transition: opacity .4s, transform .4s; }
+  .ochip.ok { color: var(--accent-deep); background: var(--accent-soft); border-color: #A9527C38; }
+  .ochip.in { opacity: 1; transform: none; }
+  .bandkey { display: flex; gap: .9rem; flex-wrap: wrap; font-family: var(--mono); font-size: .6rem; color: var(--ink-faint); margin-top: .85rem; border-top: 1px solid var(--hairline); padding-top: .6rem; }
+  .bandkey i { font-style: normal; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: .3rem; vertical-align: -.02em; }
+  .bandkey .kg i { background: var(--accent); } .bandkey .ky i { background: var(--amber); } .bandkey .ko i { background: var(--red); }
+
+  /* 04 the the same answers, graded twice — the same replies, two wordings, two scores */
+  .rgrid { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; }
+  @media (max-width: 480px) { .rgrid { grid-template-columns: 1fr; } }
+  .rcard { border: 1px solid var(--hairline); border-radius: 10px; background: var(--paper); padding: .7rem .8rem; }
+  .rcard .rl { font-family: var(--mono); font-size: .58rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); }
+  .rcard .rbig { font-family: var(--serif); font-size: 2.2rem; font-weight: 500; line-height: 1.1; font-variant-numeric: tabular-nums; margin-top: .15rem; }
+  .rcard .rbig.lo { color: var(--red); } .rcard .rbig.hi { color: var(--accent-deep); }
+  .rcard .rs { font-family: var(--mono); font-size: .6rem; color: var(--ink-muted); margin-top: .15rem; }
+  .samechips { display: flex; flex-wrap: wrap; gap: .38rem; margin-top: .6rem; }
+  .samechip { font-family: var(--mono); font-size: .62rem; padding: .26rem .5rem; border-radius: 999px; background: var(--accent-soft); border: 1px solid var(--accent-line); color: var(--accent-deep); }
+  .verdictbox { font-family: var(--mono); font-size: .68rem; color: var(--ink); background: var(--paper); border: 1px solid var(--hairline); border-left: 3px solid var(--red); border-radius: 8px; padding: .5rem .65rem; margin-top: .7rem; }
+  .verdictbox .al { color: var(--red); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; font-size: .56rem; display: block; }
+
+  /* 05 the router — one config line changes; the tiers; the suite reruns */
+  .code { font-family: var(--mono); font-size: .66rem; line-height: 1.8; background: var(--paper); border: 1px solid var(--hairline); border-radius: 9px; padding: .6rem .75rem; overflow-x: auto; }
+  .code .cf { color: var(--ink-faint); font-size: .58rem; display: block; margin-bottom: .15rem; }
+  .code .dl { display: block; white-space: pre; }
+  .code .dl.del { color: var(--ink-faint); text-decoration: line-through; }
+  .code .dl.add { color: var(--accent-deep); font-weight: 700; }
+  .rstatus { font-family: var(--mono); font-size: .66rem; color: var(--accent-deep); margin: .7rem 0 0; }
+  .tiers { display: grid; gap: .4rem; margin-top: .8rem; border-top: 1px dashed var(--hairline); padding-top: .8rem; }
+  .tier { display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem; font-family: var(--mono); font-size: .64rem; color: var(--ink-muted); border: 1px solid var(--hairline); border-radius: 8px; background: var(--paper); padding: .4rem .6rem; }
+  .tier b { color: var(--ink); font-size: .68rem; }
+  .tier .tn { color: var(--accent-deep); font-weight: 700; }
+
+  /* 06 the loop — a trace lands, a correction becomes a case, the echo closes the arc */
+  .lrow { display: flex; align-items: center; gap: .55rem; flex-wrap: wrap; border: 1px solid var(--hairline); border-radius: 9px; background: var(--paper); padding: .5rem .6rem; margin-bottom: .45rem; }
+  .lrow .lk { font-family: var(--mono); font-weight: 600; font-size: .76rem; }
+  .lrow .lm { font-family: var(--mono); font-size: .62rem; color: var(--ink-faint); }
+  .lrow .ochip { margin-left: auto; }
+  .lecho { margin-top: .8rem; }
+  .pwho { display: flex; align-items: center; gap: .45rem; font-family: var(--mono); font-size: .7rem; color: var(--ink-muted); margin-bottom: .55rem; }
+  .pwho b { color: var(--ink); }
+  .bubble { max-width: 88%; width: fit-content; padding: .5rem .75rem; border-radius: 13px; font-size: .86rem; margin-bottom: .55rem; background: var(--paper); border: 1px solid var(--hairline); color: var(--ink); border-bottom-left-radius: 4px; }
+
+
+  /* where it's heading — deliberately the LARGEST roadmap in the family. Solid mauve
+     cards = in the box today; dashed amber = the ambition. The line is stated in
+     prose too, so nothing on this page pretends. */
+  /* THE ORIENTATION BLOCK — this page named its two audiences in a throwaway mono
+     strip in the hero (.taglines) and then never mentioned them again. Promoted into
+     two lens cards with plain bullets, so a reader knows which of the two they are
+     before the first beat, then a gate line that hands them to it.
+     The .setup-part wrappers exist ONLY so phones can snap to each half; on desktop
+     `display: contents` removes them from the box tree, so the section lays out
+     exactly as if they were not there. Reused verbatim from brain, where a single
+     snap stop carrying more than a screen parked the reader at its top and left the
+     tail below the fold. */
+  .setup { max-width: 840px; margin: 0 auto; padding: 3rem 2rem; text-align: center; }
+  .setup .eyebrow2 { font-family: var(--mono); font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin: 0 0 .5rem; }
+  .setup h2 { font-family: var(--serif); font-weight: 500; font-size: clamp(1.6rem, 3.6vw, 2.15rem); letter-spacing: -.01em; margin: 0 0 .7rem; }
+  .setup .lead2 { color: var(--ink-muted); font-size: 1.02rem; max-width: 60ch; margin: 0 auto 1.5rem; line-height: 1.6; }
+  .setup .lead2 b { color: var(--ink); font-weight: 600; }
+  .setup-lens { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; max-width: 800px; margin: 0 auto; text-align: left; }
+  .lens-card { border: 1px solid var(--hairline); border-radius: 14px; padding: 1.25rem 1.35rem; background: var(--card); }
+  .lens-card .lh { display: block; font-weight: 600; font-size: 1.02rem; color: var(--ink); }
+  .lens-card .lens-sub { font-family: var(--mono); font-size: .6rem; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-faint); margin: .3rem 0 .85rem; }
+  .lens-card ul { list-style: none; padding: 0; margin: 0; display: grid; gap: .6rem; }
+  .lens-card li { position: relative; padding-left: 1.15rem; font-size: .87rem; color: var(--ink-muted); line-height: 1.45; }
+  .lens-card li::before { content: ""; position: absolute; left: .05rem; top: .52em; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+  .lens-card li b { color: var(--ink); font-weight: 600; }
+  .setup-outro { padding: 1rem 0 0; }
+  .setup-outro::before { content: ""; display: block; width: 46px; height: 2px; border-radius: 2px; background: var(--accent); opacity: .55; margin: 0 auto 1.7rem; }
+  .setup-outro .outro-title { font-family: var(--serif); font-size: clamp(1.4rem, 3vw, 1.95rem); color: var(--accent-deep); margin: 0; }
+  .setup-arrow { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: #FDFBF7; font-size: 1.25rem; text-decoration: none; margin: 1.3rem auto 0; animation: bob 1.9s ease infinite; transition: background .2s; }
+  .setup-arrow:hover { background: var(--accent-deep); }
+  @media (min-width: 761px) { .setup-part { display: contents; } }
+
+  /* THE MID-PAGE CTA — a waypoint in the scroll, not a close. Plain paper and no rules
+     top or bottom: brain's first version was a tinted panel with rules and it read as
+     the end of the page. The copy names what is still below, so the reader chooses. */
+  .midcta { text-align: center; padding: 5rem 1.5rem; background: var(--paper); }
+  .midcta-inner { max-width: 540px; margin: 0 auto; }
+  .midcta .mc-mark { display: block; color: var(--accent); font-size: 1rem; margin-bottom: .9rem; opacity: .75; }
+  .midcta .mc-lead { font-family: var(--mono); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-muted); margin: 0 0 .7rem; }
+  .midcta .mc-head { font-family: var(--serif); font-size: clamp(1.35rem, 3vw, 1.9rem); color: var(--accent-deep); line-height: 1.2; margin: 0 0 1.4rem; }
+  .midcta .mc-btn { display: inline-block; font-family: var(--mono); font-size: .82rem; font-weight: 600; letter-spacing: .02em;
+    text-decoration: none; padding: .72rem 1.4rem; border-radius: 10px; background: var(--accent); color: #FDFBF7;
+    border: 1px solid var(--accent-deep); transition: background .2s; }
+  .midcta .mc-btn:hover { background: var(--accent-deep); }
+  .midcta .mc-alt { font-size: .97rem; color: var(--ink-muted); line-height: 1.55; max-width: 42ch; margin: 1.5rem auto 0; }
+  .midcta .mc-alt b { color: var(--ink); font-weight: 600; }
+  .midcta .mc-scroll { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--accent); color: var(--accent); font-size: 1.1rem; text-decoration: none; margin: 1.3rem auto 0; animation: bob 1.9s ease infinite; transition: background .2s, color .2s; }
+  .midcta .mc-scroll:hover { background: var(--accent); color: #FDFBF7; }
+
+  .roadmap { max-width: 920px; margin: 0 auto; padding: 3rem 2rem 1rem; }
+  /* --amber-deep = amber darkened for small text. --amber clears AA on plain paper
+     (4.62:1) but not on --amber-soft (4.19:1), and these labels sit at .52–.66rem. */
+  .roadmap .rl { font-family: var(--mono); font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: var(--amber-deep); }
+  .roadmap h2 { font-family: var(--serif); font-weight: 500; font-size: 1.55rem; margin: .45rem 0 .3rem; }
+  .roadmap .rsub { color: var(--ink-muted); font-size: .93rem; max-width: 66ch; margin: 0 0 1.2rem; }
+  .rgl { font-family: var(--mono); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; margin: 1.2rem 0 .5rem; }
+  .rgl.live { color: var(--accent-deep); } .rgl.next { color: var(--amber-deep); }
+  .rmgrid { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+  @media (max-width: 640px) { .rmgrid { grid-template-columns: 1fr; } }
+  .rmitem { border: 1px dashed #c3b596; border-radius: 10px; padding: .75rem .9rem; background: var(--paper); }
+  .rmitem .tag { font-family: var(--mono); font-size: .52rem; letter-spacing: .06em; text-transform: uppercase; color: var(--amber-deep); }
+  .rmitem h3 { font-size: .92rem; margin: .15rem 0 .25rem; font-weight: 600; }
+  .rmitem p { font-family: var(--mono); font-size: .64rem; color: var(--ink-muted); margin: 0; line-height: 1.5; }
+  .rmitem.live { border-style: solid; border-color: var(--accent-line); background: #A9527C0d; }
+  .rmitem.live .tag { color: var(--accent-deep); }
+
+  /* Short laptop windows (1280x800): the roadmap is 888px against an 800px window —
+     it is deliberately the largest roadmap in the family (10 cards). Padding and rhythm
+     only, nothing dropped; at 1440x900 it already fits. */
+  @media (min-width: 761px) and (max-height: 850px) {
+    .roadmap { padding: 1.4rem 2rem .5rem; }
+    .rmgrid { gap: .5rem; }
+    .rmitem { padding: .55rem .75rem; }
+    .rgl { margin: .7rem 0 .4rem; }
+    .roadmap .rsub { margin-bottom: .8rem; }
+  }
+
+  /* closer — the mauve panel; the ask is an engagement, not a demo */
+  footer.closer { padding: 5rem 1.5rem 6rem; background: linear-gradient(160deg, var(--accent) 0%, var(--accent-deep) 100%); color: #FCF7FA; }
+  .closer :is(a, button):focus-visible { outline-color: #E8C2D5; }
+  .closer-inner { max-width: 960px; margin: 0 auto; width: 100%; text-align: left; display: grid; grid-template-columns: 1.05fr .95fr; gap: 3rem; align-items: center; }
+  .closer .cl-title { font-family: var(--serif); font-weight: 500; font-size: clamp(1.9rem, 4vw, 2.6rem); color: #FDFBF7; margin: 0 0 .5rem; letter-spacing: -.01em; text-wrap: balance; }
+  .closer .cl-sub { color: #F9F1F5; font-size: 1rem; max-width: 42ch; margin: 0 0 1.6rem; }
+  .closer .cl-list { list-style: none; padding: 0; margin: 0; display: grid; gap: .6rem; }
+  .closer .cl-list li { position: relative; padding-left: 1.6rem; color: #FCF7FA; font-size: .98rem; line-height: 1.4; }
+  .closer .cl-list li::before { content: "✓"; position: absolute; left: 0; top: -.02em; color: #E8C2D5; font-weight: 700; }
+  .closer .cl-box { background: #ffffff14; border: 1px solid #ffffff30; border-radius: 16px; padding: 1.6rem 1.5rem; }
+  .closer .cl-boxlabel { font-family: var(--mono); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: #F9F1F5; margin: 0 0 .9rem; }
+  .closer .cl-form { display: flex; flex-direction: column; gap: .6rem; }
+  .closer .cl-form input { width: 100%; font-family: var(--sans); font-size: 1rem; padding: .8rem 1rem; border-radius: 10px; border: 1px solid #ffffff45; background: #ffffff1c; color: #FDFBF7; }
+  .closer .cl-form input::placeholder { color: #F9F1F5; }
+  .closer .cl-form input:focus { outline: 2px solid #E8C2D5; outline-offset: 1px; background: #ffffff2c; }
+  .closer .cl-form button { width: 100%; font-family: var(--mono); font-size: .84rem; letter-spacing: .02em; font-weight: 600; padding: .82rem 1.4rem; border-radius: 10px; border: none; cursor: pointer; background: #F7F3EC; color: var(--accent-deep); transition: background .2s; }
+  .closer .cl-form button:hover { background: #fff; }
+  .closer .cl-fine { font-family: var(--mono); font-size: .72rem; color: #F9F1F5; margin: 1rem 0 0; }
+  .closer .byline { font-family: var(--mono); font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: #F9F1F5; opacity: .85; text-align: center; margin: 3rem auto 0; }
+  .closer .cl-fine a { color: #fff; font-weight: 600; }
+  /* the receipts box replaced the contact form; its doc links sit on the mauve
+     gradient, where the page-level --accent-deep link colour would be unreadable */
+  .closer .cl-box a { color: #fff; font-weight: 600; }
+  .closer .cl-status { font-family: var(--mono); font-size: .78rem; color: #FCF7FA; margin: .8rem 0 0; min-height: 1.1em; }
+  @media (max-width: 760px) {
+    .closer-inner { grid-template-columns: 1fr; gap: 1.2rem; text-align: center; max-width: 420px; }
+    .closer .cl-sub { max-width: none; margin-bottom: 1rem; }
+    .closer .cl-list { max-width: 300px; margin: 0 auto; text-align: left; gap: .45rem; }
+    /* §3.6, and the trim brain's closer needed for the same reason: this section
+       carries a headline, four value lines, a form AND a byline, and 5rem/6rem of
+       padding on top of that pushed the byline past the fold. Padding and rhythm
+       come down; nothing is dropped. */
+    .closer .cl-title { font-size: 1.6rem; }
+    .closer .cl-box { padding: 1.1rem 1.1rem; }
+    .closer .cl-form input, .closer .cl-form button { padding-top: .65rem; padding-bottom: .65rem; }
+    .closer .cl-fine { margin-top: .6rem; }
+    .closer .byline { margin-top: 1.4rem; }
+  }
+
+  /* MOBILE right-sizing (≤760, stacked view): the sweep table gets narrower score
+     columns. The staged reveals play on scroll here just like desktop — the
+     IntersectionObserver uses a lower threshold on phones so tall stages fire
+     promptly, and the <noscript> block still un-hides every end state for JS-off. */
+  @media (max-width: 760px) {
+    .swhead, .swrow { grid-template-columns: minmax(0,1fr) 2.2rem 2.5rem 2.2rem 3.2rem; }
+  }
+
+  /* MOBILE (≤640px): title + visual per beat; the explanation folds behind a tap.
+     .fold and the button are JS-added — with no JS the paragraphs simply stay visible. */
+  /* Phones-only content. Top level, NOT inside the ≤640 query — same idiom as .morebtn
+     below. Nesting the hide rule inside the query left it unset on desktop, where an
+     element defaults to display:block: the "+5 more cases" line rendered UNDER all seven
+     rows it was meant to replace, so the beat contradicted itself at 1440. */
+  .mobonly { display: none; }
+  .morebtn { display: none; font-family: var(--mono); font-size: .68rem; color: var(--accent-deep); background: none; border: none; padding: .45rem .1rem; margin: .05rem 0 0; cursor: pointer; text-align: left; }
+  .morebtn::before { content: "▸ "; }
+  .txt.open .morebtn::before, .roadmap.open .morebtn::before { content: "▾ "; }
+  @media (max-width: 640px) {
+    /* §3.6 padding and type, applied LAST — after every cut below. Together these are
+       worth ~35px a beat, which is what put 01 and 03 inside the fold rather than
+       one line over it. */
+    .row { padding: 1.1rem 1.25rem; gap: .7rem; }
+    .row.sl .txt, .row.sr .txt { order: 0; }
+    .row.sl .stagecell, .row.sr .stagecell { order: 1; }
+    .txt h2 { font-size: 1.32rem; margin-bottom: .1rem; }
+    .morebtn { display: inline-block; }
+    .txt.fold :is(p:not(.kicker), .subhead, .fine) { display: none; }
+    .txt.fold.open :is(p:not(.kicker), .subhead, .fine) { display: block; }
+    .roadmap.fold :is(.rsub, .rgl, .rmgrid) { display: none; }
+    .roadmap.fold.open .rsub { display: block; }
+    .roadmap.fold.open .rgl { display: block; }
+    .roadmap.fold.open .rmgrid { display: grid; }
+    /* The .fine content now lives inside the illustrations as .mfine. It was behind the
+       fold before and it stays behind it: the stages are already the tallest thing on
+       this page, and C4 must not buy a wording win with mobile height. */
+    .mfine { display: none; }
+    /* the orientation block's two lens cards each get their own screen */
+    .setup-lens { grid-template-columns: 1fr; gap: .8rem; }
+    .lens-card { padding: .95rem 1.05rem; }
+    .lens-card .lh { font-size: .95rem; }
+    .lens-card .lens-sub { display: none; }
+    .lens-card li { font-size: .82rem; line-height: 1.4; }
+    .lens-card ul { gap: .45rem; }
+    .midcta { padding: 3rem 1.5rem; }
+    /* MOBILE STAGE DESIGN — ⚠ SUPERSEDED in part. The original rule was "every stage
+       carries ALL of its rows: nothing hidden, nothing summarized", and the re-set
+       below is what it bought. Measured at 390x734 after the machines run, three
+       sections still overflowed the fold, so styling-rules.md §3's cut order now
+       applies here too (see the per-beat mobile cuts at the foot of this query).
+       Everything that is NOT cut still follows the original rule. */
+    .canvas { padding: .6rem .7rem .6rem; }
+    .chrome { padding: .38rem .7rem; font-size: .58rem; }
+    .mfoot { font-size: .54rem; margin-top: .55rem; padding-top: .4rem; }
+    .lead { font-size: .56rem; }
+    .band { font-size: .5rem; padding: .08rem .4rem; }
+    /* beat 01 (the exam): the three agent tiles ride as one 3-across mini row;
+       the case table keeps every train/heldout verdict at caption size. */
+    .dtiles { grid-template-columns: 1fr 1fr 1fr; gap: .3rem; }
+    .dtile { padding: .3rem .35rem; border-radius: 7px; }
+    .dtile .tl { font-size: .44rem; }
+    .dtile .tv { font-size: .54rem; margin-top: .05rem; }
+    .dtile .ts { font-size: .44rem; margin-top: .05rem; }
+    .rulewrap.in { padding: .4rem; }
+    .rulewrap .gt { font-size: .62rem; }
+    .rulewrap.in .gt { margin: 0 0 .35rem; }
+    .rulewrap .gt .gs { font-size: .5rem; }
+    .bigstat { gap: .45rem; margin: 0 0 .45rem; }
+    .bignum { font-size: 1.35rem; }
+    .biglab { font-size: .54rem; max-width: none; }
+    .caseblock { margin-top: .7rem; padding-top: .6rem; }
+    .ext { gap: .35rem; }
+    .exg { padding: .28rem .4rem .32rem; }
+    .exh { font-size: .54rem; gap: .4rem; padding: .05rem .05rem .12rem; }
+    .exh b { font-size: .6rem; }
+    .exrow { font-size: .54rem; padding: .12rem .2rem; grid-template-columns: 2.6rem minmax(0,1fr) auto; gap: .4rem; }
+    .exrow .split { font-size: .46rem; }
+    .exmore { font-size: .52rem; padding-top: .18rem; }
+    .exnote { font-size: .52rem; margin-top: .4rem; }
+    /* beat 02 (the gate): all snapshot rows, one step down */
+    .grows { gap: .3rem; }
+    .grow { padding: .3rem .45rem; gap: .4rem; }
+    .grow .gname { font-size: .62rem; }
+    .grow .gsnap { font-size: .52rem; }
+    .gdivider { margin: .35rem 0 .25rem; font-size: .54rem; }
+    .gexit { font-size: .6rem; padding: .35rem .5rem; margin-top: .4rem; }
+    /* beat 03 (the sweep): all 7 model rows + champions, caption size;
+       the noise band + key compress, never hide. */
+    .swhead { font-size: .48rem; padding: 0 .4rem .2rem; }
+    .swhead, .swrow { grid-template-columns: minmax(0,1fr) 2rem 2.2rem 2rem 2.6rem; gap: .35rem; }
+    .swrow { font-size: .56rem; padding: .22rem .4rem; margin-top: .22rem; }
+    .swnote { font-size: .5rem; margin-top: .35rem; }
+    #bandlead { margin-top: .55rem !important; }
+    .nrows { gap: .35rem; margin-top: .4rem; }
+    .nrow { padding: .35rem .45rem; }
+    .nrow .ncase { font-size: .62rem; }
+    .nrow .nsub { font-size: .52rem; margin-top: .1rem; }
+    .nrow .nchip { margin-top: .3rem; }
+    .nrow .ochip { font-size: .52rem; }
+    .bandkey { font-size: .5rem; gap: .45rem; margin-top: .5rem; padding-top: .4rem; }
+
+    /* ── MOBILE CUTS, styling-rules.md §3 ────────────────────────────────────────
+       Measured at 390x734 AFTER every phase machine has run. Beats 01 and 03 stood
+       at 997px and 931px against a 694px budget, which on a mandatory-snap page means
+       the reader lands on the beat's top and the rest sits below the fold with the
+       snap resisting the scroll. Cut in §3's order, most-decorative first. Desktop
+       keeps every one of these. */
+    .mobonly { display: block; }
+
+    /* 01 · the test — 997px. The results table with the failures left in is the whole
+       point of the beat, so it is the last thing to touch and it keeps both FAIL rows. */
+    /* §3.1/3.5: with its scene-setting line and its sub-labels gone the anatomy block
+       reads "prompt / its instructions · tools / its tools · model / which AI it uses",
+       which is the sentence the prose opens with and nothing more. It is the removable
+       half; the results table underneath is the evidence. */
+    .rulewrap { display: none; }
+    /* §3.2 shown twice: the ⚠ is already on the email-sorting row itself */
+    #exnote { display: none; }
+    /* §3.4 restates the beat prose */
+    #rulefoot { display: none; }
+    /* §3.2 five near-identical pass rows -> one "+5 more" line, the idiom this table
+       already uses for the expenses group. Every failing row survives. */
+    .exrow.mobcut { display: none; }
+
+    /* 03 · the comparison — 931px. The 7-model table is the artifact; it stays whole,
+       and so do both readings under it. */
+    /* §3.2 the key spells out in colour what each chip already says in words */
+    .bandkey { display: none; }
+    /* §3.4 notes restating what sits directly beside or below them */
+    .nrow .nsub { display: none; }
+    #bandlead { display: none; }
+    #bandfoot { display: none; }
+    .swnote .mobcut { display: none; }
+  }
+</style>
+<style>
+  @media (min-width: 761px) {
+    html.snapready { scroll-snap-type: y proximity; }
+    .hero { scroll-snap-align: start; }
+    .row, .setup, .midcta, .roadmap, footer { min-height: 100vh; scroll-snap-align: center; }
+    .setup, .midcta, .roadmap, footer { display: flex; flex-direction: column; justify-content: center; }
+  }
+  @media (max-width: 760px) {
+    html.snapready { scroll-snap-type: y mandatory; }
+    /* dvh, not svh: svh reserves room for browser chrome even when it has
+       collapsed, which left a sliver of the next section (the mauve closer's
+       top edge) showing under the roadmap. dvh tracks the real viewport. */
+    /* .setup-part and .midcta are in this list on purpose. A new section that matches
+       none of these selectors is not a snap stop at all: mandatory snap skips straight
+       past it, and when it does stop, the next beat peeks in underneath. brain paid for
+       that with its mid-CTA. .setup itself steps aside so its two PARTS are the stops —
+       one screen each, instead of one stop carrying both. */
+    .hero, .row, .setup-part, .midcta, .roadmap, footer { min-height: 100vh; min-height: 100dvh; scroll-snap-align: start; scroll-snap-stop: always; }
+    .setup { min-height: 0; display: block; padding: 0; }
+    .setup-part { padding: 2.5rem 1.5rem; }
+    .setup-part, .midcta, .roadmap, footer { display: flex; flex-direction: column; justify-content: center; }
+    /* top-anchor each beat inside its viewport box: a stage taller than the
+       viewport then overflows DOWNWARD, reachable by scroll (snap is proximity)
+       — centering clipped tall beats at both ends. */
+    /* This block is a LATER stylesheet than the ≤640 one, so its padding-top wins.
+       Kept in step with the §3.6 trim there — 2rem was silently overriding it. */
+    .row { align-content: start; padding-top: 1.1rem; }
+    /* The closer outgrew its snap stop: 5rem/6rem of vertical padding on top of content
+       that already fills the screen pushed the byline past the fold once Safari's
+       toolbars claim their ~110px. Trim the padding, never the content. */
+    footer.closer { padding: 1.75rem 1.5rem 2rem; }
+  }
+</style>
+<noscript>
+  
+  <style>
+    .stage [data-r], .rv { opacity: 1 !important; transform: none !important; }
+    .rulewrap { border-color: var(--accent); background: var(--accent-soft); padding: .6rem; }
+    .rulewrap .gt { max-height: 3.4rem; opacity: 1; margin: 0 0 .55rem; }
+    .ochip { opacity: 1; transform: none; }
+    /* The payoff pills are revealed by .row:has(.stage.on), which JS adds — so with JS
+       off they were the one thing on the page still at opacity 0, and they now carry
+       each beat's result. The contract in this file's header is that JS-off still sees
+       every number; this is the clause that keeps it true. */
+    .insights-pill { opacity: 1; transform: none; }
+  </style>
+</noscript>
+</head>
+<body>
+
+<script>
+  // always open on the hero — browsers otherwise restore a deep scroll position
+  history.scrollRestoration = "manual";
+  addEventListener("pageshow", () => scrollTo(0, 0)); setTimeout(function () { scrollTo(0, 0); document.documentElement.classList.add("snapready"); }, 400);
+</script>
+
+<header class="hero stage" id="hero">
+  <p class="eyebrow">agent-sandbox</p>
+  <h1>You changed the model. Did anything break?</h1>
+  <p class="thesis">This repo turns that into a number. It also caught its own scoring
+    system lying, and fired it.</p>
+  <p class="sub">Five small office agents on local models (4–14B, one 16&nbsp;GB laptop). The
+    agents are deliberately boring — a prompt, a tool list, one config line. The asset is the
+    exam suite around them: 86 committed cases, deterministic scoring, no LLM judge anywhere.
+    This page is the visual companion to the repo's frozen write-up; the failures stay on it.</p>
+  <div class="cta"><span class="cap">every figure traces to a committed file · dated on each beat · anything illustrative says so · walkthrough updated 2026-08-24</span></div>
+  <p class="hint">scroll · the exam, the gate, the sweep, and what keeps them honest ↓</p>
+</header>
+
+
+<section class="setup" id="setup">
+ <div class="setup-part">
+  <p class="eyebrow2">what you're looking at</p>
+  <h2>One repo, two things worth reading.</h2>
+  <p class="lead2"><b>The agents are replaceable in an afternoon.</b> What compounds is the
+    discipline around them. This page shows the system first, and the method that discipline
+    enforces runs through every beat.</p>
+  <div class="setup-lens">
+    <div class="lens-card">
+      <span class="lh">The system</span>
+      <p class="lens-sub">runner · gate · router · watcher</p>
+      <ul>
+        <li>Every agent gets <b>an exam at birth</b> — no exam, no agent</li>
+        <li>A change that lowers a saved score <b>stops the release</b>, exit 1, on its own</li>
+        <li>Swapping the model is <b>one config line</b>, and every exam reruns against it</li>
+      </ul>
+    </div>
+    <div class="lens-card">
+      <span class="lh">The method</span>
+      <p class="lens-sub">the habits the numbers come from</p>
+      <ul>
+        <li>A check must be <b>seen red</b> before its green is trusted</li>
+        <li>Kill criteria are <b>pre-registered</b>, so experiments can die cheap</li>
+        <li><b>Noise bands before rankings</b> — a lucky case can't ship a model</li>
+        <li><b>Fail loud, never a placeholder</b> — an unreadable verdict fails the case</li>
+      </ul>
+    </div>
+  </div>
+ </div>
+ <div class="setup-part">
+  <div class="setup-outro">
+    <p class="outro-title">Here's how it works.</p>
+    <a href="#b1" class="setup-arrow" aria-label="see the first step">↓</a>
+  </div>
+ </div>
+</section>
+
+
+<section class="row sl" id="b1">
+  <div class="stagecell">
+    <div class="stage frame" data-stage="rule">
+      <div class="chrome"><span class="dot"></span><b>agent-sandbox</b> · the exam<span class="right">per-case rows: committed snapshot 2026-07-24</span></div>
+      <div class="canvas" id="rulecanvas">
+        <div class="rulewrap" id="rulewrap">
+          <div class="gt"><span class="d">◆</span> agent — may exist · test attached <span class="gs">a written set of test questions ✓ · no test, no agent</span></div>
+          <div class="dtiles" role="img" aria-label="The anatomy of an agent: its instructions, its tools, and one line naming which AI it uses. The test wraps around all three: without a written set of test questions the agent may not exist.">
+            <div class="dtile rv"><span class="tl">prompt</span><span class="tv">its instructions</span><span class="ts">plain text · version-controlled</span></div>
+            <div class="dtile rv"><span class="tl">tools</span><span class="tv">its tools</span><span class="ts">stand-ins while testing · the real thing in use</span></div>
+            <div class="dtile rv"><span class="tl">model</span><span class="tv">which AI it uses</span><span class="ts">one line · e.g. a small model on your own machine</span></div>
+          </div>
+        </div>
+        <div class="caseblock rv" id="caseblock">
+          <div class="bigstat" style="margin-bottom:.6rem">
+            <span class="bignum" id="casenum">86</span>
+            <span class="biglab">committed cases · 5 exams · every check plain code · both real failures below stay on this page</span>
+          </div>
+          <div class="ext" role="img" aria-label="committed results, one row per case, practice and unseen split, failures left in. The per-case rows are the committed snapshot of 2026-07-24; the suite has since grown to 86 cases across 5 exams. Each exam header names its scoring mode: customer follow-up is scored on trajectory, expenses per field, email sorting on exact labels, reply drafting on code-checked properties, meeting recap on coverage and length. customer follow-up on a small local model, practice 3 of 3, unseen 3 of 4: practice cases lookup-last-contact, deal-amount, status-churned all pass; unseen cases unknown-company, unknown-deal-value, no-deals-known-company pass; unseen case two-tool-combo fails — a real recorded failure. expenses on ollama gemma4:e2b-it-qat, practice 1.0, unseen 0.8: proximus-monthly passes on practice, anthropic-api fails on unseen — the second real failure — hotel-lisbon passes on unseen; 7 more cases, all pass. email sorting: 10 of 10 pass, unseen 1.0, flagged too easy. reply drafting: 8 of 8 pass, unseen 1.0. meeting recap, added August 2026 as the hardest exam on purpose: unseen 7 of 10.">
+            <div class="exg">
+              <div class="exh rv"><b>customer follow-up</b><span class="exmode">did it take the right steps</span><span>a small local model</span><span class="exscore">practice 3 of 3 · unseen 3 of 4</span></div>
+              <div class="exrow rv"><span class="split">practice</span><span class="case">lookup-last-contact</span><span class="band g">pass</span></div>
+              <div class="exrow rv mobcut"><span class="split">practice</span><span class="case">deal-amount</span><span class="band g">pass</span></div>
+              <div class="exrow rv mobcut"><span class="split">practice</span><span class="case">status-churned</span><span class="band g">pass</span></div>
+              <div class="exrow rv mobcut"><span class="split">unseen</span><span class="case">unknown-company</span><span class="band g">pass</span></div>
+              
+              <div class="exrow fail rv"><span class="split">unseen</span><span class="case">two-tool-combo</span><span class="band o">fail</span></div>
+              <div class="exrow rv mobcut"><span class="split">unseen</span><span class="case">unknown-deal-value</span><span class="band g">pass</span></div>
+              <div class="exrow rv mobcut"><span class="split">unseen</span><span class="case">no-deals-known-company</span><span class="band g">pass</span></div>
+              
+              <div class="exmore rv mobonly">+ 5 more cases · all pass (2 practice · 3 unseen)</div>
+            </div>
+            <div class="exg">
+              <div class="exh rv"><b>expenses</b><span class="exmode">did it pull the right details</span><span>a small local model</span><span class="exscore">practice all pass · unseen 4 of 5</span></div>
+              <div class="exrow rv"><span class="split">practice</span><span class="case">proximus-monthly</span><span class="band g">pass</span></div>
+              <div class="exrow fail rv"><span class="split">unseen</span><span class="case">anthropic-api</span><span class="band o">fail</span></div>
+              <div class="exrow rv"><span class="split">unseen</span><span class="case">hotel-lisbon</span><span class="band g">pass</span></div>
+              <div class="exmore rv">+ 7 more cases · all pass (4 practice · 3 unseen)</div>
+            </div>
+            <div class="exg">
+              <div class="exh rv"><b>email sorting</b><span class="exmode">did it file it correctly</span><span class="exscore">10 of 10 pass · unseen 4 of 4 · ⚠ everyone passes this</span></div>
+            </div>
+            <div class="exg">
+              <div class="exh rv"><b>reply drafting</b><span class="exmode">did it fill in the right things</span><span class="exscore">8 of 8 pass · unseen all correct</span></div>
+            </div>
+            <div class="exg">
+              <div class="exh rv"><b>meeting recap</b><span class="exmode">added 2026-08 · the hardest exam, on purpose</span><span class="exscore">unseen 7 of 10</span></div>
+            </div>
+          </div>
+          <p class="exnote rv" id="exnote">per-case rows: the committed 2026-07-24 snapshot · the suite
+            has since grown to 86 cases across 5 exams · ⚠ a perfect score is a broken exam, not a good
+            model: the sweep found email sorting's unseen saturated — every model swept scored 4/4</p>
+        </div>
+        <p class="mfoot rv" id="rulefoot">agents are replaceable · the exam suite is the asset that outlives them</p>
+        <p class="mfine">current: 5 agents · 86 committed cases · 20 test files · no LLM judge anywhere in the suite · why steps matter: ten steps at 90% each only works 35% of the time</p>
+      </div>
+    </div>
+  </div>
+  <div class="txt">
+    <p class="kicker">01 · the exam</p>
+    <h2>Every agent ships with an exam it has to pass.</h2>
+    <p>An agent here is small: a prompt, its tools, one model line in a config file. What makes
+      it real is the exam it is born with. A fixed set of cases, scored by code, with the
+      failures left on the page. Some cases the agent <b>practices</b> on. Some it has
+      <b>never seen</b>, and those are the ones that count.</p>
+    <p>The grading gets stricter as the task gets harder: exact labels, then per-field partial
+      credit, then code-checked properties where the wording can vary, up to full multi-step
+      tool runs, where it matters which tools were called, how many steps it took and whether
+      the answer is grounded. Chained steps compound: ten steps at 90% each is a 35% workflow.</p>
+    <p class="insights-pill"><span class="ip-mark">◆</span> 86 committed cases across 5 agents,
+      every check plain code. Both real failures stay on this page.</p>
+  </div>
+</section>
+
+
+<section class="row sr" id="b2">
+  <div class="stagecell">
+    <div class="stage frame" data-stage="gate">
+      <div class="chrome"><span class="dot"></span><b>re-checking every saved answer</b><span class="right">one run each</span></div>
+      <div class="canvas" id="gatecanvas">
+        <p class="lead left">the passing figures are real saved results · the drift is staged on purpose</p>
+        <div class="grows" style="margin-top:.6rem" role="img" aria-label="rerun everything re-checks every saved result: customer follow-up practice 3 of 3, unseen 3 of 4 — match. email sorting unseen 4 of 4 — match. expenses unseen 4 of 5 — match. reply drafting, 8 cases, checked by code — match. Then a deliberately poisoned prompt drifts customer follow-up unseen from 3 of 4 down to 2 of 4 and the build is blocked: the build does not ship.">
+          <div class="grow rv"><span class="gname">customer follow-up</span><span class="gsnap">practice 3 of 3 · unseen 3 of 4</span><span class="band g">✓ match</span></div>
+          <div class="grow rv"><span class="gname">email sorting</span><span class="gsnap">unseen 4/4</span><span class="band g">✓ match</span></div>
+          <div class="grow rv"><span class="gname">expenses</span><span class="gsnap">unseen 4/5</span><span class="band g">✓ match</span></div>
+          <div class="grow rv"><span class="gname">reply drafting</span><span class="gsnap">8 cases · checks are code</span><span class="band g">✓ match</span></div>
+        </div>
+        <p class="gdivider rv" id="gdivider">— now poison one prompt, on purpose —</p>
+        <div class="grows">
+          <div class="grow bad rv" id="driftrow"><span class="gname">customer follow-up</span><span class="gsnap">unseen 3 of 4 → 2 of 4 · simulated</span><span class="band o">✗ drift</span></div>
+        </div>
+        <p class="gexit bad rv" id="gexit">blocked · a slipped score stops the release, it does not warn about it</p>
+        <p class="mfine">the customer follow-up figures are a real saved result: practice 3 of 3 · unseen 3 of 4 · the other rows come from the 2026-07-23 comparison run · only the failing row is simulated, and the mechanics around it are real</p>
+      </div>
+    </div>
+  </div>
+  <div class="txt">
+    <p class="kicker">02 · the gate<span class="who pill">runs on every commit · exit 1</span></p>
+    <h2>If a change makes it worse, it can't go out.</h2>
+    <p>Every score an agent passes with is saved. Before anything ships, every saved score is
+      measured again. If one of them has slipped, the release stops. Red means stop, and no AI's
+      opinion can override it. The questions the agent has never seen stay that way: you may
+      tune an agent on the ones it practices with, never on the ones it is graded by.</p>
+    <p>Nothing passes silently either. An empty answer raises. An answer the checks cannot read
+      fails. A broken check fails. Loud, never a placeholder.</p>
+    <p class="insights-pill"><span class="ip-mark">◆</span> A change that lowers a score stops
+      the release on its own. Nobody has to be watching.</p>
+  </div>
+</section>
+
+
+<section class="row sl" id="b3">
+  <div class="stagecell">
+    <div class="stage frame" data-stage="sweep">
+      <div class="chrome"><span class="dot"></span><b>seven AI models, four tests each</b><span class="right">72 minutes · one laptop · no cloud bill</span></div>
+      <div class="canvas" id="sweepcanvas">
+        <div class="swt" role="img" aria-label="comparison run unseen scores, 7 models across 3 tests — the reply drafting column is left out because its grader was too unreliable. current models baseline: crm 3 of 4, email 4 of 4, expense 4 of 5. deepseek-r1:8b: 2, 4, 5 — 638 seconds. llama3:8b: 1, 4, 3 — 191 seconds, fastest usable. gemma4:e4b-it-qat, the standout: 4, 4, 4 — 409 seconds. qwen3:4b: 3, 4, 4 — 1315 seconds, the long pole. qwen3:8b: 3, 4, 5 — 650 seconds. phi4-mini: 0, 4, 2 — 106 seconds.">
+          <div class="swhead"><span>model</span><span>customer follow-up</span><span>email sorting</span><span>expenses</span><span>time taken</span></div>
+          <div class="swrow rv"><span class="swm">current models</span><span>3</span><span>4</span><span>4</span><span>—</span></div>
+          <div class="swrow rv"><span class="swm">deepseek-r1:8b</span><span>2</span><span>4</span><span><b>5</b></span><span>638s</span></div>
+          <div class="swrow rv"><span class="swm">llama3:8b</span><span>1</span><span>4</span><span>3</span><span>191s</span></div>
+          <div class="swrow win rv"><span class="swm">gemma4:e4b-it-qat</span><span><b>4</b></span><span>4</span><span>4</span><span>409s</span></div>
+          <div class="swrow rv"><span class="swm">qwen3:4b</span><span>3</span><span>4</span><span>4</span><span>1315s</span></div>
+          <div class="swrow rv"><span class="swm">qwen3:8b</span><span>3</span><span>4</span><span><b>5</b></span><span>650s</span></div>
+          <div class="swrow rv"><span class="swm">phi4-mini</span><span>0</span><span>4</span><span>2</span><span>106s</span></div>
+        </div>
+        <p class="swnote rv" id="swnote">unseen only · reply drafting column withheld (the grader was too unreliable to trust)<span class="mobcut"> · llama3:8b = fastest usable · qwen3:4b = long pole · fast and wrong is still wrong</span></p>
+        <p class="lead left rv" id="bandlead" style="margin-top:1rem">how to read the differences · the current model ran every question five times first, and that spread is the normal variation</p>
+        <div class="nrows" role="img" aria-label="Two deltas from the the comparison run run, read through the normal variation. Case lookup-last-contact: the current model scores 0.6 at runs equals 5 — the case wobbles, so a challenger's gain there falls inside the normal variation and is dismissed. Case two-tool-combo: the current model fails all five runs, every time — and gemma4:e4b-it-qat passes it. That difference is outside every band: a real capability gap, the challenger chains the second tool call the current model never makes.">
+          <div class="nrow rv" id="nrow1">
+            <span class="ncase">lookup-last-contact</span>
+            <p class="nsub">current model 0.6 over five runs · this question answers differently run to run</p>
+            <span class="ochip nchip" id="nc1">difference inside normal variation — dismissed</span>
+          </div>
+          <div class="nrow rv" id="nrow2">
+            <span class="ncase">two-tool-combo</span>
+            <p class="nsub">current model fails all five runs, every time · needs a chained
+              second tool call · upgrade candidate, decided by PR, not by this page</p>
+            <span class="ochip ok nchip" id="nc2">gemma4:e4b-it-qat passes — outside the band · a real gap</span>
+          </div>
+        </div>
+        <div class="bandkey rv" id="bandkey">
+          <span class="kg"><i></i>outside the band · counts</span>
+          <span class="ky"><i></i>inside the band · dismissed</span>
+          <span class="ko"><i></i>fails every time · a real gap</span>
+        </div>
+        <p class="mfoot rv" id="bandfoot">running it five times catches a model disagreeing with itself · it will never catch one being confidently wrong, which is why the checks are plain code</p>
+        <p class="mfine">comparison run, 2026-07-23, on one laptop · the look-up question passes 3 times in 5, which is the normal variation · the two-step question fails every time · the reply drafting column is left out because its grader was too unreliable to trust, see beat 04</p>
+      </div>
+    </div>
+  </div>
+  <div class="txt">
+    <p class="kicker">03 · the sweep</p>
+    <h2>A new model drops. Everything reruns. You get one table.</h2>
+    <p>Seven models, four tests, 72 minutes start to finish on one laptop. About a lunch hour, no
+      cluster, no cloud bill. Before any of it, the current model runs every question five times.
+      Some questions come back with a different answer each time, and that spread is the
+      <b>normal variation</b>: a challenger that only improves by less than that has not improved,
+      however good the screenshot looks.</p>
+    <p>What survives is signal. The current model fails the <b>two-step question</b> every time,
+      five runs out of five. gemma4:e4b-it-qat passes it, the only model in the comparison that
+      does, and it matched or beat the current model everywhere else. That gap is bigger than the
+      normal variation, so it is a real capability rather than a coin flip. Swap or keep becomes a
+      measurement instead of a debate.</p>
+    <p class="insights-pill"><span class="ip-mark">◆</span> Seven models compared in 72 minutes on
+      one laptop. One of them passes a question the current model has never passed.</p>
+  </div>
+</section>
+
+
+<section class="row sr" id="b4">
+  <div class="txt">
+    <p class="kicker">04 · the audit</p>
+    <h2>We caught our own scoring system lying. So we fired it.</h2>
+    <p>We used to let an AI grade some answers against a written scoring guide. Rewording that
+      guide, with the same model, the same questions and the same answers, moved the score from
+      one end of the range to the other. The number was measuring our wording, not the agent. A
+      grader you can't trust corrupts every measurement, so the AI grader went: every check in
+      the suite is now plain code.</p>
+    <p>The same comparison run showed that two of the four tests had quietly stopped telling
+      models apart. One had become too easy, because every model aced it. One was drowned by the
+      grader's own noise. Finding that out is what a measurement layer is <i>for</i>.</p>
+    <p class="insights-pill"><span class="ip-mark">◆</span> Rewording the grading instructions
+      moved the score from 2 of 4 to 4 of 4 on identical answers. That is why no AI grades
+      anything here.</p>
+  </div>
+  <div class="stagecell">
+    <div class="stage frame" data-stage="rubric">
+      <div class="chrome"><span class="dot"></span><b>the same answers, graded twice</b><span class="right">only the wording of the grading changed</span></div>
+      <div class="canvas" id="rubriccanvas">
+        <div class="rgrid" role="img" aria-label="The same set of replies scored under two wordings of the scoring guide: the old wording scores 1 of 4, the new wording scores 4 of 4 — every time, with no change to the model, the questions or the answers. The reading: the score measured the rubric, not the model. Consequence: the AI grader was dropped and every check in the suite is now plain code.">
+          <div class="rcard rv"><span class="rl">the old wording</span><span class="rbig lo" id="ra">0.25</span><span class="rs">unseen · scored 0.5 twice on rerun</span></div>
+          <div class="rcard rv"><span class="rl">the new wording</span><span class="rbig hi" id="rb">1.00</span><span class="rs">unseen · 4 of 4, three times running</span></div>
+        </div>
+        <div class="samechips">
+          <span class="samechip rv">same model</span>
+          <span class="samechip rv">same cases</span>
+          <span class="samechip rv">same replies</span>
+        </div>
+        <div class="verdictbox rv" id="rverdict"><span class="al">the reading</span>The score measured the
+          scoring guide, not the model. The wording was doing the scoring, not the
+          answer. So the AI grader is gone, and every check is plain code.</div>
+        <p class="mfoot rv" id="rubricfoot">also caught: every model scored 4 of 4 on email sorting · a test has to be re-checked for whether it is still hard enough, not just for whether it is right</p>
+        <p class="mfine">the same answers, graded twice: the old wording scored 2 of 4 twice, the new wording 4 of 4 three times, on identical replies · the judge also mis-passed 3 of 3 invented-date replies before it went · no LLM judge anywhere in the suite, by decision, 2026-07-24 · the cost is written down: a generic reply now passes reply drafting — accepted, documented, on the fix list</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="midcta" id="midcta">
+  <div class="midcta-inner">
+    <span class="mc-mark">◆</span>
+    <p class="mc-lead">That was the measuring layer.</p>
+    <h3 class="mc-head">Below: the parts most portfolios leave out.</h3>
+    <p class="mc-alt">How swapping the model becomes one setting, a corrections loop that is
+      honestly one trace deep, <b>two experiments that died cheap on purpose</b>, the next
+      instrument being built — and what is broken right now, stated plainly.</p>
+    <a href="#b5" class="mc-scroll" aria-label="keep scrolling">↓</a>
+  </div>
+</section>
+
+
+<section class="row sl" id="b5">
+  <div class="stagecell">
+    <div class="stage frame" data-stage="router">
+      <div class="chrome"><span class="dot"></span><b>which AI runs it</b><span class="right">a setting, not a rebuild</span></div>
+      <div class="canvas" id="routercanvas">
+        <div class="code" role="img" aria-label="A model swap is one config change: the agent's yaml moves from provider ollama, model llama3.1 latest — tier 1, local — to provider scaleway, model mistral-medium-3.5 — tier 2, EU-sovereign, Paris. Then all 86 cases rerun against the new tier and the difference decides.">
+          <span class="cf">the agent's settings file</span>
+          <span class="dl del rv" id="oldline">- provider: ollama    model: llama3.1:latest        # tier 1 · local</span>
+          <span class="dl add rv" id="newline">+ provider: scaleway  model: mistral-medium-3.5     # tier 2 · EU · Paris</span>
+        </div>
+        <p class="rstatus rv" id="rstatus">→ re-running all 86 cases against the new one · same bar</p>
+        <div class="tiers">
+          <div class="tier rv"><span class="tn">tier 1</span><b>on your own machines</b><span>work touching personal data never leaves the building</span></div>
+          <div class="tier rv"><span class="tn">tier 2</span><b>in the EU</b><span>Scaleway (Paris-only) · OVHcloud · Nebius</span></div>
+          <div class="tier rv"><span class="tn">tier 3</span><b>the big commercial models</b><span>opt-in escape hatch · blocked for anything confidential</span></div>
+        </div>
+        <p class="mfoot rv" id="routerfoot">a new backend is one line in a settings table, never new code · swap or keep, the numbers decide</p>
+        <p class="mfine">EU tier verified 2026-07-18: Scaleway (Paris-only DC) · OVHcloud AI Endpoints · Nebius · the swap shown illustrates real mechanics, and no current model was moved on this page</p>
+      </div>
+    </div>
+  </div>
+  <div class="txt">
+    <p class="kicker">05 · the router</p>
+    <h2>Changing the model underneath is one setting.</h2>
+    <p>Swapping the model under an agent is one line of configuration, never new code. Three
+      tiers, chosen per agent by how sensitive its data is: models on your own machine for
+      anything touching personal data, EU-hosted open models when a task outgrows the laptop,
+      and the big commercial APIs as an opt-in escape hatch for the genuinely hard.</p>
+    <p>The measuring travels with the swap. Change the line, rerun all 86 cases, read the
+      difference. Sovereignty without measurement is just a different place to guess.</p>
+    <p class="insights-pill"><span class="ip-mark">◆</span> Changing which model runs an agent is
+      one line. All 86 cases rerun against it before the change is kept.</p>
+  </div>
+</section>
+
+
+<section class="row sr" id="b6">
+  <div class="txt">
+    <p class="kicker">06 · the loop<span class="who pill">designed · not yet fed</span></p>
+    <h2>Every mistake becomes a new case.</h2>
+    <p>Every live run is recorded. When one goes wrong, the wrong answer plus a hand fix becomes
+      a new committed case, permanently, so the same mistake cannot quietly come back. The exam
+      gets harder exactly where reality disagreed with it.</p>
+    <p>Honestly: this is the least-built part of the system. The shadow logger shipped on
+      2026-07-24 and the record still holds exactly one trace a month later — the loop is
+      designed and wired, not yet fed. It stays on this page because the page's rule is that
+      unflattering numbers stay in.</p>
+    <p class="insights-pill"><span class="ip-mark">◆</span> A wrong answer plus a hand fix becomes
+      a permanent case. The record: one trace, unchanged since July — stated, not hidden.</p>
+  </div>
+  <div class="stagecell">
+    <div class="stage frame" data-stage="loop">
+      <div class="chrome"><span class="dot"></span><b>what happened in real use</b><span class="right">recorded, read-only</span></div>
+      <div class="canvas" id="loopcanvas" role="img" aria-label="The corrections loop: a read-only recorder captures what happened in real use. A wrong reply plus a hand fix becomes a locked in case, and the exam gets harder where reality disagreed. For the record: 1 live trace recorded 2026-07-24, and the record still holds exactly one trace a month later — the loop is designed, not yet fed; turning a mistake into a permanent case is a manual step today, by design, because someone reviews it first.">
+        <div class="lrow">
+          <span class="lk">live run recorded</span><span class="lm">shadow logger · read-only · shipped 2026-07-24</span>
+          <span class="ochip" id="lc1">1 trace — and still 1, a month on</span>
+        </div>
+        <div class="lrow">
+          <span class="lk">wrong reply + a hand fix</span><span class="lm">one JSON case away</span>
+          <span class="ochip ok" id="lc2">→ locked-in case · the exam got harder</span>
+        </div>
+        <div class="lecho">
+          <div class="pwho rv" id="loopwho"><span class="dot"></span><b>agent-sandbox</b></div>
+          <div class="bubble rv" id="loopecho">the suite compounds: where reality disagrees, the exam learns the disagreement, and the release gate keeps it learned.</div>
+        </div>
+        <p class="mfoot rv" id="loopfoot">the record has not moved since 2026-07-24 · designed, not yet fed · labelled as such</p>
+        
+        <p class="mfine">1 live trace, recorded 2026-07-24, still the only one as of 2026-08-24 (results/live/, checked today) · turning a mistake into a permanent case is a manual step today, by design, because someone reviews it first</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="row sl" id="b7">
+  <div class="stagecell">
+    <div class="stage frame">
+      <div class="chrome"><span class="dot"></span><b>e20 · multi-turn drift</b><span class="right">killed 2026-08 · before a line was built</span></div>
+      <div class="canvas" role="img" aria-label="Experiment E20 was to be the first multi-turn exam, built on the field's claim that instruction-following degrades across turns. Before building anything a falsifier ran: 3 conversations of 3 turns with constraints accumulating, kill criterion written down in advance — 9 model calls, zero code, under an hour. The champion held all constraints 3 of 3 with zero drift; the premise was false and the lane was killed before a line of it was built.">
+        <div class="grows">
+          <div class="grow" data-r="1"><span class="gname">the field's claim</span><span class="gsnap">models drop instructions as turns accumulate</span><span class="band y">to test</span></div>
+          <div class="grow" data-r="2"><span class="gname">step 0a · falsifier first</span><span class="gsnap">3 conversations × 3 turns · kill criterion pre-registered</span><span class="band g">9 calls · zero code</span></div>
+          <div class="grow" data-r="3"><span class="gname">champion held every constraint</span><span class="gsnap">3 of 3 · zero drift · it got <i>better</i> across turns</span><span class="band o">premise false</span></div>
+        </div>
+        <p class="gexit" data-r="4">lane killed before a line of it was built · under an hour of compute</p>
+        <p class="mfine">commit 0bc8c73, “step 0a RAN and KILLED the lane” · the follow-up doc records the probe itself was wrong twice in the direction its author hoped — falsifiers get audited like everything else (docs/sprint-map.md, E20)</p>
+      </div>
+    </div>
+    <div class="stage frame">
+      <div class="chrome"><span class="dot"></span><b>does a bigger model fix the hardest exam?</b><span class="right">~40 min · €0</span></div>
+      <div class="canvas" role="img" aria-label="The model-size probe of 2026-08-05: gemma4:e4b at roughly 4 billion parameters, qwen3:8b at 8.2 billion and qwen3:14b at 14 billion — two families, a 3.4 times parameter range — all score an identical 7 of 10 heldout on the recap exam. The 8B writes short and drops items; the 14B writes long and blows the length bar. The reading: the lever is the target, not the parameters — do not buy hardware to raise this score.">
+        <div class="grows">
+          <div class="grow" data-r="1"><span class="gname">gemma4:e4b</span><span class="gsnap">~4B</span><span class="band g">recap unseen 7 / 10</span></div>
+          <div class="grow" data-r="2"><span class="gname">qwen3:8b</span><span class="gsnap">8.2B · writes short, drops items</span><span class="band g">7 / 10</span></div>
+          <div class="grow" data-r="3"><span class="gname">qwen3:14b</span><span class="gsnap">14B · writes long, blows the length bar</span><span class="band g">7 / 10</span></div>
+        </div>
+        <div class="verdictbox" data-r="4"><span class="al">the reading</span>3.4× the parameters, the identical
+          score — different points on the same trade-off curve, not different heights on one axis.
+          The lever is the target, not the parameters. A hardware spend settled for €0.</div>
+        <p class="mfine">docs/model-size-probe-2026-08-05.md · the probe nearly lied: the first run used the default 120 s timeout and returned zero completed cases — killed and rerun at 900 s rather than interpreted as capability failure</p>
+      </div>
+    </div>
+  </div>
+  <div class="txt">
+    <p class="kicker">07 · experiments die cheap<span class="who pill">kill criteria · pre-registered</span></p>
+    <h2>Two weeks of work that never got wasted.</h2>
+    <p>Before the first multi-turn exam was built, a falsifier ran against its premise — the
+      field's claim that models drop instructions as conversations grow. Kill criterion written
+      down in advance, nine model calls, zero code: the champion held every constraint, three
+      turns out of three. The lane died in under an hour instead of consuming a week of
+      exam-building on a false premise.</p>
+    <p>The same habit priced a hardware question. Would a bigger model fix the hardest exam?
+      A 4B, an 8B and a 14B all score an identical 7 of 10 on it, failing in opposite styles.
+      The fix is a better target, not more parameters — and nothing got bought.</p>
+    <p class="insights-pill"><span class="ip-mark">◆</span> A pre-registered falsifier killed a
+      planned exam for nine model calls; a 40-minute probe settled a hardware spend at €0.</p>
+  </div>
+</section>
+
+
+<section class="row sr" id="b8">
+  <div class="txt">
+    <p class="kicker">08 · the next instrument</p>
+    <h2>A 0/9 you can trust beats a 1.00 you can't.</h2>
+    <p>The small exams rank bad models out but cannot pull two good ones apart, so a harder
+      instrument is being built from real code: every merged PR of a production repo, distilled
+      through a measured funnel into tasks that reproduce red→green. When the human
+      <b>oracle</b> — the author's own merged code, pushed through the identical pipeline —
+      graded end-to-end on only 3 of 10 tasks, the count was rewritten <i>down</i>, and a second
+      task shape was added until the oracle ran green 12 of 12 on the first try.</p>
+    <p>The first model through scores 0 of 9 on the strict gate — and the zero has structure:
+      six near-misses passing 76–97% of their gating tests, three deaths where the model writes
+      22–41k characters and never completes a file. Named failure modes on a discriminating
+      instrument beat the saturated 1.00s that beat 01 flags as defects.</p>
+    <p class="insights-pill"><span class="ip-mark">◆</span> 1,150 real PRs distilled to 15
+      oracle-verified tasks. First model: 0/9 strict, with named failure modes — the same
+      honesty, pointed at a harder instrument.</p>
+  </div>
+  <div class="stagecell">
+    <div class="stage frame">
+      <div class="chrome"><span class="dot"></span><b>from 1,150 merged PRs to a graded pool</b><span class="right">zero model calls in the funnel</span></div>
+      <div class="canvas" role="img" aria-label="The e-corpus funnel, 2026-08-14, zero model calls: 1,150 merged PRs from one production repo, 261 mechanical fits, 125 after dropping tests that grade source text instead of behaviour — that filter removed 52 percent — 89 in the discriminating difficulty band, 13 that reproduce red to green at their base commit against a pre-registered bar of at least 12: the doc says clears by one, not success. Then the human oracle graded the graders: only 3 of 10 modify tasks were gradeable end-to-end, because function-level splicing cannot represent PRs that also touch module-level constants and imports — so the count was rewritten down. A second task shape, whole-file create tasks, ran oracle-green 12 of 12 on the first try. Pool now 15 gradeable tasks. First model on the pool, qwen3-8b at temperature zero: 0 of 9 on the strict gate — 6 near-misses passing 76 to 97 percent of their gating tests, 3 termination deaths of 22 to 41 thousand characters, and task 369 excluded rather than scored because its prompt exceeds the context window.">
+        <div class="grows">
+          <div class="grow" data-r="1"><span class="gname">merged PRs · one production repo</span><span class="band y">1,150</span></div>
+          <div class="grow" data-r="1"><span class="gname">mechanical fits</span><span class="band y">261</span></div>
+          <div class="grow" data-r="2"><span class="gname">grade behaviour, not source text</span><span class="gsnap">this filter removed 52%</span><span class="band y">125</span></div>
+          <div class="grow" data-r="2"><span class="gname">discriminating difficulty band</span><span class="band y">89</span></div>
+          <div class="grow" data-r="3"><span class="gname">reproduce red→green at base commit</span><span class="gsnap">bar pre-registered at ≥12 · “clears by one”</span><span class="band g">13</span></div>
+        </div>
+        <p class="gdivider" data-r="3">— then the human oracle graded the graders —</p>
+        <div class="grows">
+          <div class="grow bad" data-r="4"><span class="gname">modify tasks</span><span class="gsnap">splicing can't carry module-level edits</span><span class="band o">3 of 10 gradeable</span></div>
+          <div class="grow" data-r="4"><span class="gname">create tasks · a second shape</span><span class="gsnap">oracle green on the first try</span><span class="band g">12 / 12</span></div>
+        </div>
+        <p class="gexit" data-r="5">pool: 15 gradeable tasks · first model, qwen3-8b: <b>0 of 9 strict</b> — 6 near-misses at 76–97% · 3 termination deaths</p>
+        <p class="mfine">docs/e-corpus-sweep-2026-08-14.md · e-corpus-create-2026-08-15.md · e-corpus-ladder-2026-08-15.md · the ladder run was operator-stopped at task 10 of 14 and is titled PARTIAL, not rounded up · task #369 excluded rather than scored (prompt exceeds the context window) · the oracle passes 12/12 through the same pipeline, so the harness is not the zero</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="roadmap">
+  <p class="rl">the ledger</p>
+  <h2>What's in the box, and what's honestly broken.</h2>
+  <p class="rsub"><b>Solid mauve is shipped and measured.</b> Runnable from a clean clone this
+    afternoon. <b>Dashed amber is broken or deferred, stated plainly</b> — the same list the
+    repo's own write-up keeps, because knowing precisely what doesn't work yet is the method.</p>
+  <p class="rgl live">in the box today</p>
+  <div class="rmgrid">
+    <div class="rmitem live">
+      <h3>The exam suite</h3>
+      <p>5 agents, 86 committed cases, 20 test files, practice and unseen kept apart, every
+        check plain code. No LLM judge anywhere, by decision, not by accident.</p></div>
+    <div class="rmitem live">
+      <h3>The complexity ladder</h3>
+      <p>exact labels → per-field credit → code-checked properties → full multi-step tool runs,
+        graded on the whole run rather than the final sentence.</p></div>
+    <div class="rmitem live">
+      <h3>The release gate</h3>
+      <p>every passing score saved · a slipped score exits 1 and stops the release · fail loud,
+        never a placeholder · the unseen cases stay unseen.</p></div>
+    <div class="rmitem live">
+      <h3>The sweep, noise bands first</h3>
+      <p>7 models × 4 exams in 71.9 min on one laptop. Normal variation computed before any
+        ranking, so a lucky case can't ship a model.</p></div>
+    <div class="rmitem live">
+      <h3>The three-tier router</h3>
+      <p>model swaps as one config line. EU endpoints (Scaleway · OVHcloud · Nebius) verified
+        2026-07-18. When exams can't separate two models it says <i>cannot-distinguish</i>
+        instead of guessing.</p></div>
+    <div class="rmitem live">
+      <h3>The real-code pool</h3>
+      <p>15 gradeable tasks distilled from 1,150 merged PRs, oracle-verified 12/12, selection
+        step committed so the funnel reruns from a clean clone.</p></div>
+  </div>
+  <p class="rgl next">broken or deferred · stated plainly</p>
+  <div class="rmgrid">
+    <div class="rmitem">
+      <h3>Ranking two good models</h3>
+      <p>heldout sets are 10–11 cases, so one case ≈ 9–10% of a score — inside the noise band.
+        The routing layer's honest headline output is a refusal: <i>cannot-distinguish</i>,
+        grow heldout before revisiting.</p></div>
+    <div class="rmitem">
+      <h3>reply-draft depth</h3>
+      <p>measures hallucination + format only. When its LLM judge mis-passed 3/3 invented-date
+        replies it was dropped, and the cost written down: a generic reply now passes.</p></div>
+    <div class="rmitem">
+      <h3>Portuguese &amp; Spanish</h3>
+      <p>zero cases in either, despite the target market. Deferred on purpose: adding languages
+        to exams that can't rank buys saturated scores in more languages.</p></div>
+    <div class="rmitem">
+      <h3>The corrections loop</h3>
+      <p>designed, wired, and one trace deep for a month. The feed that turns mistakes into
+        cases has no traffic yet, and this page says so rather than dressing it up.</p></div>
+  </div>
+</section>
+
+<footer class="closer" id="closer">
+  <div class="closer-inner">
+    <div class="cl-copy">
+      <h2 class="cl-title">The receipts, not the highlights.</h2>
+      <p class="cl-sub">Every number on this page traces to a committed file in this repository.
+        The write-ups name them inline.</p>
+      <ul class="cl-list">
+        <li>A check must be seen red before its green is trusted</li>
+        <li>Kill criteria are pre-registered, so experiments die cheap</li>
+        <li>Noise bands come before rankings — a lucky case can't ship a model</li>
+        <li>Fail loud, never a placeholder. A saturated 1.00 is an instrument defect</li>
+      </ul>
+    </div>
+    <div class="cl-box">
+      <p class="cl-boxlabel">Read the source</p>
+      <ul class="cl-list">
+        <li><a href="eval-suite-is-the-asset.md">eval-suite-is-the-asset.md</a> — the frozen write-up this page visualises</li>
+        <li><a href="sprint-map.md">sprint-map.md</a> — the live, moving state</li>
+        <li><a href="../README.md">README</a> — layout and every runner command</li>
+      </ul>
+      <p class="cl-fine"><a href="https://github.com/Michiel-DK/agent-sandbox">github.com/Michiel-DK/agent-sandbox</a></p>
+    </div>
+  </div>
+  <p class="byline">agent-sandbox · Michiel De Koninck</p>
+</footer>
+
+<script>
+  const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Stacked mobile stages are tall relative to the viewport, so a 0.3 visibility
+  // threshold fires late (or, for a stage taller than ~3 viewports, never). Phones
+  // get a lower threshold; desktop keeps 0.3 unchanged.
+  const IO_THRESHOLD = matchMedia("(max-width: 760px)").matches ? 0.12 : 0.3;
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      e.target.classList.toggle("on", e.isIntersecting);
+      const s = e.target.dataset.stage;
+      if (s === "rule") e.isIntersecting ? startRule() : stopRule();
+      if (s === "gate") e.isIntersecting ? startGate() : stopGate();
+      if (s === "sweep") e.isIntersecting ? startSweep() : stopSweep();
+      if (s === "rubric") e.isIntersecting ? startRubric() : stopRubric();
+      if (s === "router") e.isIntersecting ? startRouter() : stopRouter();
+      if (s === "loop") e.isIntersecting ? startLoop() : stopLoop();
+    }
+  }, { threshold: IO_THRESHOLD });
+  document.querySelectorAll(".stage").forEach((el) => io.observe(el));
+
+  function countTo(el, to, dur, fmt) {
+    const t0 = performance.now();
+    const iv = setInterval(() => {
+      const p = Math.min(1, (performance.now() - t0) / dur);
+      el.textContent = fmt(to * (1 - Math.pow(1 - p, 3)));
+      if (p >= 1) clearInterval(iv);
+    }, 40);
+    return iv;
+  }
+  const clearAll = (arr) => { arr.forEach((t) => { clearTimeout(t); clearInterval(t); }); return []; };
+  const land = (els, timers, base, step) =>
+    els.forEach((el, i) => timers.push(setTimeout(() => el.classList.add("in"), base + i * step)));
+
+  // 01 the exam — the agent's three parts land, the exam wraps them into existence,
+  // then the case corpus counts to 35 while the per-case results table fills row by
+  // row, failures included. Static HTML carries the terminal figures; this only
+  // walks the path to them.
+  let ruleTimers = [];
+  function startRule() {
+    stopRule();
+    const c = document.getElementById("rulecanvas");
+    const tiles = c.querySelectorAll(".dtile"), wrap = document.getElementById("rulewrap");
+    const cb = document.getElementById("caseblock"), rows = cb.querySelectorAll(".rv");
+    const cn = document.getElementById("casenum"), foot = document.getElementById("rulefoot");
+    if (REDUCED) { tiles.forEach((t) => t.classList.add("in")); wrap.classList.add("in"); cb.classList.add("in"); rows.forEach((r) => r.classList.add("in")); foot.classList.add("in"); return; }
+    cn.textContent = "0";
+    land(tiles, ruleTimers, 400, 340);
+    ruleTimers.push(setTimeout(() => wrap.classList.add("in"), 400 + tiles.length * 340 + 250));
+    ruleTimers.push(setTimeout(() => {
+      cb.classList.add("in");
+      ruleTimers.push(countTo(cn, 86, 1200, (x) => String(Math.round(x))));
+    }, 400 + tiles.length * 340 + 800));
+    land(rows, ruleTimers, 400 + tiles.length * 340 + 1000, 140);
+    ruleTimers.push(setTimeout(() => foot.classList.add("in"), 400 + tiles.length * 340 + 1000 + rows.length * 140 + 300));
+  }
+  function stopRule() {
+    ruleTimers = clearAll(ruleTimers);
+    const c = document.getElementById("rulecanvas");
+    if (!c) return;
+    c.querySelectorAll(".dtile, #caseblock .rv, #caseblock, #rulefoot").forEach((r) => r.classList.remove("in"));
+    document.getElementById("rulewrap").classList.remove("in");
+    document.getElementById("casenum").textContent = "86";
+  }
+
+  // 02 the gate — the four real snapshots hold one by one, then the staged poisoning:
+  // the drift row lands oxblood and the exit line closes red. Terminal state = red gate.
+  let gateTimers = [];
+  function startGate() {
+    stopGate();
+    const c = document.getElementById("gatecanvas");
+    const rows = c.querySelectorAll(".grows:first-of-type .grow");
+    const div = document.getElementById("gdivider"), drift = document.getElementById("driftrow"),
+          exit = document.getElementById("gexit");
+    if (REDUCED) { rows.forEach((r) => r.classList.add("in")); div.classList.add("in"); drift.classList.add("in"); exit.classList.add("in"); return; }
+    land(rows, gateTimers, 450, 330);
+    const t = 450 + rows.length * 330;
+    gateTimers.push(setTimeout(() => div.classList.add("in"), t + 500));
+    gateTimers.push(setTimeout(() => drift.classList.add("in"), t + 1100));
+    gateTimers.push(setTimeout(() => exit.classList.add("in"), t + 1700));
+  }
+  function stopGate() {
+    gateTimers = clearAll(gateTimers);
+    const c = document.getElementById("gatecanvas");
+    if (!c) return;
+    c.querySelectorAll(".grow, #gdivider, #gexit").forEach((r) => r.classList.remove("in"));
+  }
+
+  // 03 the sweep — the table fills row by row, the standout already inked in mauve,
+  // then the withheld-column note — and then the noise-band reading lands on top of
+  // it: the step-0 lead, the dismissed delta, the real one, the key. The chips stamp
+  // with the ochip scale-in.
+  let sweepTimers = [];
+  function startSweep() {
+    stopSweep();
+    const rows = document.querySelectorAll("#sweepcanvas .swrow");
+    const note = document.getElementById("swnote"), lead = document.getElementById("bandlead");
+    const n1 = document.getElementById("nrow1"), n2 = document.getElementById("nrow2");
+    const c1 = document.getElementById("nc1"), c2 = document.getElementById("nc2");
+    const key = document.getElementById("bandkey"), foot = document.getElementById("bandfoot");
+    if (REDUCED) { rows.forEach((r) => r.classList.add("in")); [note, lead, n1, n2, c1, c2, key, foot].forEach((x) => x.classList.add("in")); return; }
+    land(rows, sweepTimers, 400, 260);
+    const t = 400 + rows.length * 260;
+    sweepTimers.push(setTimeout(() => note.classList.add("in"), t + 200));
+    sweepTimers.push(setTimeout(() => lead.classList.add("in"), t + 800));
+    sweepTimers.push(setTimeout(() => n1.classList.add("in"), t + 1400));
+    sweepTimers.push(setTimeout(() => c1.classList.add("in"), t + 2100));
+    sweepTimers.push(setTimeout(() => n2.classList.add("in"), t + 2700));
+    sweepTimers.push(setTimeout(() => c2.classList.add("in"), t + 3400));
+    sweepTimers.push(setTimeout(() => key.classList.add("in"), t + 3900));
+    sweepTimers.push(setTimeout(() => foot.classList.add("in"), t + 4300));
+  }
+  function stopSweep() {
+    sweepTimers = clearAll(sweepTimers);
+    document.querySelectorAll("#sweepcanvas .swrow, #swnote, #bandlead, #nrow1, #nrow2, #nc1, #nc2, #bandkey, #bandfoot").forEach((r) => r.classList.remove("in"));
+  }
+
+  // 04 the the same answers, graded twice — both scores count in from zero (the same replies underneath),
+  // the same-same-same chips stamp, then the reading lands.
+  let rubricTimers = [];
+  function startRubric() {
+    stopRubric();
+    const c = document.getElementById("rubriccanvas");
+    const cards = c.querySelectorAll(".rcard"), chips = c.querySelectorAll(".samechip");
+    const ra = document.getElementById("ra"), rb = document.getElementById("rb");
+    const v = document.getElementById("rverdict"), foot = document.getElementById("rubricfoot");
+    if (REDUCED) { cards.forEach((x) => x.classList.add("in")); chips.forEach((x) => x.classList.add("in")); v.classList.add("in"); foot.classList.add("in"); return; }
+    ra.textContent = "0.00"; rb.textContent = "0.00";
+    rubricTimers.push(setTimeout(() => { cards[0].classList.add("in"); rubricTimers.push(countTo(ra, 0.25, 1200, (x) => x.toFixed(2))); }, 400));
+    rubricTimers.push(setTimeout(() => { cards[1].classList.add("in"); rubricTimers.push(countTo(rb, 1.0, 1200, (x) => x.toFixed(2))); }, 1300));
+    land(chips, rubricTimers, 2600, 260);
+    rubricTimers.push(setTimeout(() => v.classList.add("in"), 3600));
+    rubricTimers.push(setTimeout(() => foot.classList.add("in"), 4200));
+  }
+  function stopRubric() {
+    rubricTimers = clearAll(rubricTimers);
+    const c = document.getElementById("rubriccanvas");
+    if (!c) return;
+    c.querySelectorAll(".rcard, .samechip, #rverdict, #rubricfoot").forEach((r) => r.classList.remove("in"));
+    document.getElementById("ra").textContent = "0.25";
+    document.getElementById("rb").textContent = "1.00";
+  }
+
+  // 05 the router — the old line lands struck, the new line lands mauve, the rerun
+  // status follows, then the three tiers and the closing rule.
+  let routerTimers = [];
+  function startRouter() {
+    stopRouter();
+    const old = document.getElementById("oldline"), nw = document.getElementById("newline");
+    const st = document.getElementById("rstatus");
+    const tiers = document.querySelectorAll("#routercanvas .tier");
+    const foot = document.getElementById("routerfoot");
+    if (REDUCED) { old.classList.add("in"); nw.classList.add("in"); st.classList.add("in"); tiers.forEach((t) => t.classList.add("in")); foot.classList.add("in"); return; }
+    routerTimers.push(setTimeout(() => old.classList.add("in"), 400));
+    routerTimers.push(setTimeout(() => nw.classList.add("in"), 1200));
+    routerTimers.push(setTimeout(() => st.classList.add("in"), 2000));
+    land(tiers, routerTimers, 2600, 340);
+    routerTimers.push(setTimeout(() => foot.classList.add("in"), 2600 + tiers.length * 340 + 300));
+  }
+  function stopRouter() {
+    routerTimers = clearAll(routerTimers);
+    document.querySelectorAll("#routercanvas .dl, #rstatus, #routercanvas .tier, #routerfoot").forEach((r) => r.classList.remove("in"));
+  }
+
+  // 06 the loop — the day-one chip stamps honestly, the promoted-case chip follows,
+  // the echo lands, and the corpus line closes the arc.
+  let loopTimers = [];
+  function startLoop() {
+    stopLoop();
+    const c1 = document.getElementById("lc1"), c2 = document.getElementById("lc2"),
+          who = document.getElementById("loopwho"), echo = document.getElementById("loopecho"),
+          foot = document.getElementById("loopfoot");
+    if (REDUCED) { [c1, c2, who, echo, foot].forEach((x) => x.classList.add("in")); return; }
+    loopTimers.push(setTimeout(() => c1.classList.add("in"), 800));
+    loopTimers.push(setTimeout(() => c2.classList.add("in"), 1700));
+    loopTimers.push(setTimeout(() => { who.classList.add("in"); echo.classList.add("in"); }, 2600));
+    loopTimers.push(setTimeout(() => foot.classList.add("in"), 3400));
+  }
+  function stopLoop() {
+    loopTimers = clearAll(loopTimers);
+    document.querySelectorAll("#lc1, #lc2, #loopwho, #loopecho, #loopfoot").forEach((r) => r.classList.remove("in"));
+  }
+
+  // MOBILE fold — on phones (≤640px, CSS-gated) each beat shows title + the visual and
+  // the paragraphs open on a tap. The hiding class is added HERE, not in the markup, so
+  // without JS nothing is hidden; above 640px the button is display:none.
+  document.querySelectorAll(".row .txt").forEach((t) => {
+    const h = t.querySelector("h2");
+    if (!h || !t.querySelector("p:not(.kicker)")) return;
+    t.classList.add("fold");
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "morebtn";
+    b.textContent = "read more";
+    b.setAttribute("aria-expanded", "false");
+    b.addEventListener("click", () => {
+      b.setAttribute("aria-expanded", String(t.classList.toggle("open")));
+    });
+    h.after(b);
+  });
+  document.querySelectorAll(".roadmap").forEach((t) => {
+    const h = t.querySelector("h2");
+    if (!h) return;
+    t.classList.add("fold");
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "morebtn";
+    b.textContent = "the box, and what's broken";
+    b.setAttribute("aria-expanded", "false");
+    b.addEventListener("click", () => {
+      b.setAttribute("aria-expanded", String(t.classList.toggle("open")));
+    });
+    h.after(b);
+  });
+</script>
+</body>
+</html>

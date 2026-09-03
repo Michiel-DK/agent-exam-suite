@@ -1,0 +1,338 @@
+{
+  "agent": "transcript-en",
+  "mode": "properties",
+  "note": "S-TRANSCRIPT-EN-EXAM — English business call-transcript summarisation (pilot demo shape). Calibration probe run 2026-08-26 on gemma4:e4b-it-qat, temp 0, samples 1, through the real adapter (sandbox/runner.py call_model), wall time 26.9s/26.8s/32.2s on the 1.4k/3.8k/8.0k-char probe transcripts, well under the 120s default (agent.yaml's timeout_s: 900 is headroom, not a fix for an observed timeout — `check` has no --timeout flag by design, runner.py:1577-1584). Probe measured (input chars -> summary chars, ratio): SHORT 1420->401 (.282), MEDIUM 3849->456 (.118), LONG 7955->530 (.067), QUIET 723->~289 (.399, and the champion set nothing_important=False plus invented a 'schedule next check-in' action item on this exact quiet call — a real observed manufactured-significance failure, kept as quiet-checkin-short-train). No JSON truncation observed up to 7955 chars (2680 prompt tokens / 3796 total, under the ~4096-token default context ceiling documented in evals/recap/cases.json for this same untouched router.py config) — the long band here is capped around 5300-8000 chars for that reason, deliberately under recap's own 7597-char case that DID truncate in Dutch.\n\nCALIBRATION CORRECTION (caught before any heldout inference ran, so this is the calibration step the brief mandates, not tuning-to-fit): the summary-length curve above is a near-FLAT ABSOLUTE FLOOR (~400-530 chars) across an 11x range of input length, NOT proportional to it — confirming E13's prior that compression ratio is the discriminating knob, but also meaning a naive per-tier PERCENTAGE ratio is unreachable on short/medium inputs (e.g. 0.20 x 1400ch = 280-char limit, below the measured 401-char floor for ANY correct busy-call summary at that length — a broken instrument, not difficulty). Fixed by rule, applied uniformly, before running heldout: for a BUSY case under 1000 chars, max_ratio is DROPPED (compression is not measurable there; difficulty comes from coverage/action_items/grounding instead); for 1000+ chars the ratio is set so the limit clears ~580-700 chars UNLESS the case is one of the two designed long-band compression cases (discovery-heldout-long: 641, support-heldout-long: 673), which keep a tight ratio on purpose — the champion genuinely has to compress there. Every QUIET case has max_ratio dropped everywhere and relies solely on abstain_max_chars, which is already the intended absolute cap (recap's own pattern) — carrying a second, percentage-based cap alongside it is the same floor trap with extra steps.",
+  "not_verified": "READABILITY / prose quality is not measured — no judge, judge-free by repo decision. Speaker attribution correctness (REP vs CUSTOMER) is not checked. check_action_items is PRESENCE-only on required substrings — it does not check that action_items excludes ungrounded or duplicate items beyond what check_grounded independently catches on numbers. Multi-call history / relationship across calls is out of scope, this exam is single-call only, matching recap's single-shot scope. CASE TEXT IS SYNTHETIC, hand-authored, no real client or the lead data. check_compression fired on ZERO of 13 heldout cases against this champion (measured, snapshot.json) — its falsifiability rests on the echo adversarial fixture (test_transcript_en.py test_4) and the isolation test (test_2e), not on any live case, because the champion's output already stays under every corrected limit. It is a guard against a future degenerate padding strategy, not a current discriminator; the two long-band cases carrying the tightest ratios (discovery-heldout-long, support-heldout-long) both failed on check_coverage instead.",
+  "cases": [
+    {
+      "id": "discovery-short-train",
+      "split": "train",
+      "input": "REP: Hi, this is Dana from Northline Software, thanks for taking the call.\nPROSPECT: Sure, happy to chat. I'm Marcus, I run operations at Beacon Freight.\nREP: Great. So from the intake form, you're currently tracking shipments in\nspreadsheets and it's getting hard to scale. Can you tell me more about that?\nPROSPECT: Yeah, we have about 40 shipments a week now, up from 10 last year.\nThree people update the same spreadsheet and we keep getting version conflicts.\nREP: Got it. Our platform gives each shipment a live status page and everyone\nsees the same data in real time, no more spreadsheet conflicts. Would that solve\nthe core problem for you?\nPROSPECT: That would help a lot, yes. What does it cost for a team our size?\nREP: For up to 10 users it's 900 EUR a month, billed annually. There's also a\none-time 500 EUR onboarding fee that covers data migration from your sheets.\nPROSPECT: Okay, that's in range. I'd need to loop in our finance director,\nElena, before we commit to anything.\nREP: Makes sense. I can send over a one-page proposal today so you have\nsomething concrete to show her. Would Thursday work for a follow-up call once\nshe's had a look?\nPROSPECT: Thursday works. Let's say 2pm.\nREP: Perfect, I'll send the proposal by end of day and calendar the call for\nThursday at 2pm. Anything else on your mind before we wrap up?\nPROSPECT: No, that covers it. Thanks Dana.\nREP: Thanks Marcus, talk Thursday.\n",
+      "expected": {
+        "must_mention": [
+          "900",
+          "Elena"
+        ],
+        "must_commit": [
+          "proposal",
+          "Thursday"
+        ],
+        "max_ratio": 0.44,
+        "nothing_important": false
+      }
+    },
+    {
+      "id": "renewal-medium-train",
+      "split": "train",
+      "input": "REP: Hi Priya, thanks for making time — I know renewal conversations can feel\nlike a chore, so I'll keep this efficient.\nCUSTOMER: No problem, go ahead.\nREP: So your current contract with Solvix runs through the end of this month,\n25 seats at 45 EUR per seat per month, so 1125 EUR monthly, 13500 EUR annually.\nUsage has actually grown — you're at 31 active seats today.\nCUSTOMER: Right, we added the support team in Q2. What are you proposing for\nrenewal?\nREP: Two options. Option one, true up to 31 seats at the same 45 EUR rate,\nthat's 1395 EUR monthly, 16740 EUR annually. Option two, move to our Growth\ntier which includes the API add-on you asked about in March, at 52 EUR per\nseat for up to 40 seats, so 1612 EUR monthly, 19344 EUR annually, but that\ncovers you through your planned Q4 hiring without another true-up.\nCUSTOMER: The API add-on is interesting, we do still want that. Was that the\nwebhook feature or the full REST API?\nREP: The full REST API, plus webhooks for status changes. It also includes\npriority support, which today you're paying for separately at 200 EUR a\nmonth.\nCUSTOMER: If it's bundled that changes the math. Let me think about the two\nnumbers for a second... okay, Growth tier sounds like the better fit if it\nreally does cover us through Q4. How many seats do you expect us to need by\nDecember?\nREP: Based on your hiring plan you mentioned last quarter, around 36, so\nyou'd have headroom without touching the contract again.\nCUSTOMER: That's appealing. One concern — we had an incident in January where\nsupport took 18 hours to respond on a Sev1. Is priority support meaningfully\nfaster?\nREP: Yes, priority support has a 2-hour SLA for Sev1, that incident was\nactually before we rolled out priority support company-wide. I can pull the\ncurrent SLA doc and send it over.\nCUSTOMER: Please do, that would help me make the case internally.\nREP: I'll send the SLA doc today. For the contract itself, I can have the\nGrowth tier agreement drafted and in your inbox by Wednesday. Would that give\nyou enough time to review before your renewal deadline?\nCUSTOMER: Wednesday works. I'll also need our legal team to glance at the\ndata processing addendum since it's a new tier — can you include that in the\nsame email?\nREP: Absolutely, I'll attach the DPA along with the agreement on Wednesday.\nCUSTOMER: Great. One more thing — is the 52 EUR rate locked for the full\nyear or can it move?\nREP: It's locked for a 12-month term once signed. I'll note that explicitly\nin the cover email so there's no ambiguity.\nCUSTOMER: Perfect, that's everything from my side.\nREP: Sounds good. To recap — I'll send the SLA doc today, and the Growth tier\nagreement plus DPA by Wednesday, 31 -> up to 40 seats at 52 EUR, 12-month\nlock. I'll also flag your December seat estimate of 36 in the notes so we\ndon't have to re-negotiate before then.\nCUSTOMER: Sounds right. Thanks Dana.\nREP: Actually, before you go — one more question came up internally. Our\nmarketing team asked whether the Growth tier includes the analytics\ndashboard, or if that's still a separate add-on.\nCUSTOMER: Sorry, I meant to ask that too, go ahead.\nREP: It's included in Growth, that's actually one of the differences from\nyour current tier — right now you're paying 150 EUR a month for analytics\nas an add-on, and under Growth that folds into the base price with no extra\ncharge.\nCUSTOMER: Oh, that's good to know, that changes the value comparison even\nmore in favor of switching. Can you make sure that's spelled out clearly in\nthe agreement, since our CFO will ask why the line item disappeared?\nREP: I will, I'll add a short note in the cover email explaining that\nanalytics moves from a 150 EUR add-on to included, so the CFO has the\nexplanation without having to ask.\nCUSTOMER: Perfect, that's genuinely everything now. Thanks Dana.\nREP: Thanks Priya, talk soon.\n",
+      "expected": {
+        "must_mention": [
+          "36",
+          "150"
+        ],
+        "must_commit": [
+          "SLA",
+          "Wednesday"
+        ],
+        "max_ratio": 0.2,
+        "nothing_important": false
+      }
+    },
+    {
+      "id": "support-long-train",
+      "split": "train",
+      "input": "REP: Hi, this is Tom from support, I understand you've been having trouble\nwith the export feature — can you walk me through what's happening?\nCUSTOMER: Yes, thank you for calling back. Our account is Larkspur Clinics,\nand since last Tuesday every CSV export from the patient scheduling module\ncomes back with the appointment times shifted by an hour. It's causing real\nproblems because our front desk staff are double-booking slots.\nREP: That sounds disruptive, I'm sorry. Let me make sure I understand the\nscope — is this every export, or only certain reports?\nCUSTOMER: It's specifically the daily schedule export, the one our office\nmanagers run every morning at 7am. The weekly summary export looks fine as\nfar as we can tell.\nREP: Okay, that's a useful distinction. Do you know if this started right\nafter an update on your end, or did it just appear on its own?\nCUSTOMER: We didn't change anything. Our IT lead, Grace, thinks it might be\nrelated to daylight saving time, since the shift is exactly one hour, but\nshe's not certain.\nREP: That's a strong lead actually — a timezone handling bug around a DST\nboundary would produce exactly a one-hour shift on exports but leave the\nin-app calendar correct, which matches what you're describing. Can you\nconfirm — does the calendar view inside the app show the correct times?\nCUSTOMER: Yes, in-app everything is correct. It's only the exported file\nthat's wrong.\nREP: Understood, that narrows it down to the export pipeline specifically,\nnot the underlying data. I'm going to open a ticket right now and mark it\nSev2 given the double-booking impact. Can I get your account ID to attach to\nthe ticket?\nCUSTOMER: It's LC-40217.\nREP: Got it, LC-40217. I'll also need one example export file if you can\nsend it, so engineering can see the exact offset in your data.\nCUSTOMER: I can send this morning's export. Should I email it to this\naddress?\nREP: Yes, support@ourcompany.example works, please put LC-40217 in the\nsubject line so it routes straight to this ticket.\nCUSTOMER: Will do, sending it right after this call.\nREP: Thank you. Now, while engineering investigates, is there a workaround\nyour team can use in the meantime? For example, manually adjusting the\nexport time before printing the schedule?\nCUSTOMER: We've actually started doing that already — Grace wrote a note\ntelling the front desk to subtract an hour from every exported time until\nthis is fixed, but it's error-prone and everyone's stressed about missing\none.\nREP: That's a reasonable stopgap but I agree it's risky at scale. Let me\ncheck something — do you use the export as a PDF anywhere, or is it always\nCSV?\nCUSTOMER: Always CSV, we pipe it into our own printer template.\nREP: Okay. I don't have a faster fix to offer you on this call, but I want\nto set clear expectations rather than guess. Engineering triages Sev2\ntickets within 4 business hours, and depending on what they find, a timezone\nbug like this is usually a same-day or next-day fix once identified, but I\ncan't promise a number until they've looked at the actual code path.\nCUSTOMER: I understand, I'd just like to know when I'll hear something next,\neven if it's not resolved yet.\nREP: Fair. I'll personally follow up with you by end of day tomorrow with a\nstatus update, whether or not it's fixed by then. If it looks like it will\ntake longer, I'll escalate again on your behalf.\nCUSTOMER: That would help a lot, thank you. Also — will we get any credit\nfor this given the front desk overhead it's causing?\nREP: I can't approve a credit myself, but I will flag it to our account\nteam, and typically a service issue causing operational impact like this\ndoes get reviewed for a service credit. I don't want to promise a number\nsince that's not my call to make.\nCUSTOMER: That's fair, I just wanted it noted somewhere.\nREP: Understood, I'm noting it in the ticket now so the account team sees it\nwhen they review.\nCUSTOMER: Appreciated. One more thing while I have you — separately from\nthis bug, we've been wanting to ask about adding a second location. We're\nopening a clinic in Riverside next month and want to know if that's a\nstraightforward add to our existing plan or a new contract.\nREP: That's outside what I handle day to day, but I can connect you with\nyour account manager, Felix, for that conversation — he'll know your\ncurrent plan terms. Should I have him reach out, or would you rather book\ntime directly?\nCUSTOMER: Having him reach out is fine, no rush on that one, the export bug\nis the priority today.\nREP: Understood, I'll message Felix after this call and mention Riverside so\nhe has context whenever you're ready to talk.\nCUSTOMER: Great, thank you.\nREP: To make sure I've got everything — I'm opening a Sev2 ticket for\nLC-40217 on the daily schedule export DST offset, you'll send an example\nCSV to support@ourcompany.example with LC-40217 in the subject, I'll follow\nup by end of day tomorrow with a status update regardless of resolution, I'm\nflagging the operational impact for a possible service credit review, and\nI'll message Felix to reach out about the Riverside second location.\nCUSTOMER: That all matches what we discussed. Thank you for being thorough.\nREP: Of course. Is there anything else I can help with today?\nCUSTOMER: No, that covers everything on my end.\nREP: Great, talk to you tomorrow, Grace — I mean, talk to you tomorrow, and\nplease tell Grace thanks for the DST theory, that's probably going to save\nengineering some time.\nCUSTOMER: Ha, I will. Thanks Tom.\nREP: Before you go, actually — while I have the ticket open, can you tell me\nroughly what time zone your clinic is in? It'll save engineering a step.\nCUSTOMER: We're in Eastern time, same as most of our sister clinics except\nthe Denver one, which is Mountain.\nREP: That's helpful, I'll note both time zones on the ticket in case the bug\nbehaves differently across them — sometimes a DST bug only shows up in\nregions that observe it a certain way, so it's worth ruling in or out early.\nCUSTOMER: Good thinking. Should I ask the Denver office to send an export\ntoo, or is Larkspur's enough for now?\nREP: If it's not too much trouble, yes — a second example from a different\ntime zone would genuinely help engineering confirm the pattern faster rather\nthan guessing from one data point.\nCUSTOMER: I'll reach out to the Denver office manager today and have them\nsend an export to the same address with LC-40217 in the subject.\nREP: Perfect, that's a real help, thank you. I'm updating the ticket now to\nnote that a second export from the Denver, Mountain-time location is\nexpected as well.\nCUSTOMER: Sounds good. Is there a ticket number I can reference if I need to\ncall back before tomorrow?\nREP: Yes, it's the same LC-40217, that's both your account ID and the\nticket reference, so any agent who picks it up will see the full history.\nCUSTOMER: Great, that makes it easy. I think that's really everything now.\nREP: One last thing on my end — I noticed your plan is still on the legacy\nscheduling module version. That's not related to this bug, but the legacy\nversion is being retired at the end of next quarter, so at some point you'll\nneed to migrate. I don't want to push that today given everything else\ngoing on, but I'll have Felix mention it when he reaches out about\nRiverside, so it's on your radar rather than a surprise later.\nCUSTOMER: Appreciate the heads up, better to know now than get caught off\nguard later.\nREP: Agreed. Alright, I think we've covered everything — Sev2 ticket\nLC-40217 open for the DST export offset, example CSVs coming from both\nLarkspur and the Denver office, my status update tomorrow by end of day, the\nservice credit flag for the account team, Felix reaching out about\nRiverside and mentioning the legacy module retirement. Anything I've missed?\nCUSTOMER: No, I think that's a complete list, thank you for being so\nthorough on this call.\nREP: Happy to help, talk tomorrow.\nCUSTOMER: Ha, I will. Thanks Tom.\nREP: Take care.\n",
+      "expected": {
+        "must_mention": [
+          "LC-40217",
+          "Felix"
+        ],
+        "must_commit": [
+          "LC-40217",
+          "Felix"
+        ],
+        "max_ratio": 0.13,
+        "nothing_important": false
+      }
+    },
+    {
+      "id": "quiet-checkin-short-train",
+      "split": "train",
+      "input": "REP: Hi Sam, just doing our monthly check-in — nothing urgent from my\nside, wanted to see how things are going.\nCUSTOMER: Hey, good timing. Everything's actually been running smoothly this\nmonth, no complaints from the team.\nREP: Great to hear. Anyone using the new dashboard we shipped last month?\nCUSTOMER: A couple of people have poked at it but nothing serious yet.\nREP: No rush, it'll be there when you need it. Any issues with support\nresponse times or anything like that?\nCUSTOMER: No, everything's been fine. Honestly this is a pretty quiet month\nfor us.\nREP: Good to hear. I don't have anything else on my end either. Same time\nnext month?\nCUSTOMER: Works for me.\nREP: Great, talk then.\nCUSTOMER: Sounds good, bye.\n",
+      "expected": {
+        "nothing_important": true,
+        "abstain_max_chars": 420
+      }
+    },
+    {
+      "id": "pricing-objection-medium-train",
+      "split": "train",
+      "input": "REP: Hi Jonas, thanks for hopping on. I saw your note that the proposal we\nsent last week gave the team some pause on price.\nPROSPECT: Yeah, honestly the 1800 EUR a month for the Pro plan is more than\nwe budgeted. We were thinking closer to 1200.\nREP: I hear you. Can I ask what you budgeted 1200 for — is that a hard\nceiling from finance, or more of an internal target?\nPROSPECT: It's a target we set before we really understood what the Pro plan\nincludes. Our CFO hasn't seen a number yet.\nREP: Okay, that's useful. A few things that might close the gap — first, if\nyou commit to an annual contract instead of month-to-month, the rate drops\nto 1500 EUR a month, that's a straightforward discount. Second, the Pro\nplan includes the reporting module, which you'd otherwise pay 300 EUR a\nmonth for separately on the Standard plan. Have you priced Standard plus\nreporting against this?\nPROSPECT: We hadn't, actually. If Standard plus reporting comes close to\nPro's price anyway, that changes things.\nREP: Right, Standard plus reporting add-on comes to 1450 EUR a month, so\nPro at 1500 with the annual discount is only 50 EUR more and includes two\nfeatures Standard doesn't — the audit log and priority onboarding.\nPROSPECT: That's a much smaller gap than I thought. I'd still like to run\nthe 1500 number past our CFO, Renata, before saying yes.\nREP: Completely understandable. Can I send over a one-pager comparing Pro\nannual against Standard plus reporting, so Renata has the comparison in\nfront of her rather than just a number?\nPROSPECT: That would help a lot, please do.\nREP: I'll get that to you by tomorrow morning. Once Renata's seen it, would\na short call with the three of us make sense, or do you want to relay it\nfirst?\nPROSPECT: Let me relay it first, I think that's faster. I'll get back to you\nby Friday either way.\nREP: Sounds good, I'll send the comparison tomorrow and wait to hear from\nyou by Friday.\n",
+      "expected": {
+        "must_mention": [
+          "1500",
+          "Renata"
+        ],
+        "must_commit": [
+          "comparison",
+          "Friday"
+        ],
+        "max_ratio": 0.33,
+        "nothing_important": false
+      }
+    },
+    {
+      "id": "discovery-long-train",
+      "split": "train",
+      "input": "REP: Hi Amara, thanks for jumping on, this is Leo from Fieldcrest Analytics.\nPROSPECT: Hi Leo, thanks for reaching out. I run supply chain for Torvane\nManufacturing, we make industrial fasteners.\nREP: Great to meet you. From what you filled in on the form, you're looking\nat demand forecasting tools — can you tell me a bit about how you handle\nthat today?\nPROSPECT: Right now it's mostly a senior planner, Devon, using a set of\nspreadsheets built up over years. He forecasts by hand based on trailing\ntwelve-month sales plus gut feel for seasonality. It mostly works but it\ndoesn't scale and it's a huge risk if Devon's ever out.\nREP: That's a really common pattern, and the single point of failure is\nexactly the kind of thing our platform is built to remove. Roughly how many\nSKUs are we talking about?\nPROSPECT: About 1400 active SKUs across three warehouses.\nREP: Okay, that's well within range for us — we have customers running\nsimilar SKU counts across more locations. Our forecasting engine ingests\nyour historical sales, current inventory, and any promotional calendar you\nhave, and produces a rolling 13-week forecast per SKU per location, updated\nweekly.\nPROSPECT: That's the shape of what we need. How accurate is it typically\ncompared to a human planner?\nREP: On average our customers see forecast error drop from around 35%\nmean absolute percentage error, which is roughly where a manual spreadsheet\nprocess lands, down to about 18% within the first two months. It keeps\nimproving after that as the model sees more of your actual pattern.\nPROSPECT: That would be a big improvement for us — right now we're\noverstocking about 22% of SKUs and stocking out on another 9%, mostly\nbecause Devon can't realistically track seasonality for 1400 items by hand.\nREP: Those numbers line up with what we typically see going in. On pricing,\nfor your SKU count and warehouse count, you'd be looking at our Growth\ntier, which runs 3200 EUR a month, billed quarterly, and includes a\ndedicated onboarding specialist for the first 60 days to help get your\nhistorical data mapped in cleanly.\nPROSPECT: 3200 a month is more than I expected honestly, though if the\nstockout number really drops that's easy to justify. Is there a pilot or\ntrial option before committing to a full year?\nREP: Yes, we do offer a 30-day pilot on a subset of SKUs — usually customers\npick one warehouse and maybe 200-300 of their highest-velocity SKUs to\nprove out the forecast quality before rolling out fully. The pilot is 800\nEUR flat, which is credited back against your first quarter if you convert.\nPROSPECT: That's much easier to get approved internally. I'd want to pick\nour Ohio warehouse for the pilot, that's our biggest and Devon is based\nthere so he can validate the output directly against his own forecasts.\nREP: Perfect, Ohio warehouse it is. I'll need a data export from you to get\nstarted — historical sales for the last 24 months plus your current SKU\nmaster list. Can Devon get that to us, or is there someone else who handles\ndata exports?\nPROSPECT: Devon can pull that, he has access to our ERP directly. I'll ask\nhim to prepare it this week.\nREP: Great, once we have the export I can turn around a data quality check\nwithin 3 business days and let you know if anything looks off before we\nkick the pilot off properly.\nPROSPECT: Sounds good. What's the actual timeline from data received to\nfirst forecast output?\nREP: Typically about a week for the initial model to run, then we review the\nfirst forecast together on a call before Devon starts using it day to day.\nPROSPECT: Okay, I think I have what I need to bring this to our VP of\nOperations, Harriet, for sign-off on the 800 EUR pilot spend.\nREP: That's great. Would it help if I sent a short summary document you\ncould forward to Harriet directly, covering the pilot scope, cost, and\nexpected accuracy improvement?\nPROSPECT: Yes please, that would save me writing it up myself.\nREP: I'll get that to you by end of day tomorrow. Once Harriet approves,\njust let me know and I'll send the pilot agreement and the data request\nchecklist for Devon.\nPROSPECT: Sounds like a plan. I'll aim to have an answer from Harriet by\nearly next week.\nREP: Perfect, I'll follow up with you next Wednesday if I haven't heard\nanything by then, just so it doesn't slip.\nPROSPECT: That works, thanks Leo.\nREP: Thanks Amara, talk soon.\n",
+      "expected": {
+        "must_mention": [
+          "3200",
+          "800",
+          "Ohio"
+        ],
+        "must_commit": [
+          "Harriet",
+          "Wednesday"
+        ],
+        "max_ratio": 0.16,
+        "nothing_important": false
+      }
+    },
+    {
+      "id": "renewal-short-train",
+      "split": "train",
+      "input": "REP: Hi Ines, quick renewal call — your plan expires in 10 days.\nCUSTOMER: Right, I saw the reminder. What's the renewal price?\nREP: Same as last year, 640 EUR for the annual plan, no change.\nCUSTOMER: Good, no complaints there. Can you just send the invoice to\naccounts@ this time instead of me directly?\nREP: Sure, I'll send the 640 EUR invoice to accounts@ today.\nCUSTOMER: Perfect, that's all I needed.\nREP: Great, thanks Ines.\n",
+      "expected": {
+        "must_mention": [
+          "640"
+        ],
+        "must_commit": [
+          "invoice"
+        ],
+        "nothing_important": false
+      }
+    },
+    {
+      "id": "support-medium-train",
+      "split": "train",
+      "input": "REP: Hi, this is Nadia from support, thanks for waiting. I see you opened a\nticket about the mobile app crashing.\nCUSTOMER: Yes, this is Oskar from Brightfield Retail. The app crashes every\ntime one of our store managers tries to scan a barcode with more than 12\ndigits, which happens on maybe 15% of our SKUs.\nREP: Okay, that's specific and helpful. Does it crash immediately on scan,\nor after the barcode is recognized?\nCUSTOMER: Immediately on scan, the screen just goes black and kicks you back\nto the home screen.\nREP: Got it. Which version of the app are your managers running?\nCUSTOMER: We're on 4.2.1, we haven't updated in about two months.\nREP: That actually lines up — we shipped a barcode-length fix in 4.3.0 two\nweeks ago that sounds like exactly this issue. Before I say that's the fix\nfor certain, can you have one manager update to 4.3.0 and try the same\nlong barcode again?\nCUSTOMER: I can ask our Chicago store to test it this afternoon, they hit\nthis the most.\nREP: That would be great, please have them report back either way. I'm\nopening a ticket, reference BF-8834, and I'll mark it pending your test\nresult.\nCUSTOMER: Will do. If it's not fixed, what's next?\nREP: If 4.3.0 doesn't resolve it, I'll escalate directly to the mobile team\nwith your example SKUs so they can reproduce it exactly, rather than\nstarting from scratch.\nCUSTOMER: Okay, I'll let you know by end of day.\nREP: Sounds good, I'll check back with you tomorrow morning either way.\nCUSTOMER: Appreciated, thanks Nadia.\n",
+      "expected": {
+        "must_mention": [
+          "4.3.0",
+          "BF-8834"
+        ],
+        "must_commit": [
+          "Chicago",
+          "tomorrow"
+        ],
+        "max_ratio": 0.41,
+        "nothing_important": false
+      }
+    },
+    {
+      "id": "quiet-checkin-medium-train",
+      "split": "train",
+      "input": "REP: Hi Wendell, this is our quarterly check-in — how's everything on your\nend?\nCUSTOMER: Good, actually. Been a fairly uneventful quarter for us, nothing\nmajor to report.\nREP: Glad to hear it. Last time we spoke you mentioned maybe adding a\nsecond team to the account eventually — any movement on that?\nCUSTOMER: Not yet, that's still just a maybe on our roadmap, nothing\nconcrete. Ask me again next quarter.\nREP: No problem, I'll just keep it in mind, no need to do anything with it\nnow. Any support tickets or bugs worth mentioning?\nCUSTOMER: None that I'm aware of, the team hasn't flagged anything to me.\nREP: Good. Usage looks steady on our side too, nothing unusual in the\ndashboards. I think that's a wrap unless you've got anything else?\nCUSTOMER: Nope, that's everything. Thanks for checking in.\nREP: Of course, talk next quarter.\nCUSTOMER: Sounds good, bye.\n",
+      "expected": {
+        "nothing_important": true,
+        "abstain_max_chars": 420
+      }
+    },
+    {
+      "id": "discovery-heldout-easy",
+      "split": "heldout",
+      "input": "REP: Hi, this is Rosa from Cascade Metrics, thanks for the intro call.\nPROSPECT: Hi Rosa, I'm Yusuf, I handle vendor relationships at Palfrey Foods.\nREP: Great. What prompted you to look at analytics tools right now?\nPROSPECT: Our board wants monthly sales dashboards and right now someone\nmanually builds them in a spreadsheet every month, takes about two days.\nREP: We can automate that entirely — connects to your POS system and\nrefreshes daily instead of monthly. For a company your size it's 450 EUR a\nmonth.\nPROSPECT: That's well within budget. I'd like to get a demo set up for our\nwhole ops team.\nREP: I can set that up for next Tuesday if that works.\nPROSPECT: Tuesday works, I'll get the team's calendars sent over today.\nREP: Perfect, I'll send a demo invite for Tuesday once I have those.\nPROSPECT: Sounds good, thanks Rosa.\n",
+      "expected": {
+        "must_mention": [
+          "450"
+        ],
+        "must_commit": [
+          "Tuesday"
+        ],
+        "nothing_important": false
+      }
+    },
+    {
+      "id": "discovery-heldout-hard",
+      "split": "heldout",
+      "input": "REP: Hi Petra, this is Sam from Ridgeline Data, thanks for taking the call.\nPROSPECT: Hi Sam, sure. I'm Petra, I lead procurement at Amsel Logistics.\nREP: Great to meet you. Tell me a bit about what's driving the search for a\nnew procurement platform.\nPROSPECT: We run purchase orders across four regional offices and none of\nthem talk to each other. Berlin uses one system, Rotterdam another, and the\nother two just use email and PDFs.\nREP: That fragmentation is exactly the problem we solve — one shared\npurchase order system across all regions, with approval workflows built in.\nHow many purchase orders are we talking about per month, roughly?\nPROSPECT: Combined across all four offices, about 620 a month.\nREP: That's a solid volume. Our platform handles that comfortably. Pricing\nfor four regional offices at that volume would be 2100 EUR a month, billed\nquarterly, which includes a dedicated implementation manager for the\nrollout.\nPROSPECT: 2100 is more than we'd budgeted, we were thinking closer to 1600.\nCould we start with just Berlin and Rotterdam and add the other two later?\nREP: We could phase it that way — two offices at that volume would bring it\ndown to roughly 1300 EUR a month to start, and you'd add the remaining\noffices once you've proven the workflow internally.\nPROSPECT: That's much closer to what I can get approved. I'd want our CFO,\nHenrik, to see the phased number before I commit to anything, and honestly\nI should probably also mention this to our Rotterdam ops lead, Sanne, since\nshe'll be the one actually running it day to day there — I'll try to loop\nher in before our next call if I can catch her.\nREP: That would be great context to have. I'll put together the phased\npricing breakdown and send it over so you have something concrete for\nHenrik.\nPROSPECT: Please do. I think that covers what I need for now.\nREP: I'll get that pricing breakdown to you by tomorrow.\nPROSPECT: Perfect, thanks Sam.\n",
+      "expected": {
+        "must_mention": [
+          "620",
+          "1300",
+          "Henrik"
+        ],
+        "must_commit": [
+          "pricing",
+          "tomorrow"
+        ],
+        "max_ratio": 0.33,
+        "nothing_important": false
+      }
+    },
+    {
+      "id": "discovery-heldout-long",
+      "split": "heldout",
+      "input": "REP: Hi Faye, this is Marco from Vantable Systems, thanks for making time.\nPROSPECT: Hi Marco, thanks for reaching out. I'm Faye, I run IT for Corbin\nHealth Partners, a network of urgent care clinics.\nREP: Great to meet you. From your intake notes, you're looking at patient\nintake software — can you walk me through your current process?\nPROSPECT: Right now patients fill out paper forms in the waiting room, then\nour front desk staff manually key that into our records system. Across our\n9 clinics that's a lot of duplicate data entry and it's slow.\nREP: How many patient visits a day are we talking about, roughly, across all\n9 clinics?\nPROSPECT: About 340 visits a day combined, more on Mondays.\nREP: Okay, that's a meaningful volume of manual entry to remove. Our intake\nplatform lets patients fill out forms on a tablet or their phone before\nthey're even called back, and it feeds directly into your records system, no\nre-keying.\nPROSPECT: That would save our front desk staff a huge amount of time. Does\nit handle insurance card scanning too, or just the intake form itself?\nREP: Yes, insurance card scanning is included, it OCRs the card and\npre-fills the insurance fields, staff just verify rather than typing from\nscratch.\nPROSPECT: That's a big one for us, insurance entry errors cause a lot of\nbilling rework. What's the pricing look like for 9 clinics at that volume?\nREP: For 9 locations at your visit volume, it's 4200 EUR a month, billed\nannually, and that includes the insurance OCR feature and a dedicated\nonboarding period of 45 days to get each clinic's front desk trained.\nPROSPECT: 4200 a month is a real number, I'd need to build a case for that\ninternally. Is there any way to see it in action before committing at that\nlevel?\nREP: We can do a single-clinic pilot first — pick your busiest location, run\nit there for 30 days, and use the results to build the internal case. The\npilot is 600 EUR flat for that month, credited back if you roll out to all\n9.\nPROSPECT: That's much more approachable. I'd want to pilot at our downtown\nclinic, that's our busiest and the manager there, Otis, is generally open to\ntrying new tools.\nREP: Downtown it is. I'll need someone to coordinate the tablet setup and a\nshort training session with Otis's team — can you connect me with him\ndirectly, or would you rather be the point of contact?\nPROSPECT: I'll connect you with Otis directly, he'll appreciate being looped\nin from the start rather than hearing about it secondhand.\nREP: Sounds good, I'll wait for that intro before scheduling anything with\nhis team.\nPROSPECT: I'll send that intro email today.\nREP: Perfect. Once the pilot data's in, would you want a results readout\nwith just the two of us, or should I include your CFO directly given the\n4200 number is what's ultimately being decided?\nPROSPECT: Let's do just the two of us first, I'll decide after seeing the\nnumbers whether to bring in our CFO, Meredith, for the full rollout\nconversation.\nREP: Understood, I'll plan a readout with you at the end of the 30-day\npilot.\nPROSPECT: Sounds good. What do you need from me to actually kick the pilot\noff, besides the intro to Otis?\nREP: Just a signed one-page pilot agreement for the 600 EUR — I'll draft\nthat and send it over today along with the intro request.\nPROSPECT: Great, I'll keep an eye out for both.\nREP: I'll get you the pilot agreement and follow up on the Otis intro by end\nof day.\nPROSPECT: Perfect, thanks Marco, talk soon.\nREP: Actually, one more thing before we wrap — do any of your 9 clinics use\na language other than English with patients regularly? I ask because our\nintake tablets support multi-language forms, and if that's relevant here\nit's worth including in the pilot scope from the start rather than adding\nit later.\nPROSPECT: Yes actually, our downtown clinic — the one we're piloting at —\nsees a lot of Spanish-speaking patients, probably a third of visits there.\nREP: Good thing I asked, then. I'll make sure Spanish-language forms are\nincluded in the downtown pilot configuration from day one.\nPROSPECT: That's important, thank you for catching that.\nREP: Of course. Separately, I should mention — since Corbin Health is a\nhealthcare provider, we'll need a signed data processing addendum in\naddition to the pilot agreement, covering how patient data is handled.\nThat's standard for any healthcare customer, not specific to you.\nPROSPECT: That makes sense, we have our own compliance officer, Idris, who\nusually reviews anything like that for us before signing.\nREP: Understood, I'll include the DPA alongside the pilot agreement so Idris\ncan review both at once rather than in two separate emails.\nPROSPECT: That would be efficient, yes please.\nREP: Will do. Last thing on my end — what's the best way to reach Otis once\nI have the intro, phone or email?\nPROSPECT: Email first is easier for him, he's usually in exam rooms during\nthe day.\nREP: Good to know, I'll lead with email when I reach out to him.\nPROSPECT: Sounds good. I think that's genuinely everything now.\nREP: Agreed. To recap — Spanish-language forms included in the downtown\npilot config, DPA sent alongside the pilot agreement for Idris to review,\nand I'll email Otis once I have the intro from you, all by end of day\ntoday along with the agreement itself.\nPROSPECT: That all matches. Thanks Marco.\nREP: Thanks Faye, talk soon.\n",
+      "expected": {
+        "must_mention": [
+          "4200",
+          "600",
+          "Otis"
+        ],
+        "must_commit": [
+          "pilot agreement",
+          "Otis"
+        ],
+        "max_ratio": 0.12,
+        "nothing_important": false
+      }
+    },
+    {
+      "id": "renewal-heldout-medium",
+      "split": "heldout",
+      "input": "REP: Hi Karol, renewal check-in for your Vantable contract, due in three\nweeks.\nCUSTOMER: Right, go ahead.\nREP: Current plan is 18 seats at 38 EUR per seat, so 684 EUR monthly, 8208\nannually. You're actually using 22 seats today based on our usage report.\nCUSTOMER: Yeah, we added a few people in the spring. What's the renewal\noption?\nREP: True up to 22 seats at the same rate, that's 836 EUR monthly, 10032\nannually. Or, if you're planning more growth, our Scale tier caps at 30\nseats for a flat 950 EUR monthly regardless of exact headcount, so you'd\nhave room to grow without another true-up conversation.\nCUSTOMER: We are planning to add a support team, maybe 5-6 more people by\nyear end, so Scale might make sense. What's included that we don't have\nnow?\nREP: Scale adds single sign-on and a dedicated CSM, which today isn't part\nof your plan at all.\nCUSTOMER: Single sign-on would actually help us, our security team has been\nasking about that. Can you send me a comparison of current plan versus\nScale so I can bring it to my manager?\nREP: I'll put that comparison together and send it over tomorrow.\nCUSTOMER: Great, and can you loop in someone from security on your side too,\nin case my team has SSO configuration questions?\nREP: Sure, I'll have our solutions engineer, Priyanka, join that\nconversation once you're ready.\nCUSTOMER: Perfect, that covers what I need for now, thanks.\nREP: Thanks Karol, talk soon.\n",
+      "expected": {
+        "must_mention": [
+          "950",
+          "22"
+        ],
+        "must_commit": [
+          "comparison",
+          "tomorrow"
+        ],
+        "max_ratio": 0.44,
+        "nothing_important": false
+      }
+    },
+    {
+      "id": "renewal-heldout-digits",
+      "split": "heldout",
+      "input": "REP: Hi Dorien, thanks for jumping on, this is the annual renewal\nconversation for Halstead Robotics.\nCUSTOMER: Sure, go ahead, I've got about 20 minutes.\nREP: Your current plan is 60 seats at 28.50 EUR per seat monthly, so\n1710.00 EUR monthly, 20520.00 EUR annually. Your usage report shows you're\nat 74 active seats today.\nCUSTOMER: We picked up a new engineering team in the spring, that tracks.\nREP: Two paths for renewal. True up to 74 seats at the current rate, that's\n2109.00 EUR monthly, 25308.00 EUR annually. Or move to our Enterprise tier,\nwhich supports up to 100 seats for a flat 2450.00 EUR monthly, 29400.00 EUR\nannually, and includes the audit-log and SCIM provisioning features you\nasked about back in February.\nCUSTOMER: SCIM provisioning would genuinely help us, we're doing user\nprovisioning by hand right now across 74 accounts and it's a mess.\nREP: It would automate that entirely — new hires get access automatically\nbased on your identity provider group membership.\nCUSTOMER: That's compelling. Walk me through the math one more time — 74\nseats true-up is 2109.00 monthly versus Enterprise flat at 2450.00 monthly?\nREP: Correct, so Enterprise is 341.00 EUR more per month than the true-up,\nbut covers you up to 100 seats with no additional true-up conversation, plus\nSCIM and the audit log, which today aren't available on your plan at any\nprice.\nCUSTOMER: Given we're planning to grow past 74 anyway, the extra 341.00 a\nmonth is probably worth it just for SCIM alone. I'd like our security\narchitect, Tomasz, to review the SCIM setup requirements before we commit,\nhe handles our identity provider config.\nREP: Makes sense, I can have our solutions engineer prepare a short SCIM\nsetup document specifically for Tomasz to review — technical detail on the\nprovisioning flow rather than a sales pitch.\nCUSTOMER: That would be exactly right, please do.\nREP: I'll get that SCIM document over by Thursday.\nCUSTOMER: Good. Separately — is the 2450.00 rate locked for the year, or\ncan it move if we go over 100 seats?\nREP: Locked at 2450.00 up to 100 seats for the 12-month term. If you cross\n100 seats mid-term we'd revisit pricing at that point, not before.\nCUSTOMER: Understood, that's clear enough. One more thing — our finance\nlead, Bibi, will want to see the exact annual number, 29400.00, broken out\nby quarter for budgeting purposes.\nREP: I can include a quarterly breakdown in the renewal agreement itself,\nthat's a standard addition, no extra work.\nCUSTOMER: Great, please make sure that's in there when you send the\nagreement.\nREP: Understood, I'll include the quarterly breakdown when I send the\nEnterprise agreement.\nCUSTOMER: When can I expect the agreement itself?\nREP: I'll have the full Enterprise agreement, with the quarterly breakdown,\nready by Friday, alongside the SCIM document for Tomasz on Thursday.\nCUSTOMER: That timeline works. I think that's everything from my side.\nREP: One last thing — should I loop in Bibi directly on the email with the\nagreement, or would you rather relay the quarterly numbers yourself?\nCUSTOMER: Please loop her in directly, that'll save a step.\nREP: Will do, I'll include Bibi on the agreement email.\nCUSTOMER: Perfect, thanks Dorien— sorry, thanks for walking through this.\nREP: Of course, talk Thursday.\n",
+      "expected": {
+        "must_mention": [
+          "2450.00",
+          "Tomasz"
+        ],
+        "must_commit": [
+          "SCIM",
+          "Thursday"
+        ],
+        "max_ratio": 0.21,
+        "nothing_important": false
+      }
+    },
+    {
+      "id": "renewal-heldout-short",
+      "split": "heldout",
+      "input": "REP: Hi Tobias, renewal's up in a week, plan stays the same, 320 EUR\nannual.\nCUSTOMER: No changes needed on my end, go ahead and renew.\nREP: I'll send the 320 EUR renewal invoice today.\nCUSTOMER: Sounds good, thanks.\n",
+      "expected": {
+        "must_mention": [
+          "320"
+        ],
+        "must_commit": [
+          "invoice"
+        ],
+        "nothing_important": false
+      }
+    },
+    {
+      "id": "support-heldout-short",
+      "split": "heldout",
+      "input": "REP: Hi, this is Ali from support, I see your ticket about login failures.\nCUSTOMER: Yes, this is Greta from Falkirk Design, three of our five users\ncan't log in since this morning, they get an invalid password error even\nafter resetting.\nREP: Sorry about that. Can you confirm which three, or is it easier if I\njust check the account directly?\nCUSTOMER: Check directly, ticket reference is FD-1190.\nREP: Got it, I'm escalating FD-1190 to our authentication team right now\ngiven three users are locked out.\nCUSTOMER: How soon will I hear back?\nREP: I'll have an update for you within two hours.\nCUSTOMER: Okay, thank you.\n",
+      "expected": {
+        "must_mention": [
+          "FD-1190"
+        ],
+        "must_commit": [
+          "FD-1190",
+          "two hours"
+        ],
+        "nothing_important": false
+      }
+    },
+    {
+      "id": "support-heldout-long",
+      "split": "heldout",
+      "input": "REP: Hi, this is Priya from support, thanks for your patience, I see the\nticket about invoice totals not matching.\nCUSTOMER: Yes, this is Callum from Merrow Brewing. Our finance team noticed\nthat the totals on our exported invoices don't match the totals shown in\nthe dashboard, off by small amounts, usually a few cents but sometimes a\nfew euros.\nREP: That's worth digging into carefully, small mismatches like that are\noften a rounding or tax-calculation issue. Can you give me an example —\none specific invoice where you saw a mismatch?\nCUSTOMER: Invoice MB-2291, dashboard shows 1284.50 EUR, the exported PDF\nshows 1284.47 EUR.\nREP: Okay, a 0.03 EUR difference, that's consistent with a rounding\nbehavior rather than a data error, but let me not assume — do you know if\nthat invoice has multiple line items with different tax rates?\nCUSTOMER: It does, we have two products at different VAT rates on most\ninvoices.\nREP: That's likely it — if the dashboard sums pre-tax amounts and applies\ntax once at the end, but the PDF export calculates tax per line and then\nsums, you get exactly this kind of small rounding drift when there are\nmixed rates. I want to confirm rather than guess though. Can you send me\ntwo more example invoices with the same mismatch pattern?\nCUSTOMER: I can send three more from this week.\nREP: That would help a lot, please send those to\nsupport@ourcompany.example with MB-2291 in the subject so they land in the\nsame ticket.\nCUSTOMER: Will do, sending today.\nREP: Thank you. I'm going to open this as a ticket, reference MB-2291, and\nmark it for our billing engineering team to look at the tax calculation\norder specifically.\nCUSTOMER: How urgent is this on your end? For us it's not blocking\nanything today, our totals are close enough that customers haven't\ncomplained, but our finance team wants it fixed before quarter close.\nREP: Understood, given it's not blocking day to day but has a real\ndeadline, I'll mark it high priority rather than urgent, and I'll make\nsure billing engineering knows your quarter-close date matters here. When\nis quarter close for you?\nCUSTOMER: Three weeks from today.\nREP: Noted, I'll flag the three-week window in the ticket so it doesn't\nsit in a general queue.\nCUSTOMER: I appreciate that. Is there anything my team should do\ndifferently in the meantime, or just wait?\nREP: Just wait and keep using the dashboard totals as the source of truth\nfor now, since those match what you're actually being charged — the PDF\nexport is what's drifting, not the billing itself.\nCUSTOMER: Good to know, that's reassuring actually, I was worried we were\nbeing overcharged somewhere.\nREP: No, this is a display issue on the export, not a charging issue,\nI'll say that explicitly in the ticket too so there's no ambiguity for\nwhoever picks it up.\nCUSTOMER: Thank you, that's exactly what I needed to hear. When should I\nexpect to hear back?\nREP: I'll check in with you in three business days with either a fix\ntimeline or, if billing engineering needs more time, at least a status\nupdate so you're not waiting in silence.\nCUSTOMER: That works, thank you Priya.\nREP: Of course. I'll wait for those three additional invoice examples from\nyou, and follow up in three business days regardless.\nCUSTOMER: Sending them today. Thanks again.\nREP: Actually, before we finish — one more thing while I have context. Do\nyour invoices ever get forwarded to a third party, like an accountant or a\nbookkeeping service outside Merrow?\nCUSTOMER: Yes, our external bookkeeper, Ingrid, gets a copy every month, she\nhandles our VAT filings.\nREP: Good to know — if the mismatch has been showing up in what Ingrid\nreceives too, that's worth mentioning to billing engineering so they check\nthe export path she uses specifically, in case it's a slightly different\ncode path than the dashboard.\nCUSTOMER: I hadn't thought about that, let me ask her directly whether she's\nnoticed it too.\nREP: That would help a lot, if you can find out whether Ingrid has seen the\nsame small discrepancies, that's useful signal for the team.\nCUSTOMER: I'll email her today and let you know what she says.\nREP: Perfect, I'll wait to hear back from you on that. One other thing — do\nyou want me to also let you know once the fix ships, even after the\nthree-day check-in, or is the three-day update enough?\nCUSTOMER: Please do let me know once it actually ships, not just status\nupdates, that's what I really care about for closing this out with Ingrid\nand our finance team.\nREP: Understood, I'll make sure you get a direct notification once the fix\nis actually deployed, separate from the routine status updates.\nCUSTOMER: That's exactly what I needed. I think that's everything now.\nREP: One last thing on my side — I want to make sure whoever picks this up\nnext has full context, so I'm going to write a detailed internal note on\nthe ticket summarizing the mixed VAT-rate rounding theory, your quarter\nclose date, and now the Ingrid angle too, so nothing gets lost if I'm out\nfor any reason.\nCUSTOMER: That's reassuring, thank you for being so thorough about it.\nREP: Of course. So to summarize everything — I'm waiting on three more\nexample invoices from you today, I'll check in on Ingrid's export\nexperience once you've asked her, I'll follow up in three business days\nwith a status update regardless, and I'll notify you directly and\nseparately once the actual fix ships, ahead of your quarter close in three\nweeks.\nCUSTOMER: That covers everything. Thank you Priya, this was really helpful.\nREP: Happy to help, talk soon Callum.\nCUSTOMER: Sending them today. Thanks again.\nREP: Thanks Callum, talk soon.\n",
+      "expected": {
+        "must_mention": [
+          "MB-2291",
+          "1284.50"
+        ],
+        "must_commit": [
+          "MB-2291",
+          "three business days"
+        ],
+        "max_ratio": 0.12,
+        "nothing_important": false
+      }
+    },
+    {
+      "id": "pricing-objection-heldout-medium",
+      "split": "heldout",
+      "input": "REP: Hi Femke, thanks for hopping on, I know the quote we sent raised some\neyebrows.\nPROSPECT: It did, 2200 EUR a month for the mid-tier plan is a stretch for\nus right now, we're a 12-person team.\nREP: I understand. Can I ask what number would feel comfortable for a team\nyour size?\nPROSPECT: Realistically, under 1500.\nREP: Okay. A couple of options — first, if 12 people is close to your\nceiling for a while, our Team plan at 1400 EUR a month covers up to 15\nseats and includes most of what's in mid-tier except the custom reporting\nmodule.\nPROSPECT: We don't really use custom reporting much anyway, honestly. What\nwould we lose exactly?\nREP: Just the ability to build fully custom report templates — you'd still\nget our 12 standard report types, which cover what most teams our size\nactually look at day to day.\nPROSPECT: That sounds like it would work for us. Is there a catch with\nTeam plan, like a lower seat cap or support tier?\nREP: No catch, same support tier, the only difference is the custom\nreporting module and the seat cap at 15 versus mid-tier's 40.\nPROSPECT: Since we're nowhere near 15 seats, that's fine for the\nforeseeable future. I'd like to move forward with Team plan at 1400.\nREP: Great, I'll get the Team plan agreement drafted and sent over by\nMonday.\nPROSPECT: Perfect, thanks for working with us on this.\nREP: Of course, thanks Femke.\n",
+      "expected": {
+        "must_mention": [
+          "1400"
+        ],
+        "must_commit": [
+          "agreement",
+          "Monday"
+        ],
+        "max_ratio": 0.46,
+        "nothing_important": false
+      }
+    },
+    {
+      "id": "pricing-objection-heldout-short",
+      "split": "heldout",
+      "input": "REP: Hi Niklas, following up on the quote — any thoughts on the 780 EUR\nmonthly number?\nPROSPECT: It's a bit high for us, we were hoping closer to 600.\nREP: I can offer 650 if you sign a two-year term instead of month-to-month.\nPROSPECT: 650 on a two-year term works for us.\nREP: Great, I'll send the two-year agreement at 650 EUR monthly today.\nPROSPECT: Sounds good, thanks.\n",
+      "expected": {
+        "must_mention": [
+          "650"
+        ],
+        "must_commit": [
+          "agreement"
+        ],
+        "nothing_important": false
+      }
+    },
+    {
+      "id": "quiet-checkin-heldout-short",
+      "split": "heldout",
+      "input": "REP: Hi Iris, monthly check-in, how's it going?\nCUSTOMER: All good here, nothing to report this month.\nREP: Great, same on our end, usage looks normal. Anything you want to flag?\nCUSTOMER: Nope, all quiet. Talk next month.\nREP: Sounds good, bye.\n",
+      "expected": {
+        "nothing_important": true,
+        "abstain_max_chars": 380
+      }
+    },
+    {
+      "id": "quiet-checkin-heldout-medium",
+      "split": "heldout",
+      "input": "REP: Hi Bram, quarterly check-in, how's the team finding things?\nCUSTOMER: Pretty smooth, actually. Nothing broken, nobody complaining.\nREP: Good to hear. Any interest in the new reporting features we shipped\nlast month?\nCUSTOMER: A couple of people mentioned it looked nice but nobody's\nactually switched over yet, still using the old view out of habit.\nREP: That's fine, no pressure, it'll be there when they're ready. Any\nsupport tickets on your end recently?\nCUSTOMER: None that I know of. Oh — one small thing, can we push our\nregular Thursday call to Fridays going forward? Thursdays got busy on our\nend.\nREP: Sure, I can move our recurring call to Fridays from now on.\nCUSTOMER: Great, that's the only change. Everything else is steady.\nREP: Sounds good, talk next quarter.\nCUSTOMER: Bye.\n",
+      "expected": {
+        "nothing_important": true,
+        "abstain_max_chars": 420
+      }
+    },
+    {
+      "id": "mixed-heldout-dense",
+      "split": "heldout",
+      "input": "REP: Hi Selma, this is Kofi from Meridian Cloud, thanks for the time —\nwanted to cover both the support ticket and the upcoming renewal in one\ncall since I had you.\nCUSTOMER: Sure, let's do the support issue first since that's more urgent.\nREP: Understood. I see the ticket, reference MC-5502, about slow report\ngeneration — reports that used to take 30 seconds are now taking around 4\nminutes.\nCUSTOMER: Right, and it's every report, not just the big ones. Started\nabout a week ago.\nREP: Do you know if anything changed around that time — a data import, a\nnew integration, anything like that?\nCUSTOMER: We did connect a new data source about ten days ago, a CRM\nintegration that pulls in about 50000 additional records.\nREP: That's very likely the cause — a large new data source can slow down\nreport queries if the indexing hasn't caught up yet. I'm going to escalate\nMC-5502 to our database team to check the indexing on that new data\nspecifically.\nCUSTOMER: How long until that's looked at?\nREP: I'll have a first response from the database team within one business\nday.\nCUSTOMER: Okay, please keep me posted either way.\nREP: I will, I'll follow up with you tomorrow regardless of where it\nstands. Now, on the renewal side — your current plan is 40 seats at 22 EUR\nper seat, 880 EUR monthly, up for renewal in two weeks.\nCUSTOMER: Right, we're not planning to add seats, we'd just renew as is.\nREP: That's straightforward then, I'll prepare a like-for-like renewal at\n880 EUR monthly, no changes.\nCUSTOMER: Sounds good. Actually, one more thing on the report slowness —\nour ops lead, Dov, mentioned he might want to just chat directly with\nsomeone technical on your side rather than going through me, if that's\npossible once the database team has looked at it.\nREP: That's fine, once I hear back from the database team I can set up\nthat direct conversation for Dov.\nCUSTOMER: Great, that would put his mind at ease.\nREP: I'll send the like-for-like renewal paperwork this week, and I'll\nfollow up on MC-5502 tomorrow.\nCUSTOMER: Perfect, thanks Kofi.\nREP: Thanks Selma, talk soon.\n",
+      "expected": {
+        "must_mention": [
+          "MC-5502",
+          "880"
+        ],
+        "must_commit": [
+          "renewal",
+          "tomorrow"
+        ],
+        "max_ratio": 0.31,
+        "nothing_important": false
+      }
+    }
+  ]
+}
