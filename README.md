@@ -4,6 +4,7 @@
 ![python](https://img.shields.io/badge/python-3.10%2B-3776AB)
 ![eval cases](https://img.shields.io/badge/eval%20cases-122%20%2871%20held--out%29-2b8a7e)
 ![LLM judge](https://img.shields.io/badge/LLM%20judge-none%2C%20deterministic%20scoring-2b8a7e)
+![tests](https://github.com/Michiel-DK/agent-exam-suite/actions/workflows/tests.yml/badge.svg)
 
 > **Public snapshot (repo state 2026-09-03, published 2026-09-03).** A curated,
 > sanitized cut of a private working repo: the agents, the exams, the runner, the write-up
@@ -15,7 +16,8 @@
 
 Local-first agent sandbox. Six small office agents (email triage, CRM follow-up, expense
 categorization, meeting recap, reply drafting, call-transcript summarisation) run on local
-models (2B to 14B on a 16 GB laptop) or on hosted models through one config line. The agents
+models (2B to 14B on a 16 GB laptop; sizes are Gemma's effective sizes, Ollama lists
+`gemma4:e2b-it-qat` as 2.3B effective, 5.1B with embeddings) or on hosted models through one config line. The agents
 are deliberately boring. The exam suite around them is the point of this repo.
 
 **The case for that claim, with receipts:**
