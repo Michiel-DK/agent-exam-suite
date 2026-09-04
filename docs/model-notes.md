@@ -47,8 +47,8 @@ predate the fat-payload exam; the saturation ended when realism arrived — see 
 
 | behaviour | evidence |
 |---|---|
-| **PROTOCOL BREAK at production payload sizes — the behaviour that cost it the crown.** With 4 KB tool responses in context it answers correctly *in prose* and stops emitting the parseable JSON the loop requires ("no JSON object found… 'the contact status is listed as **"churned"**'"). 19→13 of 24 at fat (probe, 2/2 reproducible); 8/16 heldout on the committed fat exam, 0/28 verdict flips across three same-day runs. | `docs/probes/crm-realism-2026-08-30/RESULTS.md`; PR #59 snapshot; PR #60 diff |
-| **Silent scope-drop.** Asked for a 3-company roundup it answered for ONE from a single lookup, correct and confident, no mention of the other two. | `docs/probes/crm-heavyband-feasibility-2026-08-31/RESULTS.md` |
+| **PROTOCOL BREAK at production payload sizes — the behaviour that cost it the crown.** With 4 KB tool responses in context it answers correctly *in prose* and stops emitting the parseable JSON the loop requires ("no JSON object found… 'the contact status is listed as **"churned"**'"). 19→13 of 24 at fat (probe, 2/2 reproducible); 8/16 heldout on the committed fat exam, 0/28 verdict flips across three same-day runs. | `docs/probes/crm-realism-2026-08-30/RESULTS.md` (private, not in this snapshot); PR #59 snapshot; PR #60 diff |
+| **Silent scope-drop.** Asked for a 3-company roundup it answered for ONE from a single lookup, correct and confident, no mention of the other two. | `docs/probes/crm-heavyband-feasibility-2026-08-31/RESULTS.md` (private, not in this snapshot) |
 
 ---
 
@@ -377,8 +377,8 @@ and each is pinned by a test that documents today's behaviour so a silent change
 
 | behaviour | evidence |
 |---|---|
-| **Kimi K3 drops hard at fat payloads: 7/16 heldout on the committed crm exam (json off)** — below the local 2B's 14/16. Forcing `response_format` recovers to 11/16 (+4; slim pair repeats the direction at +3), but flips run both ways: two down-flips are redundancy-monitor fails, so forced JSON also perturbs tool-calling. One run per cell, probe-grade. | `docs/probes/reasoning-effort-ab-2026-08-31/results/jsonmode_*` + RESULTS.md rider |
-| **`reasoning_effort` low = held-or-better score at −76% (GLM) / −54% (Kimi) output tokens**, same-day pooled; setting the param at ANY value (incl. `high`) collapses reasoning vs unset — there is no "high = baseline" mode on these two. R1 has no discount (step-0). | `docs/probes/reasoning-effort-ab-2026-08-31/RESULTS.md` |
+| **Kimi K3 drops hard at fat payloads: 7/16 heldout on the committed crm exam (json off)** — below the local 2B's 14/16. Forcing `response_format` recovers to 11/16 (+4; slim pair repeats the direction at +3), but flips run both ways: two down-flips are redundancy-monitor fails, so forced JSON also perturbs tool-calling. One run per cell, probe-grade. | `docs/probes/reasoning-effort-ab-2026-08-31/results/jsonmode_*` (private, not in this snapshot) + RESULTS.md rider |
+| **`reasoning_effort` low = held-or-better score at −76% (GLM) / −54% (Kimi) output tokens**, same-day pooled; setting the param at ANY value (incl. `high`) collapses reasoning vs unset — there is no "high = baseline" mode on these two. R1 has no discount (step-0). | `docs/probes/reasoning-effort-ab-2026-08-31/RESULTS.md` (private, not in this snapshot) |
 | **Day-level provider drift exceeds the within-day error bar**: same two models, same exams, two days apart → −5/−6 heldout cases, vs 0–4/17 verdict flips within a day. Two models, one day-pair — bounded observation. Cross-day hosted comparisons are not comparisons. | same file, caveat section |
 | **GLM-5.3 × crm-followup 429s systematically** (trajectory exam's burst of sequential calls; 9+ attempts across arms, 75 s cooldowns insufficient) while all five plain exams pass — the second trajectory-shaped rate-limit casualty after Mistral's full gap on 29 Aug. | `logs/driver.log` in the same probe dir |
 

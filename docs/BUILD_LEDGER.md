@@ -771,7 +771,7 @@ the missing-corpus guard shown to exit 1 rather than return an empty result.
 post-mortem trail. Full text: `docs/harness-change-proposals-2026-07-30.md`, hand-back section.
 
 This session's six harness proposals were synthesised with restaurant-brain's into
-`roger3000-dev/docs/harness-change-synthesis-2026-07-30.md` (`5aa1bba`). Doctrine agreed,
+`roger3000-dev/docs/harness-change-synthesis-2026-07-30.md` (private, not in this snapshot) (`5aa1bba`). Doctrine agreed,
 **nothing built.** P1/P2/P4/P5 became harness text; P3 stays repo-owned. Three things came back
 to us, and one of them was wrong.
 

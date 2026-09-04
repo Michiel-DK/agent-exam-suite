@@ -25,7 +25,7 @@ docs/              concept.md · deepdive.md (this file)
 
 ## The steal map
 
-### 1. Model router — `mast/mast/llm/provider.py` + `restaurant-brain/app/ingestion/invoices.py`
+### 1. Model router — `mast/mast/llm/provider.py` + `restaurant-brain/app/ingestion/invoices.py` (both private, not in this snapshot)
 
 The single best steal in any repo. mast already has a provider-neutral ABC with concrete
 adapters and an env-var factory with a cached singleton:
@@ -74,7 +74,7 @@ GEMINI_SCRAPING_MODEL   = "gemini-2.5-flash"
 GEMINI_CLASSIFIER_MODEL = "gemini-3.1-flash-lite"   # ~40% cheaper for cheap tasks
 ```
 
-### 2. Retry + parsing — `mast/mast/agents/_llm_retry.py`
+### 2. Retry + parsing — `mast/mast/agents/_llm_retry.py` (private, not in this snapshot)
 
 Framework-free, and makes the crucial distinction the naive loop misses: "the API flaked"
 (backoff, retry the call) vs "the model returned garbage JSON" (re-ask the model). Lift
@@ -126,7 +126,7 @@ the gate).
 
 ### 4. Eval runner — mast golden harnesses + roger3000-dev skill-eval
 
-The canonical runner shape already exists in `mast/scripts/analysis/match_golden_harness.py`:
+The canonical runner shape already exists in `mast/scripts/analysis/match_golden_harness.py` (private, not in this snapshot):
 
 ```
 python sandbox/runner.py <agent>            # capture: run exam, write snapshot
@@ -156,7 +156,7 @@ Three principles to bake into `evals/` from day one:
   samples and report the estimator, not a single lucky run. (Matches ReliabilityBench's
   finding that pass@1 overstates reliability 20–40%.)
 
-### 6. LLM-as-judge + groundedness — `mast/mast/agents/_claim_auditor.py` + `restaurant-brain/app/ingestion/recipes.py`
+### 6. LLM-as-judge + groundedness — `mast/mast/agents/_claim_auditor.py` (private, not in this snapshot) + `restaurant-brain/app/ingestion/recipes.py` (private, not in this snapshot)
 
 For qualitative outputs, mast has a production judge: every claim in a generated report
 gets a `verified | fabricated | unverifiable` verdict against a context dict, then a
@@ -177,12 +177,12 @@ re-validates every pick against real DB rows, dropping hallucinated names. "The 
 chose the ingredients; the graph keeps the numbers." Steal this as the default design for
 any agent that answers from company data.
 
-Also relevant: `mast/matching/reranker.py` (LLM grades a batch of N candidates and
+Also relevant: `mast/matching/reranker.py` (private, not in this snapshot) (LLM grades a batch of N candidates and
 re-sorts, preserving order for ungraded items) — the head-to-head "which model's output is
 better" comparator for the model-swap diff table. Its docstring honestly flags the
 circularity caveat: never let the judge be the model under test.
 
-### 7. Bounded, explainable scores — `restaurant-brain/app/services/confidence.py`
+### 7. Bounded, explainable scores — `restaurant-brain/app/services/confidence.py` (private, not in this snapshot)
 
 For the roll-up per agent: every factor bounded to [0,1], documented weights, and an
 exception-queue gate that returns items only below a confidence ceiling — when everything
