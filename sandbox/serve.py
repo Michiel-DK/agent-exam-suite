@@ -7,8 +7,12 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import stats  # noqa: E402  (A3: interval computed server-side, ONE implementation — never in JS)
 
 ROOT = Path(__file__).resolve().parent.parent
 INDEX = ROOT / "frontend" / "index.html"
@@ -123,6 +127,11 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/api/results":
             results = [json.loads(p.read_text())
                        for p in sorted((ROOT / "results").glob("*.json"))]
+            for r in results:
+                # A3: additive view-only key; results files on disk are untouched.
+                h = r.get("heldout") or {}
+                if isinstance(h.get("passed"), int) and isinstance(h.get("total"), int):
+                    h["ci95"] = list(stats.wilson(h["passed"], h["total"]))
             self._send(200, "application/json",
                        json.dumps(results, ensure_ascii=False).encode())
         elif self.path == "/api/exams":

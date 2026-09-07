@@ -48,6 +48,28 @@ def extract_json(text: str) -> dict:
     raise ValueError(f"no JSON object found in model output: {text[:200]!r}")
 
 
+class ParseFailure(ValueError):
+    """The model answered, but nothing parseable came back after every re-ask.
+
+    A ValueError SUBCLASS on purpose: every case-level boundary in this repo already
+    treats ValueError as "unparseable output" (runner.run_exam's `except (ValueError,
+    TypeError)`, judges.py's "judge unparseable"), and all of them keep working
+    unchanged. What the subclass adds is the EVIDENCE the plain ValueError threw away:
+    `raw` (the model's actual text), `meta` (the last call's usage/finish_reason) and
+    `attempts` (how many call_fn() invocations were spent). runner._run_tool_loop
+    catches THIS class at the call boundary so a prose answer mid-trajectory is
+    recorded per turn instead of wiping the case (R7 gap, 2026-09-04).
+
+    `meta` is the LAST call's — the same convention call_with_retry's success path
+    uses (a successful re-ask also reports only the final call's usage)."""
+
+    def __init__(self, message: str, *, raw, meta, attempts: int):
+        super().__init__(message)
+        self.raw = raw
+        self.meta = meta
+        self.attempts = attempts
+
+
 def _backoff(round_: int, base: float, cap: float) -> float:
     return min(cap, base * (2 ** round_))
 
@@ -73,7 +95,11 @@ def call_with_retry(call_fn, parse_fn=extract_json, *, api_attempts: int = 3,
                 sleep(_backoff(api_round, base_delay, max_delay))
         try:
             return parse_fn(raw), raw, meta, attempts - 1
-        except (TypeError, ValueError):
+        except (TypeError, ValueError) as exc:
             if parse_round == parse_attempts - 1:
-                raise
+                # Final failure is loud AND carries its evidence: the raw text, the
+                # last call's meta and the spend, so the caller can record what the
+                # model actually said instead of only that it could not be parsed.
+                raise ParseFailure(str(exc), raw=raw, meta=meta,
+                                   attempts=attempts) from exc
             sleep(_backoff(parse_round, base_delay, max_delay))

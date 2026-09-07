@@ -21,9 +21,10 @@ sandbox/test_trajectory_checks.py; this file pins the fixtures and case wiring:
      keep identical signatures mock-vs-live (golden principle);
   E. the invoice decoy amounts differ from the open-deal amounts (the trap answers
      wrong, not right) — kept armed for the future case that isolates rung B;
-  F. no committed case carries tools_offered / tools_allowed yet — rung B is
-     declared UNARMED in cases.json not_verified; if a case arms it, that
-     declaration must be rewritten (this check will remind whoever does it).
+  F. exactly ONE committed case arms tools_offered (three-tools-one-thread-janssens,
+     2026-09-04) and cases.json not_verified says so; arming another or disarming
+     it makes the declaration stale (this check reminds whoever does it), and the
+     armed roster must offer every tool the case's turns expect.
 
 Plain asserts + exit code, zero dependencies — same bar as the runner itself.
 """
@@ -61,6 +62,11 @@ def load_cases() -> dict[str, dict]:
     cases = json.loads(
         (ROOT / "evals" / "crm-followup" / "cases.json").read_text())["cases"]
     return {c["id"]: c for c in cases}
+
+
+def exam_not_verified() -> list[str]:
+    return json.loads(
+        (ROOT / "evals" / "crm-followup" / "cases.json").read_text())["not_verified"]
 
 
 def mock():
@@ -158,14 +164,28 @@ def test_e_invoice_trap_answers_wrong():
               f"amount {open_amount}", open_amount not in amounts, str(amounts))
 
 
-def test_f_rung_b_unarmed_matches_declaration():
-    """cases.json's not_verified declares rung B UNARMED. If a future case arms
-    tools_offered / tools_allowed, that declaration is stale — rewrite it (and
-    this pin) in the same change."""
-    armed = [cid for cid, c in load_cases().items()
-             if "tools_offered" in c or "tools_allowed" in c["expected"]]
-    check("no committed case arms tools_offered/tools_allowed (rung B declared "
-          "unarmed; rewrite not_verified if you arm it)", not armed, str(armed))
+def test_f_rung_b_armed_set_matches_declaration():
+    """cases.json's not_verified declares rung B ARMED on exactly one case (2026-09-04:
+    three-tools-one-thread-janssens, whose turns need calendar_lookup / invoice_lookup).
+    Arming another case, or disarming this one, makes that declaration stale — rewrite
+    it (and this pin) in the same change. Also pins that the armed roster really
+    contains the tools the case's turns expect: a roster that omits an expected tool
+    fails the case for an instrument reason, which is exactly the defect this pin was
+    written after (PR #72's splice shipped the case with no roster at all)."""
+    cases = load_cases()
+    armed = sorted(cid for cid, c in cases.items()
+                   if "tools_offered" in c or "tools_allowed" in c["expected"])
+    check("exactly one committed case arms rung B, and it is the declared one",
+          armed == ["three-tools-one-thread-janssens"], str(armed))
+    declared = [s for s in exam_not_verified() if s.startswith("E10 rung B")]
+    check("not_verified names it ARMED on that case",
+          declared and "ARMED" in declared[0] and "three-tools-one-thread-janssens" in declared[0],
+          str(declared)[:200])
+    case = cases["three-tools-one-thread-janssens"]
+    roster_names = {line.split("(")[0].strip() for line in case["tools_offered"]}
+    needed = {t for te in case["turns_expected"] for t in te["expected"].get("tools_called", [])}
+    check("the armed roster offers every tool the turns expect",
+          needed <= roster_names, f"needed {sorted(needed)} offered {sorted(roster_names)}")
 
 
 def main() -> int:

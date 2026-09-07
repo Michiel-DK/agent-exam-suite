@@ -1,0 +1,17 @@
+name: task-intake
+description: Dispatch a free-form request to one of the six agents (or none) and hand over its verbatim input
+provider: ollama
+model: gemma4:e2b-it-qat
+# CHAMPION 2026-09-05 — picked by `runner.py diff` on the committed 46-case exam (38 + an
+# 8-case heavy band added when the first 38 tied at the top), temp 0, same day:
+#   gemma4:e2b-it-qat  19/20 heldout, 24/26 train   <- champion: cheapest at the tie
+#   gemma4:e4b-it-qat  19/20 heldout, 24/26 train   <- tier 1 (routes.yaml)
+#   qwen3:8b           17/20 heldout, 22/26 train
+#   llama3.1:latest    14/20 heldout, 15/26 train
+# (rows re-run 5 Sep under the corrected hand-over grader — a per-case `handover`
+# golden for the two multi-payload cases; docs/probes/task-intake-diff-2026-09-05/)
+# Both gemmas miss the same two write-baits ('add a note to the CRM' is dispatched to
+# crm-followup, which cannot write). Operator-ratified split at merge (A4, PR #74).
+tier: local
+temperature: 0.0
+max_tokens: 2048

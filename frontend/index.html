@@ -206,7 +206,7 @@ Promise.all([
     }
 
     html += `<div class="tablewrap"><table><tr><th>model</th><th>provider</th>
-      <th>train</th><th>heldout</th><th>tokens/case</th><th>time/case</th></tr>`;
+      <th>train</th><th>heldout <span class="muted" title="95% Wilson score interval, computed by sandbox/stats.py — on 9–18 held-out cases it is 0.3–0.4 wide; that width is the reason two models often cannot be ranked">(95% CI)</span></th><th>tokens/case</th><th>time/case</th></tr>`;
     // Exactly ONE row may wear the champion badge. `results/` can hold two files for
     // the same provider+model (a pre-Stage-1 `agent__model.json` and the newer
     // `agent__provider__model.json`), and badging both made two rows each claim to be
@@ -237,7 +237,8 @@ Promise.all([
           r._dupOfChamp ? `<span class="badge dup" title="another result file has the same provider+model as the champion — a stale pre-provider-filename run. results/ is disposable: run-all regenerates it.">stale duplicate</span>` : ''}</td>
         <td class="muted">${esc(r.provider)}</td>
         <td class="num">${r.train.passed}/${r.train.total}${bar(r.train.passed, r.train.total)}</td>
-        <td class="num"><b>${r.heldout.passed}/${r.heldout.total}</b>${bar(r.heldout.passed, r.heldout.total)}</td>
+        <td class="num"><b>${r.heldout.passed}/${r.heldout.total}</b>${bar(r.heldout.passed, r.heldout.total)}${
+          Array.isArray(r.heldout.ci95) ? `<div class="muted" style="font-size:.8em">${r.heldout.ci95[0].toFixed(2)}–${r.heldout.ci95[1].toFixed(2)}</div>` : ''}</td>
         <td class="num">${tok}${flag}</td>
         <td class="num">${ms}</td></tr>`;
     }

@@ -1,0 +1,14 @@
+# The crm-followup champion is a CONFIG of gemma4:e2b-it-qat, not new weights: the
+# same model at a 16,384-token window. Reproduce it before `runner.py check`:
+#
+#   ollama create gemma4-e2b-ctx16k -f agents/crm-followup/Modelfile
+#
+# Why (CHAMPION CHANGE 2026-09-04, agent.yaml): under Ollama's 4,096 default the front
+# of a multi-turn thread (system prompt + first company) was silently truncated, so
+# "the FIRST company we discussed" was not in view. Same weights at 16k: +2 verdicts
+# (heldout mid-thread-switch-referential-callback, train portfolio-status-check), 0
+# losses, 0 flips across 3 same-day runs; ~+85% wall (docs/probes/multiturn-ladder-
+# 2026-09-03/RESULTS.md, stage 1). Per-request temperature/max_tokens still come from
+# agent.yaml — this file sets only the window.
+FROM gemma4:e2b-it-qat
+PARAMETER num_ctx 16384

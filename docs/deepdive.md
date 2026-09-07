@@ -25,7 +25,7 @@ docs/              concept.md · deepdive.md (this file)
 
 ## The steal map
 
-### 1. Model router — `mast/mast/llm/provider.py` + `restaurant-brain/app/ingestion/invoices.py` (both private, not in this snapshot)
+### 1. Model router — `mast/mast/llm/provider.py` (private, not in this snapshot) + `restaurant-brain/app/ingestion/invoices.py` (private, not in this snapshot)
 
 The single best steal in any repo. mast already has a provider-neutral ABC with concrete
 adapters and an env-var factory with a cached singleton:
@@ -97,7 +97,7 @@ For small local models that wrap JSON in prose, add the pragmatic extractor from
 `stock_agent/my_pa.py` (~line 1049) as the parse_fn's first step:
 `re.search(r'\{.*\}', llm_output, re.DOTALL)` → `json.loads`.
 
-### 3. Structured output + fail-loud — `restaurant-brain/app/ingestion/invoices.py`
+### 3. Structured output + fail-loud — `restaurant-brain/app/ingestion/invoices.py` (private, not in this snapshot)
 
 The extraction contract: every provider returns the SAME Pydantic model via native
 structured output, and a null parse **raises** instead of degrading to a valid-looking

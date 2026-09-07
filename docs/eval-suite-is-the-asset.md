@@ -71,7 +71,7 @@ calls, zero code, under an hour — and the criterion fired: the champion held a
 constraints 3/3, with zero drift.** It actually gets *better* across turns. The lane
 died before a line of it was built. The follow-up doc also records that the probe
 itself was wrong twice in the direction its author hoped — a falsifier gets audited
-like everything else (`docs/e20-brief.md`; `docs/BUILD_LEDGER.md`, E20).
+like everything else (`docs/e20-brief.md`).
 
 ### 4. 1,150 merged PRs → 13 admissible tasks, against a bar of ≥12
 
@@ -91,7 +91,7 @@ names how it was observed. No recalled impressions."** Sample entries: with the 
 lookup tool forced down, `llama3.1` invented a contact named "Karen Brown" — no tool
 result or input supplies that name — while `gemma4:e4b` passed the same traps by
 declining to fill the hole. Opposite dispositions, both observed, both cited to the
-runs that produced them. And the commercially scariest one (`docs/BUILD_LEDGER.md`):
+runs that produced them. And the commercially scariest one (from the working repo's build ledger):
 tell the model *"your best estimate is fine"* and it **skips the lookup tool
 entirely** — not fabrication, worse, because it's invisible.
 
@@ -101,7 +101,7 @@ entirely** — not fabrication, worse, because it's invisible.
   per exam, so one case ≈ 9–10% of a score — exactly the noise band the routing
   layer refuses to pick inside. The routing command's headline output on
   email-triage is a refusal: `cannot-distinguish`, "grow heldout before revisiting"
-  (`docs/BUILD_LEDGER.md`, E12 entries).
+  (the working repo's build ledger, E12 entries).
 - **reply-draft measures hallucination + format only.** When its small LLM judge
   proved unreliable (it mis-passed 3/3 invented-date replies), the judge was dropped
   entirely and the cost was written down: *a generic "thanks, I'll follow up" now
@@ -145,7 +145,7 @@ pytest path the model will use) rewrote that count twice
 gradeable end-to-end — 7 fail because function-level splicing cannot represent PRs that
 also touch module-level constants and imports, the failure mode ledger entry 018 had
 already documented. The harness then learned a second task shape — whole-file **create**
-tasks — and the oracle is green **12/12 on the first try** (PR #47, `docs/BUILD_LEDGER.md`
+tasks — and the oracle is green **12/12 on the first try** (PR #47, build ledger
 entry 022). Pool now: 15 gradeable tasks (12 create + 3 modify), and the sweep that built
 it is reproducible from a clean clone because the selection step itself is committed
 (PR #46). "Admissible" and "gradeable" turned out to be different claims; the doc says so

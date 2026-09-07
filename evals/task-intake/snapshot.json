@@ -1,0 +1,316 @@
+{
+  "provider": "ollama",
+  "model": "gemma4:e2b-it-qat",
+  "train_score": 0.9231,
+  "heldout_score": 0.95,
+  "temperature": 0.0,
+  "max_tokens": 2048,
+  "judge": null,
+  "date": "2026-09-07T13:29:27",
+  "harness_sha": "26e991c19b73d399c5d1edb3f61f21aee146158d",
+  "cases": [
+    {
+      "id": "crm-devos-stage",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "crm-janssens-contact-lastspeak",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "crm-peeters-open-deal-slack",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "crm-vitrine-wants-active",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "crm-mertens-notes",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "triage-bare-client-email",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "triage-urgent-or-not-newsletter",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "triage-bare-recruiter",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "triage-bare-disk-alert",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "triage-sort-accountant",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "reply-draft-sofie",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "reply-answer-anna",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "reply-nl-antwoord",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "reply-decline-speaker",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "reply-fr-reponds",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "reply-instruction-wins-newsletter",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "expense-book-anthropic",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "labels"
+        },
+        {
+          "bucket": "format",
+          "check": "check_none_hands_over_nothing"
+        }
+      ]
+    },
+    {
+      "id": "expense-which-category-ovh",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "expense-nmbs-ticket",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "expense-lunch-colruyt",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "expense-subscription-proximus",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "recap-summarise-day",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "recap-what-got-done",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "recap-daily-please",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "recap-highlights",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "recap-end-of-day",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "transcript-clean-up",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "transcript-devos-readable",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "transcript-tidy-support",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "transcript-bare",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "transcript-proper-english",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "none-book-train",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "none-weather",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "none-generate-invoice-client-bait",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "none-translate-contract-bait",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "none-chitchat",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "none-reminder",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "none-pause-email-bait",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "heavy-two-payloads-reply-wins",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "heavy-question-inside-email-crm",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "heavy-nl-crm-question",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "heavy-fr-expense-line",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "heavy-transcript-named-summarise-not-translate",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "heavy-email-with-log-shape-triage",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "heavy-none-edit-document-client-bait",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "check_none_hands_over_nothing"
+        }
+      ]
+    },
+    {
+      "id": "heavy-none-crm-write-bait",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "labels"
+        }
+      ]
+    }
+  ],
+  "loads": 3,
+  "runtime": {
+    "name": "ollama",
+    "version": "0.33.2"
+  }
+}

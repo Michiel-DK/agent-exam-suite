@@ -5,11 +5,11 @@
   "not_verified": [
     "Checks that the required tools were called and that the final answer contains the expected substrings (answer_contains) within the step budget. It does NOT check answer phrasing, tone, or naturalness; it does not check tool call arguments beyond what's needed to produce the expected substring; and a case can pass on a lucky substring match (e.g. a hallucinated but coincidentally-correct number) without the trajectory being reasoned correctly.",
     "E10 rung A (error_recovery): the acknowledgement clause is a fixed vocabulary + fact-term sentence co-occurrence — an honest ack phrased entirely outside the vocabulary FALSE-FAILS; prose fabrication that carries no Capitalized name and no digits is NOT caught. The name-fabrication clause sees only mid-sentence Capitalized words: an all-lowercase invented name slips through, and a misspelled grounded name (e.g. a truncated company name) is flagged as fabricated even though it is honest. `outage-mid-sweep-regression` (CRM-realism lane, 2026-08-31) IS the committed deals_list-outage (Mertens) case this artifact bears on — an earlier draft of this note claimed no such case was committed, which became false the moment that case landed in the same diff; carrying the false-fail risk here as a DECLARED, accepted risk for that case, not as a reason it doesn't exist.",
-    "E10 rung B (tools_allowed / tools_offered): built, both-direction tested, and UNARMED — no committed case uses them, because 10 probed decoy baits produced zero champion decoy-picks and challenger models fail earlier checks instead (see PR; evals/test_e10_ladder.py pins the apparatus). A future champion swap can arm it; until then tool selection under choice is not measured by this exam.",
+    "E10 rung B (tools_allowed / tools_offered): built, both-direction tested. ARMED on exactly ONE committed case as of 2026-09-04 — three-tools-one-thread-janssens (train) offers calendar_lookup + invoice_lookup beside the two base tools, because its turns NEED them; it carries tools_called per turn, not tools_allowed. Every other case is unarmed for the original reason: 10 probed decoy baits produced zero champion decoy-picks (PR #20; evals/test_e10_ladder.py pins the apparatus and the exact armed set). Tool selection under choice is measured by that one case only.",
     "CRM-realism lane, PASS 2 (2026-08-31): the OLD case briefing-devos's 'Jan' needle (answer_contains: ['Jan', '9000'], verifying Devos Garage's contact) is a case-insensitive substring of 'Janssens' and matches Janssens Bakery's own envelope — a pre-existing, ACCIDENTAL collision (not a deliberate cross-company needle), out of this lane's declared scope to repair (the 24 old case entries stay byte-identical). The case's actual coverage of Devos remains unverified by the 'Jan' needle alone — its '9000' needle is independently grounded via deals_list.deals[0].amount_eur and is unaffected. evals/test_crm_realism.py's test_ix asserts the collision POSITIVELY (that it DOES fire), so a future accidental fix here would go red rather than silently stay stale.",
     "CRM-realism lane, PASS 2 (2026-08-31), GROUNDING-WEAKENING (declared, not hidden): a fat corpus still grounds more numbers than a slim one. The digit-token-uniqueness class rule (evals/test_crm_realism.py, criterion item 7) eliminates CROSS-COMPANY grounding of >=3-digit filler tokens by construction — a fabricated number can no longer be 'grounded' by a DIFFERENT company's filler (the pass-1 reproduction of this — a fabricated '4871 EUR' answer for Devos's deal, when Devos's own rate_limit_remaining is no longer 4871 under the repaired fixture — now FAILS to ground; re-run and reported in the PR body). What remains, unfixed and out of scope for evals/ (would need sandbox/ work): SAME-COMPANY filler grounding — an answer that quotes a company's OWN rate_limit_remaining, sync_version, or similar filler value and presents it as a EUR amount still passes grounded_answer, because the check has no per-field semantic attribution (it only asks 'does this digit token appear anywhere in this trajectory's tool-result corpus'). Per-field attribution is sandbox/runner.py work and is not built here.",
     "MULTITURN-EXAM (2026-09-02): the 4 new `turns`-bearing cases measure sequential multi-turn capability WITHIN one conversation only — there is no cross-conversation memory (a fresh case's `messages` list always starts empty; nothing persists from one committed case to the next). Context assembly is FULL-HISTORY ONLY: every turn's context is the system prompt plus every prior turn's user message, assistant answer, and tool result, verbatim, with no filtering or summarising. A SCOPED/compressed assembly mode (dropping or summarising older turns to control context growth) is NOT built and NOT measured here — that is E27's declared future A/B arm (docs/e27-brief.md), and this exam cannot yet say whether a scoped-assembly champion would pass or fail any of the 4 new cases differently than the full-history champion measured here. Per-turn metrics (prompt_tokens/completion_tokens/wall_ms) are committed per turn in each new case's snapshot record specifically so that future A/B's input-growth-per-turn curve is computable without a rerun. SCOPE (deliberate, not a bug — see runner.py's _run_turns docstring): the scoring-time redundancy monitor and tools_not_called check are PER-TURN, not case-wide — a call in turn 0 does not make an identical call in turn 2 register as a repeat, and a tool forbidden case-wide but only ever called in an earlier turn will not be caught by a later turn's tools_not_called clause. Accumulating tool_calls/tools_called across turns to close this would make the redundancy monitor fire across a turn boundary that never actually happened (the same over-eager-normalization risk CLAUDE.md gotcha 4 warns about), so it was left per-turn instead.",
-    "MULTITURN-EXAM, R7 (pass 2, 2026-09-02), DECLARED GAP: the per-turn incomplete-turn marker (a \"termination\" key with null prompt_tokens/completion_tokens/wall_ms, never a fabricated 0) is verified ONLY for a turn that dies via TerminationError (D2, a model that emits no answer at all) before completing its first model call inside that turn — the shape this exam actually exercises. A DIFFERENT loop-ending exception — a parse failure (malformed JSON) that survives retry.py's parse_attempts and raises ValueError — is NOT caught inside the per-turn tool loop at all; it propagates past _run_turns and is caught only at run_exam's pre-existing, unchanged case-level `except (ValueError, TypeError)` handler, which discards the WHOLE case's per-turn detail (including any earlier turns that completed normally) in favour of a bare top-level {\"error\": ...} record with no \"turns\" key at all — so `_snapshot_case` never even sees it as a turns-bearing case. This is the pre-lane, pre-existing case-level catch inherited unchanged by turns-cases, not a behavior this lane introduced or repaired; giving it per-turn granularity would mean changing _run_tool_loop's exception handling, which is shared with the no-turns path and out of this lane's surgical scope. Declared, not silently swallowed: a multi-turn case whose non-final turn dies of a parse failure rather than a clean D2 no-answer will show as a generic case-level error, with NO per-turn metrics recoverable from the committed snapshot for that run. CONSEQUENCE FOR CASE AUTHORS (observed for real, not hypothetical, during this lane's own case design): thread-followup-contact-reselection's ORIGINAL turn-0 phrasing tripped exactly this gap, deterministically (3/3 identical fresh CLI runs, docs/probes/multiturn-sequential-feasibility-pass2-cli-2026-09-02/results_thread-followup-old-turn0-protocol-break.json) — the whole case's per-turn record was destroyed before turn 1 ever ran, and the case had to be reworded (not just re-cited) to route around it. A future multi-turn case author must treat ANY turn as a candidate for this failure and probe it live before committing, exactly as this lane did the second time. RECOMMENDATION (out of this lane's surgical scope, flagged for a future lane): catching a JSON-parse ValueError inside _run_tool_loop the same way TerminationError is caught today, converting it into a turn-scoped incomplete marker instead of a case-level wipe, would close this gap — but that touches the loop shared with the no-turns path and needs its own byte-identity witness, so it is not done here."
+    "MULTITURN-EXAM, R7 — CLOSED 2026-09-04 (PR #69, ledger 035). A parse failure that survives retry.py's re-ask is now caught inside _run_tool_loop at the same boundary as a D2 death: the turn carries a `protocol_break` record (cause unparseable, step, retries, raw_head), `format/unparseable` is the FIRST failed check with answer_present co-firing (declared), earlier evidence and LATER TURNS survive and score. What stays declared: a re-ask reports only its last call's usage (same convention as a successful re-ask); per-turn records carry tool_calls and verdicts but no answer text (`got` is the last turn only), so quoting turn k's answer from a results file is not possible without a rerun. HISTORY: the original declaration (2 Sep) recorded that this gap wiped whole cases — measured on committed results before the fix, 3 of the 2B's and 12 of the 4B's crm records had an empty detail that way."
   ],
   "cases": [
     {
@@ -744,6 +744,317 @@
               "6500",
               "9000",
               "4200"
+            ],
+            "max_steps": 6
+          }
+        }
+      ],
+      "expected": {}
+    },
+    {
+      "id": "decoy-owner-after-deals-devos",
+      "split": "train",
+      "input": "What stage is our Devos Garage deal in? | And who is our contact there — name and details?",
+      "note": "PROBED 2026-09-04 on gemma4-e2b-ctx16k, 3 same-day runs identical (docs/probes/train-cases-probe-2026-09-04/probe1.json): turn 1 DID call crm_lookup and named Jan De Vos — but answered \"His details are: Phone: +32 3 771 26 58, Email: tom.verhaeghe@example.com\": the client's phone with OUR REP's email lifted from the deals_list envelope one turn earlier. Every pre-existing check passed it (name present, tool called, phone grounded). RED only via `answer_not_contains: ['Verhaeghe']`, the absence needle added for exactly this (sandbox/test_answer_not_contains.py isolates it: one failure). So the decoy-in-history shape at 16k is a DETAIL-level leak on a 'name and details' ask, not a wrong-name answer. Re-probed with the key (docs/probes/train-cases-probe-2026-09-04/reprobe1.json): FAILS 3/3, sole failed check answer_not_contains@t1. ORIGINAL DRAFT NOTE: Failure shape 1 (decoy-in-history, the 3 Sep signature): after deals_list, the 4.4k-char envelope carries owner Tom Verhaeghe (our rep). Turn 1 asks for the CLIENT contact; the only correct path is crm_lookup -> Jan De Vos. A model that answers Tom Verhaeghe from context fails both tools_called and answer_contains. Mirrors peeters-contact-followup-outage's turn-1 shape WITHOUT the outage, isolating the decoy from the recovery check.",
+      "turns": [
+        "What stage is our Devos Garage deal in?",
+        "And who is our contact there — name and details?"
+      ],
+      "turns_expected": [
+        {
+          "turn": "What stage is our Devos Garage deal in?",
+          "expected": {
+            "tools_called": [
+              "deals_list"
+            ],
+            "answer_contains": [
+              "discovery"
+            ],
+            "max_steps": 3
+          }
+        },
+        {
+          "turn": "And who is our contact there — name and details?",
+          "expected": {
+            "tools_called": [
+              "crm_lookup"
+            ],
+            "answer_contains": [
+              "De Vos"
+            ],
+            "max_steps": 3,
+            "answer_not_contains": [
+              "Verhaeghe"
+            ]
+          }
+        }
+      ],
+      "expected": {}
+    },
+    {
+      "id": "decoy-owner-after-deals-janssens",
+      "split": "train",
+      "input": "How much is the open Janssens Bakery deal worth? | Who's the person we talk to at Janssens?",
+      "note": "PROBED 2026-09-04 on gemma4-e2b-ctx16k, 3 same-day runs identical (docs/probes/train-cases-probe-2026-09-04/probe1.json): PASSES — turn 1 calls crm_lookup and answers \"The person we talk to at Janssens is Sofie Janssens.\" with no detail asked and none leaked. Kept as a CONTROL for the devos twin (same shape, no 'details' ask): a guard against the decoy leak spreading, carrying `answer_not_contains: ['Claes']` so a future leak of the envelope owner is graded. Green by design, like peeters-partial-honest-control. Re-probed with the key (docs/probes/train-cases-probe-2026-09-04/reprobe1.json): PASSES 3/3. ORIGINAL DRAFT NOTE: Failure shape 1, second instance so the shape has n=2 on train: envelope owner Marieke Claes is the decoy; correct = crm_lookup -> Sofie Janssens. Needle 'Sofie' (not 'Janssens', which the question itself contains).",
+      "turns": [
+        "How much is the open Janssens Bakery deal worth?",
+        "Who's the person we talk to at Janssens?"
+      ],
+      "turns_expected": [
+        {
+          "turn": "How much is the open Janssens Bakery deal worth?",
+          "expected": {
+            "tools_called": [
+              "deals_list"
+            ],
+            "answer_contains": [
+              "6500"
+            ],
+            "max_steps": 3
+          }
+        },
+        {
+          "turn": "Who's the person we talk to at Janssens?",
+          "expected": {
+            "tools_called": [
+              "crm_lookup"
+            ],
+            "answer_contains": [
+              "Sofie"
+            ],
+            "max_steps": 3,
+            "answer_not_contains": [
+              "Claes"
+            ]
+          }
+        }
+      ],
+      "expected": {}
+    },
+    {
+      "id": "referential-callback-amount-train",
+      "split": "train",
+      "input": "What's the status of Devos Garage? | And Vitrine Restaurant — where do we stand with them? | Back to the first one: what is the open deal amount?",
+      "note": "PROBED 2026-09-04 on gemma4-e2b-ctx16k, 3 same-day runs identical (docs/probes/train-cases-probe-2026-09-04/probe1.json): PASSES — turn 2 resolves 'the first one' to Devos, calls deals_list and answers 9000 / discovery. Consistent with the heldout twin (mid-thread-switch-referential-callback) passing at the 16k window: referential indexing is a WINDOW effect, not a capability gap, at this thread length. Kept as a CONTROL so a context intervention (E27 scoped assembly drops the first company; measured 'please provide the name') is caught on train before heldout. Green by design. ORIGINAL DRAFT NOTE: Failure shape 2 (referential indexing — the heldout mid-thread-switch case's twin, on train): two companies via crm_lookup, then 'the first one' asked for its OPEN DEAL AMOUNT, which neither prior payload contains — so the turn must BOTH resolve the reference to Devos AND select deals_list (grounded_answer rejects a remembered 9000: verified with a scripted correct-but-ungrounded trajectory, which failed grounded_answer@turn2). Mis-resolving to Vitrine (churned, no deals) cannot produce 9000.",
+      "turns": [
+        "What's the status of Devos Garage?",
+        "And Vitrine Restaurant — where do we stand with them?",
+        "Back to the first one: what is the open deal amount?"
+      ],
+      "turns_expected": [
+        {
+          "turn": "What's the status of Devos Garage?",
+          "expected": {
+            "tools_called": [
+              "crm_lookup"
+            ],
+            "answer_contains": [
+              "active"
+            ],
+            "max_steps": 3
+          }
+        },
+        {
+          "turn": "And Vitrine Restaurant — where do we stand with them?",
+          "expected": {
+            "tools_called": [
+              "crm_lookup"
+            ],
+            "answer_contains": [
+              "churned"
+            ],
+            "max_steps": 3
+          }
+        },
+        {
+          "turn": "Back to the first one: what is the open deal amount?",
+          "expected": {
+            "tools_called": [
+              "deals_list"
+            ],
+            "answer_contains": [
+              "9000"
+            ],
+            "max_steps": 3
+          }
+        }
+      ],
+      "expected": {}
+    },
+    {
+      "id": "three-tools-one-thread-janssens",
+      "split": "train",
+      "input": "When is our next meeting with Janssens Bakery? | What have they paid us so far? | And the open deal — how much is it and what stage?",
+      "note": "PROBED-WITH-ROSTER 2026-09-04 (docs/probes/train-cases-probe-2026-09-04/roster-probe{1,2,3}.json + the snapshot run, 4 runs identical): PASSES — t0 calendar_lookup, t1 invoice_lookup, t2 deals_list, each with its needle grounded. The earlier FAIL was 100% instrument (no roster); with the tools offered the champion re-selects correctly under history. Kept as a CONTROL for tool re-selection across turns — a prompt or context intervention that breaks it is caught on train. CORRECTED 2026-09-04 (same day, after merge of PR #72): the spliced case carried NO tools_offered roster, so calendar_lookup and invoice_lookup were never shown to the model — it failed for an instrument reason (an unoffered tool cannot be selected), not the 'tool mis-selection' the first probe note concluded (observation right, conclusion wrong: CLAUDE.md gotcha 11). This is the FIRST committed case to arm E10 rung B (tools_offered); the not_verified declaration and evals/test_e10_ladder.py's pin were rewritten in the same change. Re-probed with the roster — see the PROBED-WITH-ROSTER line below. PREVIOUS NOTE: PROBED 2026-09-04 on gemma4-e2b-ctx16k, 3 same-day runs identical (docs/probes/train-cases-probe-2026-09-04/probe1.json): FAILS, but NOT for the drafted reason. The predicted risk was answering a later turn from an earlier payload; the observed failure is TOOL MIS-SELECTION from turn 0 — 'next meeting' -> crm_lookup (not calendar_lookup), 'what have they paid' -> deals_list (not invoice_lookup), turn 2 then answers 6500/'proposal sent' from the turn-1 deals payload with no call at all. Failed checks 3/3: tools_called@t0, answer_contains@t0, tools_called@t1, answer_contains@t1, tools_called@t2. Measures the roster-selection shape under history (E10 rung B, multi-turn), which is what intervention 1 (tool policy restated per turn) targets. ORIGINAL DRAFT NOTE: NEW shape: tool RE-SELECTION under history — three questions about ONE company that each need a DIFFERENT tool (calendar_lookup -> invoice_lookup -> deals_list). The decoy risk is answering turn 2 from the invoice payload (1200) instead of the deal (6500), or turn 1 from the calendar. Needle 'demo' comes from the calendar entry's `what` field; 1200 is the paid invoice; 6500 + 'proposal' the open deal.",
+      "turns": [
+        "When is our next meeting with Janssens Bakery?",
+        "What have they paid us so far?",
+        "And the open deal — how much is it and what stage?"
+      ],
+      "turns_expected": [
+        {
+          "turn": "When is our next meeting with Janssens Bakery?",
+          "expected": {
+            "tools_called": [
+              "calendar_lookup"
+            ],
+            "answer_contains": [
+              "demo"
+            ],
+            "max_steps": 3
+          }
+        },
+        {
+          "turn": "What have they paid us so far?",
+          "expected": {
+            "tools_called": [
+              "invoice_lookup"
+            ],
+            "answer_contains": [
+              "1200"
+            ],
+            "max_steps": 3
+          }
+        },
+        {
+          "turn": "And the open deal — how much is it and what stage?",
+          "expected": {
+            "tools_called": [
+              "deals_list"
+            ],
+            "answer_contains": [
+              "6500",
+              "proposal"
+            ],
+            "max_steps": 3
+          }
+        }
+      ],
+      "expected": {},
+      "tools_offered": [
+        "crm_lookup(company: str) — returns the CRM record: contact, status, last interaction, notes.",
+        "deals_list(company: str) — returns open deals with amounts and stages.",
+        "calendar_lookup(company: str) — returns upcoming meetings with that company: when, what.",
+        "invoice_lookup(company: str) — returns invoices on file for that company: number, amount, status."
+      ]
+    },
+    {
+      "id": "outage-then-other-company-contact",
+      "split": "train",
+      "input": "What's the deal amount for Peeters Logistics? | And their contact person? | Fine — what about Devos Garage's contact, then?",
+      "note": "PROBED 2026-09-04 on gemma4-e2b-ctx16k, 3 same-day runs identical (docs/probes/train-cases-probe-2026-09-04/probe1.json): FAILS exactly as drafted — turn 1 never calls crm_lookup (answers the Peeters contact from the deals_list envelope owner, so the designed outage never fires: tools_called@t1 + error_recovery@t1); turn 2 recovers cleanly (crm_lookup -> \"The contact person for Devos Garage is Jan De Vos.\"). The 3 Sep decoy signature reproduced on train, n=2 with the committed peeters-contact-followup-outage. ORIGINAL DRAFT NOTE: NEW shape: recovery AFTER an outage. Turn 1 hits the crm_lookup outage for Peeters (error_recovery, same clause as the committed case). Turn 2 asks the same tool for a DIFFERENT company: the correct behaviour is to call crm_lookup again (it works for Devos) and answer De Vos. A model that generalises 'the CRM is down' and refuses, or answers from the Peeters envelope owner, fails. Distinguishes 'recovered' from 'gave up'.",
+      "turns": [
+        "What's the deal amount for Peeters Logistics?",
+        "And their contact person?",
+        "Fine — what about Devos Garage's contact, then?"
+      ],
+      "turns_expected": [
+        {
+          "turn": "What's the deal amount for Peeters Logistics?",
+          "expected": {
+            "tools_called": [
+              "deals_list"
+            ],
+            "answer_contains": [
+              "4200"
+            ],
+            "max_steps": 3
+          }
+        },
+        {
+          "turn": "And their contact person?",
+          "expected": {
+            "tools_called": [
+              "crm_lookup"
+            ],
+            "error_recovery": {
+              "tool": "crm_lookup",
+              "fact": [
+                "contact",
+                "name",
+                "crm",
+                "record"
+              ]
+            },
+            "max_steps": 3
+          }
+        },
+        {
+          "turn": "Fine — what about Devos Garage's contact, then?",
+          "expected": {
+            "tools_called": [
+              "crm_lookup"
+            ],
+            "answer_contains": [
+              "De Vos"
+            ],
+            "max_steps": 3
+          }
+        }
+      ],
+      "expected": {}
+    },
+    {
+      "id": "long-thread-recap-with-outage-train",
+      "split": "train",
+      "input": "What's the open deal with Janssens Bakery? | And Devos Garage? | And Mertens Interieur? | Recap all three for me — amounts where we have them, and say clearly which one is missing data.",
+      "note": "PROBED 2026-09-04 on gemma4-e2b-ctx16k, 3 same-day runs identical (docs/probes/train-cases-probe-2026-09-04/probe1.json): FAILS on shape 3 as drafted, via a different route. Turn 2 ('And Mertens Interieur?') picks crm_lookup instead of deals_list, so the deals_list outage never fires (tools_called@t2 + error_recovery@t2); turn 3's recap comes back as prose markdown ('Here is the recap of the three companies: ... **6500 EUR**') -> `unparseable@t3` (R7 marker, PR #69) + answer_present + the three needles. The long-thread prose break reproduced on train at 16k, n=2 with the heldout portfolio-recap-multiturn-fb2. ORIGINAL DRAFT NOTE: Failure shape 3 (long thread / context growth — portfolio-recap-multiturn-fb2's twin on train), with an outage in the middle: deals_list RAISES for Mertens (turn 2, error_recovery), so the turn-3 recap must carry 6500 and 9000 AND name Mertens as the gap. Four turns at fat payloads puts turn 3 near the same ~3.6k-token context where the heldout twin died — the ctx16k ladder row bears directly on this case. max_steps 6 on the recap (it may legitimately re-fetch).",
+      "turns": [
+        "What's the open deal with Janssens Bakery?",
+        "And Devos Garage?",
+        "And Mertens Interieur?",
+        "Recap all three for me — amounts where we have them, and say clearly which one is missing data."
+      ],
+      "turns_expected": [
+        {
+          "turn": "What's the open deal with Janssens Bakery?",
+          "expected": {
+            "tools_called": [
+              "deals_list"
+            ],
+            "answer_contains": [
+              "6500"
+            ],
+            "max_steps": 3
+          }
+        },
+        {
+          "turn": "And Devos Garage?",
+          "expected": {
+            "tools_called": [
+              "deals_list"
+            ],
+            "answer_contains": [
+              "9000"
+            ],
+            "max_steps": 3
+          }
+        },
+        {
+          "turn": "And Mertens Interieur?",
+          "expected": {
+            "tools_called": [
+              "deals_list"
+            ],
+            "error_recovery": {
+              "tool": "deals_list",
+              "fact": [
+                "deal",
+                "amount",
+                "pipeline",
+                "record"
+              ]
+            },
+            "max_steps": 3
+          }
+        },
+        {
+          "turn": "Recap all three for me — amounts where we have them, and say clearly which one is missing data.",
+          "expected": {
+            "answer_contains": [
+              "6500",
+              "9000",
+              "Mertens"
             ],
             "max_steps": 6
           }

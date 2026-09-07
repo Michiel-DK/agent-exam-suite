@@ -37,6 +37,8 @@ measurement rather than by hand (PR #27, `eb1cf00`).
 | **Chains tools.** Only model of 7 to pass `two-tool-combo` — a deterministic 0.0 hard-fail for llama3.1 and for gemma4:e2b. | E8 sweep + this run |
 | Scores **15/15** on the current crm exam (6/6 train, 9/9 heldout) | reproduced twice, rc=0 |
 
+| **In a THREAD it breaks protocol at turn 0–1 (ladder, 2026-09-03): 0/4 multi-turn at BOTH 4k and 16k windows, 3 of 4 cases wiped by prose-instead-of-JSON** ("The deal with Devos Garage, titled …" — right content, no JSON object). The 30 Aug fat-payload protocol-break signature, arriving sooner with history. Scoping (E27) flips one case (`peeters`, decoy dropped → `crm_lookup`); the window changes nothing. Old-28 vs the 2B champion: −9. | `docs/probes/multiturn-ladder-2026-09-03/RESULTS.md` rows 3–4 + stage 2 |
+
 **Routing read:** the only local model measured here that can be trusted with a
 multi-tool task where a tool may fail. That combination — chains tools AND declines to
 fill the hole when one dies — is rare in this set and is why it wins the task.
@@ -47,12 +49,12 @@ predate the fat-payload exam; the saturation ended when realism arrived — see 
 
 | behaviour | evidence |
 |---|---|
-| **PROTOCOL BREAK at production payload sizes — the behaviour that cost it the crown.** With 4 KB tool responses in context it answers correctly *in prose* and stops emitting the parseable JSON the loop requires ("no JSON object found… 'the contact status is listed as **"churned"**'"). 19→13 of 24 at fat (probe, 2/2 reproducible); 8/16 heldout on the committed fat exam, 0/28 verdict flips across three same-day runs. | `docs/probes/crm-realism-2026-08-30/RESULTS.md` (private, not in this snapshot); PR #59 snapshot; PR #60 diff |
-| **Silent scope-drop.** Asked for a 3-company roundup it answered for ONE from a single lookup, correct and confident, no mention of the other two. | `docs/probes/crm-heavyband-feasibility-2026-08-31/RESULTS.md` (private, not in this snapshot) |
+| **PROTOCOL BREAK at production payload sizes — the behaviour that cost it the crown.** With 4 KB tool responses in context it answers correctly *in prose* and stops emitting the parseable JSON the loop requires ("no JSON object found… 'the contact status is listed as **"churned"**'"). 19→13 of 24 at fat (probe, 2/2 reproducible); 8/16 heldout on the committed fat exam, 0/28 verdict flips across three same-day runs. | `docs/probes/crm-realism-2026-08-30/RESULTS.md`; PR #59 snapshot; PR #60 diff |
+| **Silent scope-drop.** Asked for a 3-company roundup it answered for ONE from a single lookup, correct and confident, no mention of the other two. | `docs/probes/crm-heavyband-feasibility-2026-08-31/RESULTS.md` |
 
 ---
 
-## gemma4:e2b-it-qat — email-triage / expense / reply-draft champion, AND crm-followup champion (as of 2026-08-31, PR #60)
+## gemma4:e2b-it-qat — email-triage / expense / reply-draft / task-intake champion; crm-followup champion is the SAME weights at a 16k window (`gemma4-e2b-ctx16k`, PR #70, 2026-09-04)
 
 | behaviour | evidence |
 |---|---|
@@ -60,6 +62,8 @@ predate the fat-payload exam; the saturation ended when realism arrived — see 
 | **Over-triggers on surface urgency cues, under-weights the written policy.** Four D1 misses all run the same way: manufactured urgency ("need your answer TODAY" from a recruiter) → `reply_now`; a €1500 figure in an invitation → `reply_now`; alert-shaped mail that says "no action is required" → `reply_now`; and conversely "no rush at all" from a real client → `reply_later`. | PR2 / PR #19 snapshot |
 | **Cannot chain tools on the SLIM fixture** (crm `two-tool-combo` was a deterministic 0.0 for it there) — **but at production payload sizes the ranking inverts**: it holds format where the 4B protocol-breaks, passes `two-tool-combo` at fat, sweeps 3/3 companies on the roundup probe, and took the crm crown 14/16 heldout vs the 4B's 8/16 (0/28 flips across two runs). Its residual fat weaknesses: the two partial-outage honesty cases, and a protocol break on the single longest composite answer (≈2048-token budget). | probe `docs/probes/crm-realism-2026-08-30/RESULTS.md` + heavy-band probe + PR #60 snapshot, all 2026-08-30/31 |
 | **Fails ALL FOUR new multi-turn cases (0/4, PR #64 exam, 2026-09-02)** — crm heldout is now 14/18 (0.778) on the 32-case exam: the 14/16 single-turn crown stands (0 flips among the 28 old cases), but sequential-turn work (cross-turn grounding, mid-thread switch, outage-then-retry, long-thread recap) is beyond it today. This is deliberate exam headroom, not a regression. Per-turn cost datum from the committed snapshot: full-history context grows ~+1,690 prompt tokens per fat turn (+70 light). | `evals/crm-followup/snapshot.json` turn_metrics + ledger entry 031, 2026-09-02 |
+
+| **Multi-turn 0/4 DECOMPOSED (ladder + E27 A/B, 2026-09-03): two of the four were the 4,096 WINDOW, the other two are DECOY-IN-HISTORY.** Same weights at `num_ctx 16384` (`gemma4-e2b-ctx16k`, Modelfile): the heldout referential-callback case PASSES and the dead 4th turn answers — under the default window the front of the thread (system prompt + first company) was silently truncated. What survives at 16k: asked for the client contact after a `deals_list` turn, it reports OUR REP from the previous payload ("Bram Wouters (bram.wouters@example.com) …") and never calls `crm_lookup` — the decoy-extraction signature, cross-turn. E27 `--assembly scoped` removes that payload → it calls the tool → **2/4** at 1,891→234 prompt tokens on the affected turn, old 28 verdicts identical; the referential callback then fails by construction ("please provide the name of the company"). At long context it also drops JSON for prose markdown on the recap (parse failure, R7 wipe). | `docs/probes/multiturn-ladder-2026-09-03/RESULTS.md`, stage 1 rows 1–2 + stage 2 |
 
 **Routing read:** the urgency-cue sensitivity is the thing to watch — it reads *tone*
 over *policy*. For triage that means it will over-escalate anything shouty and
@@ -373,14 +377,57 @@ and each is pinned by a test that documents today's behaviour so a silent change
 
 ---
 
+## LOCAL LADDER ON THE MULTI-TURN BAND — measured 2026-09-03 (`docs/probes/multiturn-ladder-2026-09-03/RESULTS.md`)
+
+Six local rows on the 32-case crm exam (4 multi-turn cases, 2 heldout), one run each,
+temp 0; the champion rerun reproduced its snapshot with 0 flips.
+
+| model | window | heldout | multi-turn | old-28 vs champion | wall |
+|---|---|---|---|---|---|
+| gemma4:e2b-it-qat (champion) | 4k | 14/18 | 0/4 | 0 | 6 min |
+| **gemma4-e2b-ctx16k (champion since 4 Sep, PR #70)** | 16k | **15/18** (38-case exam: 15/18 · 12/20 train) | 1/4 | +1 | ~11 min |
+| gemma4-e2b-ctx16k | 16k | 15/18 | 1/4 | +1 | 12 |
+| gemma4:e4b-it-qat | 4k / 16k | 8/18 | 0/4 | −9 / −10 | 11 |
+| qwen3-8b-ctx16k | 16k | 11/18 | **3/4** | −7 | 27 |
+| qwen3:14b | 4k | 13/18 | **3/4** | −8 | 52 |
+
+- **The multi-turn band INVERTS the single-turn ranking** (finding 7's shape, thread
+  axis): the 2B wins single calls, the qwen models are the only local rows that survive a
+  thread, and they pay 7–8 single-turn cases and 4–8× wall for it. Nobody wins both — a
+  routing datum, not a swap.
+- **qwen3 8B and 14B fail the SAME case the SAME way — tool reading, not memory:** "status
+  of our deal with X" → `crm_lookup` (client status) three turns running instead of
+  `deals_list` (deal status), so no amount ever appears; turn 3 then resolves "the FIRST
+  company we discussed" **correctly** (Devos) but answers without a lookup. Referential
+  indexing is fine at 8B+. On the decoy cases both call `crm_lookup` after a deals payload
+  — the thing no gemma does — and the 8B names the outage honestly ("CRM system is
+  currently unavailable … upstream 504 timeout").
+- **qwen3-8b thinking cost:** 114k reasoning chars over the exam, 27 min — the E24
+  "thinking is where the budget goes" row, now on a thread.
+- **Caching, consistent-with:** 2B turn 0 (204 prompt tokens) 5.1 s, turn 1 (1,891) 3.1 s
+  — wall does not scale with prompt size → Ollama prefix-KV reuse; full history is cheap
+  in TIME locally, so scoping's local payoff is window headroom + decoy removal.
+- ⛔ Caveats that travel: n=1 per row; 4 multi-turn cases; a parse failure on any turn
+  wipes the whole case's per-turn record (R7 gap), so "0/4" on the 4B partly means "the
+  instrument cannot see inside".
+
 ## HOSTED at production payloads + the effort dial — measured 2026-08-31
 
 | behaviour | evidence |
 |---|---|
-| **Kimi K3 drops hard at fat payloads: 7/16 heldout on the committed crm exam (json off)** — below the local 2B's 14/16. Forcing `response_format` recovers to 11/16 (+4; slim pair repeats the direction at +3), but flips run both ways: two down-flips are redundancy-monitor fails, so forced JSON also perturbs tool-calling. One run per cell, probe-grade. | `docs/probes/reasoning-effort-ab-2026-08-31/results/jsonmode_*` (private, not in this snapshot) + RESULTS.md rider |
-| **`reasoning_effort` low = held-or-better score at −76% (GLM) / −54% (Kimi) output tokens**, same-day pooled; setting the param at ANY value (incl. `high`) collapses reasoning vs unset — there is no "high = baseline" mode on these two. R1 has no discount (step-0). | `docs/probes/reasoning-effort-ab-2026-08-31/RESULTS.md` (private, not in this snapshot) |
+| **Kimi K3 drops hard at fat payloads: 7/16 heldout on the committed crm exam (json off)** — below the local 2B's 14/16. Forcing `response_format` recovers to 11/16 (+4; slim pair repeats the direction at +3), but flips run both ways: two down-flips are redundancy-monitor fails, so forced JSON also perturbs tool-calling. One run per cell, probe-grade. | `docs/probes/reasoning-effort-ab-2026-08-31/results/jsonmode_*` + RESULTS.md rider |
+| **`reasoning_effort` low = held-or-better score at −76% (GLM) / −54% (Kimi) output tokens**, same-day pooled; setting the param at ANY value (incl. `high`) collapses reasoning vs unset — there is no "high = baseline" mode on these two. R1 has no discount (step-0). | `docs/probes/reasoning-effort-ab-2026-08-31/RESULTS.md` |
 | **Day-level provider drift exceeds the within-day error bar**: same two models, same exams, two days apart → −5/−6 heldout cases, vs 0–4/17 verdict flips within a day. Two models, one day-pair — bounded observation. Cross-day hosted comparisons are not comparisons. | same file, caveat section |
 | **GLM-5.3 × crm-followup 429s systematically** (trajectory exam's burst of sequential calls; 9+ attempts across arms, 75 s cooldowns insufficient) while all five plain exams pass — the second trajectory-shaped rate-limit casualty after Mistral's full gap on 29 Aug. | `logs/driver.log` in the same probe dir |
+
+## HOSTED, same-day, pinned, on the CURRENT exams — measured 2026-09-05 (`docs/probes/hosted-sameday-2026-09-04/RESULTS.md`)
+
+| behaviour | evidence |
+|---|---|
+| **Both flagships stay BELOW the local 2B on crm-followup, same-day, 38-case exam: GLM-5.3 13/18, Kimi-K3 10/18 vs `gemma4-e2b-ctx16k` 15/18** (+0 / −2 and +0 / −5 on heldout). Neither passes the long-thread recap either — the thread shape is not a hosted win. Finding 10 reaffirmed with n=38. | `results/z-ai_glm-5.3/crm-followup.json`, `results/moonshotai_kimi-k3/crm-followup.json` |
+| **Where hosted DOES earn a tier: one specific heldout case each.** GLM passes `recruiter-fake-urgency` (email-triage) in both same-day reps; Kimi passes `anthropic-api` (expense) and three transcript-en cases (10/13 vs 8/13). Tiers added only where NO local fallback already covers the case → email-triage (GLM) and transcript-en (Kimi), last, pinned (PR #74). | RESULTS.md table + `routes.yaml` |
+| **GLM day-pair, pinned, 17 h apart: 7 crm flips of 38, 6 transcript flips of 22, heldout +2 / −1.** At the top of the within-day range (email 1/19, Kimi transcript 4/22 same-day), not clearly above it. Pinning is score-neutral and NOT a reproducibility guarantee; finding 8 stays "episodic, bounded", n=2 pairs now. | RESULTS.md "free day-pair" |
+| **Cost of the pass: $3.16 for 2 models × 6 exams × 1 rep + 3 confirming reps** ($0.54 GLM 6 exams; $1.46 Kimi). Hosted is cheap to MEASURE; it is the local laptop that is expensive in wall time (crm thread ~50 s vs seconds hosted). | `logs/driver.log` budget lines |
 
 ## Cross-cutting intuitions
 

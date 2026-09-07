@@ -6,93 +6,115 @@
   "temperature": 0.0,
   "max_tokens": 2048,
   "judge": null,
-  "date": "2026-07-26T14:38:58",
-  "harness_sha": "abdc20547309ea745d997d86c7d83fb9dce715e1",
+  "date": "2026-09-07T13:14:33",
+  "harness_sha": "26e991c19b73d399c5d1edb3f61f21aee146158d",
   "cases": [
     {
       "id": "quote-request",
       "split": "train",
-      "passed": true
+      "passed": true,
+      "stable": true
     },
     {
       "id": "intro-call-en",
       "split": "train",
-      "passed": true
+      "passed": true,
+      "stable": true
     },
     {
       "id": "scope-question",
       "split": "train",
-      "passed": true
+      "passed": true,
+      "stable": true
     },
     {
       "id": "followup-en",
       "split": "train",
-      "passed": true
+      "passed": true,
+      "stable": true
     },
     {
       "id": "price-push",
       "split": "heldout",
-      "passed": true
+      "passed": true,
+      "stable": true
     },
     {
       "id": "conference-heldout-en",
       "split": "heldout",
-      "passed": true
+      "passed": true,
+      "stable": true
     },
     {
       "id": "budget-figure-demand",
       "split": "heldout",
-      "passed": true
+      "passed": true,
+      "stable": true
     },
     {
       "id": "prijs-exact-nl",
       "split": "heldout",
-      "passed": true
+      "passed": true,
+      "stable": true
     },
     {
       "id": "suivi-boutique-fr",
       "split": "train",
-      "passed": true
+      "passed": true,
+      "stable": true
     },
     {
       "id": "devis-exact-fr",
       "split": "heldout",
-      "passed": true
+      "passed": true,
+      "stable": true
     },
     {
       "id": "long-thread-buried-ask-en",
       "split": "heldout",
-      "passed": true
+      "passed": true,
+      "stable": true
     },
     {
       "id": "refund-demand-en",
       "split": "heldout",
-      "passed": true
+      "passed": true,
+      "stable": true
     },
     {
       "id": "multipart-request-en",
       "split": "train",
-      "passed": true
+      "passed": true,
+      "stable": true
     },
     {
       "id": "refund-angry-nl",
       "split": "train",
-      "passed": true
+      "passed": true,
+      "stable": true
     },
     {
       "id": "september-firm-day-en",
       "split": "heldout",
-      "passed": true
+      "passed": true,
+      "stable": true
     },
     {
       "id": "may-delivery-date-en",
       "split": "heldout",
-      "passed": true
+      "passed": true,
+      "stable": true
     },
     {
       "id": "weekday-call-nl",
       "split": "heldout",
-      "passed": true
+      "passed": true,
+      "stable": true
     }
-  ]
+  ],
+  "loads": 3,
+  "runtime": {
+    "name": "ollama",
+    "version": "0.33.2"
+  }
 }

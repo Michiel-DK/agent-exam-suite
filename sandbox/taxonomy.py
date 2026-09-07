@@ -85,6 +85,9 @@ CATEGORY_BY_CHECK: dict[str, str] = {
     # --- answer substance
     "answer_contains": "answer-content",
     "answer_contains_any": "answer-content",
+    # a forbidden string present = a decoy's detail attributed to the right entity;
+    # the capability that failed is grounding, not content coverage
+    "answer_not_contains": "fabrication",
     "labels": "label-mismatch",
     "fields": "label-mismatch",
     "answer_present": "no-answer",
@@ -113,6 +116,15 @@ CATEGORY_BY_CHECK: dict[str, str] = {
     "check_output_shape": "no-answer",
     "check_compression": "compression",
     "check_abstention": "over-significance",
+    # --- dispatch (A4 task-intake, 2026-09-04). The label half is `labels` above; the
+    # hand-over half maps onto existing capabilities: a paraphrased / invented / fixed-up
+    # hand-over is fabrication (the material was not the request's), a roster miss is
+    # a label mismatch, and 'none' with material attached (or a specialist with none)
+    # is the dispatcher not performing the task — filed with compression's "did not
+    # perform" reading rather than a new row.
+    "check_agent_in_roster": "label-mismatch",
+    "check_input_is_verbatim_span": "fabrication",
+    "check_none_hands_over_nothing": "compression",
     # check_action_items (transcript-en, S-TRANSCRIPT-EN-EXAM): a PRESENCE check on
     # required content, exactly like check_coverage above — it is the same failure
     # (a required item is missing) wearing a new costume, just scoped to the

@@ -1,7 +1,21 @@
 name: crm-followup
 description: Answer questions about clients using CRM lookup tools
 provider: ollama
-model: gemma4:e2b-it-qat
+model: gemma4-e2b-ctx16k
+# CHAMPION CHANGE 2026-09-04 — WINDOW, not weights: gemma4:e2b-it-qat at num_ctx 16384
+# (agents/crm-followup/Modelfile; `ollama create gemma4-e2b-ctx16k -f` it first). The
+# ladder probe (docs/probes/multiturn-ladder-2026-09-03/RESULTS.md) found two of the 2B's
+# four multi-turn failures were the 4,096 default window truncating the front of the
+# thread. Protocol per that file, executed 2026-09-04 — three same-day `run`s at temp 0:
+#   gemma4-e2b-ctx16k  15/18 heldout, 9/14 train, 0 verdict flips across the 3 runs
+#   gemma4:e2b-it-qat  14/18 heldout, 8/14 train  <- previous champion (snapshot 09-02)
+# +2 verdicts (heldout mid-thread-switch-referential-callback, train portfolio-status-
+# check), 0 losses. One heldout case is INSIDE the noise band (Wilson 95% on n=18 spans
+# ~0.60–0.94 either way); the swap is taken on the mechanism (a truncated thread is a
+# measurement defect, CLAUDE.md gotcha 1) plus the multi-turn gain, and it costs ~+85%
+# wall per thread. Operator-signed 2026-09-04. Snapshot rerun in this commit with the
+# R7-fixed runner (PR #69), so its records carry per-turn protocol_break markers instead
+# of wiped cases.
 # CHAMPION CHANGE 2026-08-31 — decided by the committed production-payload exam (PR #59),
 # per the pre-registered protocol in docs/sprint-map.md: `runner.py diff` on all 28
 # committed cases at temp 0:

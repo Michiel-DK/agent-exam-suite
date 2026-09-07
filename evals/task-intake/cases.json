@@ -1,0 +1,391 @@
+{
+  "agent": "task-intake",
+  "mode": "labels",
+  "note": "A4 dispatcher exam (2026-09-04). train = cases you may iterate the prompt against; heldout = reported score. Never tune on heldout. Split proposed by the build, ratified by the operator at merge (Heldout is untouchable).",
+  "not_verified": [
+    "The label half is exact-match on 'agent' only. The hand-over half is graded by properties.py: the input must be a contiguous verbatim span of the request covering >= 50% of its non-whitespace characters — a multi-payload case commits a `handover` span and is graded by containment instead (evals/task-intake/properties.py _golden_handover); it does NOT check that the instruction sentence was stripped (a hand-over of the whole request passes, decoy payload included), does not check that the RIGHT span was chosen when a request holds two candidate payloads, and does not grade the downstream agent's result.",
+    "Policy is house policy, not ground truth: a bare email with no instruction is email-triage; 'reply/answer/write back' is reply-draft even on a newsletter (instruction wins); a bare call transcript is transcript-en. A different shop would label some of these differently; the exam measures adherence to THIS policy as stated in prompt.md.",
+    "7 'none' cases in the first 38 (9 of 46), 3 of them baits that name a client, a document or an email; a model that dispatches every request somewhere is caught by those, a model that abstains on everything is caught by the other 31.",
+    "Heavy band (8 cases, 2026-09-05): added because the first 38 saturated at the top (2B and 4B both 16/16 heldout, 21/22 train); their split was assigned at authoring, before any model ran them, and ratified with the rest at merge."
+  ],
+  "cases": [
+    {
+      "id": "crm-devos-stage",
+      "split": "train",
+      "input": "What stage is the Devos Garage deal in?",
+      "expected": {
+        "agent": "crm-followup"
+      }
+    },
+    {
+      "id": "crm-janssens-contact-lastspeak",
+      "split": "heldout",
+      "input": "Quick one before my call — who's our contact at Janssens Bakery and when did we last speak?",
+      "expected": {
+        "agent": "crm-followup"
+      }
+    },
+    {
+      "id": "crm-peeters-open-deal-slack",
+      "split": "train",
+      "input": "Slack from Michiel: can you check if Peeters Logistics still has an open deal and how much?",
+      "expected": {
+        "agent": "crm-followup"
+      }
+    },
+    {
+      "id": "crm-vitrine-wants-active",
+      "split": "heldout",
+      "input": "Remind me what Vitrine Restaurant wanted from us and whether they're still active.",
+      "expected": {
+        "agent": "crm-followup"
+      }
+    },
+    {
+      "id": "crm-mertens-notes",
+      "split": "train",
+      "input": "Any notes on Mertens Interieur? I have them at 3pm.",
+      "expected": {
+        "agent": "crm-followup"
+      }
+    },
+    {
+      "id": "triage-bare-client-email",
+      "split": "train",
+      "input": "From: sofie@janssens-bakery.com\nSubject: quote for AI chatbot\n\nHi, we saw your work for restaurants. Could you call us this week about a chatbot for our webshop? We want to go live before September. Thanks, Sofie",
+      "expected": {
+        "agent": "email-triage"
+      }
+    },
+    {
+      "id": "triage-urgent-or-not-newsletter",
+      "split": "heldout",
+      "input": "Got this in my inbox, urgent or not?\n\nFrom: nieuws@ondernemersplatform.be\nSubject: Weekoverzicht voor ondernemers\n\nDeze week: vijf tips om je administratie te vereenvoudigen en de agenda van netwerkevents. Uitschrijven kan onderaan.",
+      "expected": {
+        "agent": "email-triage"
+      }
+    },
+    {
+      "id": "triage-bare-recruiter",
+      "split": "train",
+      "input": "From: talent@bigconsulting.example\nSubject: Senior AI role — are you open to a chat?\n\nHi, I came across your profile. We have a senior AI engineering role in Brussels, hybrid, competitive package. Would you be open to a 20-minute intro call next week?",
+      "expected": {
+        "agent": "email-triage"
+      }
+    },
+    {
+      "id": "triage-bare-disk-alert",
+      "split": "heldout",
+      "input": "From: alerts@ovh.com\nSubject: Disk usage 91% on vps-2\n\nDisk usage on vps-2 reached 91%. No action is taken automatically. Consider freeing space or upgrading the plan.",
+      "expected": {
+        "agent": "email-triage"
+      }
+    },
+    {
+      "id": "triage-sort-accountant",
+      "split": "train",
+      "input": "Sort this for me:\n\nFrom: kris@boekhouding-vdb.be\nSubject: BTW aangifte Q3\n\nDag, de BTW-aangifte voor Q3 moet binnen zijn voor 20 oktober. Kan je me de uitgaande facturen van juli-september bezorgen voor 10 oktober?",
+      "expected": {
+        "agent": "email-triage"
+      }
+    },
+    {
+      "id": "reply-draft-sofie",
+      "split": "train",
+      "input": "Draft a reply to this:\n\nFrom: sofie@janssens-bakery.com\nSubject: quote for AI chatbot\n\nHi, we saw your work for restaurants. Could you call us this week about a chatbot for our webshop? We want to go live before September. Thanks, Sofie",
+      "expected": {
+        "agent": "reply-draft"
+      }
+    },
+    {
+      "id": "reply-answer-anna",
+      "split": "heldout",
+      "input": "Can you answer Anna? Keep it short.\n\nFrom: anna@northline.example\nSubject: quote timeline\n\nHello, thanks for the call yesterday. When could we expect the written quote? We would like to decide before the board meeting on the 20th. Best regards, Anna",
+      "expected": {
+        "agent": "reply-draft"
+      }
+    },
+    {
+      "id": "reply-nl-antwoord",
+      "split": "train",
+      "input": "Kun je hierop antwoorden?\n\nFrom: jan@devosgarage.be\nSubject: scoping document\n\nDag, kunnen jullie het scoping document tegen vrijdag bezorgen? De raad van bestuur komt maandag samen. Groeten, Jan",
+      "expected": {
+        "agent": "reply-draft"
+      }
+    },
+    {
+      "id": "reply-decline-speaker",
+      "split": "heldout",
+      "input": "Write back to this one, politely decline:\n\nFrom: events@aisummit.example\nSubject: Speaker invitation — AI Summit Lisbon\n\nWe would love to have you as a speaker on our SME panel in Lisbon on 14 November. Travel and hotel covered. Could you confirm by Friday?",
+      "expected": {
+        "agent": "reply-draft"
+      }
+    },
+    {
+      "id": "reply-fr-reponds",
+      "split": "train",
+      "input": "Réponds à ce mail stp:\n\nFrom: marie@atelier-lumiere.fr\nSubject: devis chatbot\n\nBonjour, nous aimerions un devis pour un chatbot sur notre site. Quel serait le prix et le délai? Cordialement, Marie",
+      "expected": {
+        "agent": "reply-draft"
+      }
+    },
+    {
+      "id": "reply-instruction-wins-newsletter",
+      "split": "heldout",
+      "input": "Draft a reply asking them to remove me from the list:\n\nFrom: nieuws@ondernemersplatform.be\nSubject: Weekoverzicht voor ondernemers\n\nDeze week: vijf tips om je administratie te vereenvoudigen en de agenda van netwerkevents. Uitschrijven kan onderaan.",
+      "expected": {
+        "agent": "reply-draft"
+      }
+    },
+    {
+      "id": "expense-book-anthropic",
+      "split": "train",
+      "input": "Book this: 2026-08-14 ANTHROPIC API 42.10 EUR",
+      "expected": {
+        "agent": "expense-categorization"
+      }
+    },
+    {
+      "id": "expense-which-category-ovh",
+      "split": "heldout",
+      "input": "Which category — 'OVH cloud monthly 23.99'?",
+      "expected": {
+        "agent": "expense-categorization"
+      }
+    },
+    {
+      "id": "expense-nmbs-ticket",
+      "split": "train",
+      "input": "Expense line for the books: NMBS ticket Brussels-Ghent 18.40 EUR",
+      "expected": {
+        "agent": "expense-categorization"
+      }
+    },
+    {
+      "id": "expense-lunch-colruyt",
+      "split": "heldout",
+      "input": "categorise: Colruyt 54.20 (lunch with client)",
+      "expected": {
+        "agent": "expense-categorization"
+      }
+    },
+    {
+      "id": "expense-subscription-proximus",
+      "split": "train",
+      "input": "Is this a subscription? Proximus mobile 35.00 EUR August",
+      "expected": {
+        "agent": "expense-categorization"
+      }
+    },
+    {
+      "id": "recap-summarise-day",
+      "split": "train",
+      "input": "Summarise my day:\n\n--- item 1 ---\nFrom: sofie@janssens-bakery.com\nSubject: Re: chatbot proposal\nWe discussed it internally and agree on the amount. Can we plan the kickoff for the week of 15 September?\n\n--- item 2 ---\nFrom: noreply@github.com\nSubject: [agent-sandbox] CI passed on master\nAll checks passed.\n\n--- item 3 ---\nFrom: jan@devosgarage.be\nSubject: Phase 2 scoping\nThanks for the call. Please send the scoping doc by Friday so I can take it to the board.",
+      "expected": {
+        "agent": "recap"
+      }
+    },
+    {
+      "id": "recap-what-got-done",
+      "split": "heldout",
+      "input": "What did I actually get done today? Here's the log:\n\n09:00 call with Devos Garage about Phase 2 — they want a quote by Friday\n10:30 replied to Sofie (Janssens) — kickoff week of 15 Sep confirmed\n13:00 Peeters Logistics: CRM outage, could not pull the contact, retry tomorrow\n15:30 wrote the scoping doc draft, 4 pages, needs pricing table",
+      "expected": {
+        "agent": "recap"
+      }
+    },
+    {
+      "id": "recap-daily-please",
+      "split": "train",
+      "input": "Daily recap please\n\n--- item 1 ---\nFrom: accounting@proximus.be\nSubject: Your invoice for August\nYour invoice of 35.00 EUR is available online.\n\n--- item 2 ---\nFrom: karel@vitrine-restaurant.be\nSubject: pause\nWe are pausing the project until January, the kitchen renovation comes first.\n\n--- item 3 ---\nFrom: els@mertens-interieur.be\nSubject: first meeting\nWould Tuesday 10:00 work for a first meeting about the showroom app?",
+      "expected": {
+        "agent": "recap"
+      }
+    },
+    {
+      "id": "recap-highlights",
+      "split": "heldout",
+      "input": "Give me the highlights of today for my notes:\n\n--- item 1 ---\nFrom: bram@peeters-logistics.be\nSubject: Fleet quoting assistant — questions\nTwo questions before we sign: does it run on our servers, and what happens to the data?\n\n--- item 2 ---\nFrom: newsletter@saas-weekly.io\nSubject: 10 tools you missed this week\nUnsubscribe at the bottom.",
+      "expected": {
+        "agent": "recap"
+      }
+    },
+    {
+      "id": "recap-end-of-day",
+      "split": "train",
+      "input": "End of day.\n\n--- item 1 ---\nFrom: anna@northline.example\nSubject: proposal received\nGot it, we will come back to you after the board meeting on the 20th.\n\n--- item 2 ---\nFrom: alerts@ovh.com\nSubject: Disk usage 91% on vps-2\nConsider freeing space.",
+      "expected": {
+        "agent": "recap"
+      }
+    },
+    {
+      "id": "transcript-clean-up",
+      "split": "train",
+      "input": "Clean up this call transcript:\n\nREP: Hi, this is Dana from Northline Software, thanks for taking the call.\nPROSPECT: Sure, happy to chat. I'm Marcus, I run operations at Beacon Freight.\nREP: From the intake form you track shipments in spreadsheets and it is getting hard to scale?\nPROSPECT: Yeah, about 40 shipments a week now, up from 10 last year. Three people update the same sheet.\nREP: Understood. If we set up a pilot for two weeks, who would need to sign off?\nPROSPECT: Me and our CFO, Lena. Send the pricing by Thursday and I will get it in front of her.",
+      "expected": {
+        "agent": "transcript-en"
+      }
+    },
+    {
+      "id": "transcript-devos-readable",
+      "split": "heldout",
+      "input": "Here's the recording text from the Devos call, make it readable:\n\nREP: Thanks for making time, Jan. Quick check-in on Phase 2.\nCLIENT: Sure. The board wants the scoping doc before they approve the 9,000 budget.\nREP: I can send it Friday. Anything else blocking?\nCLIENT: Just the data question — where does the quote data live? On our side, right?\nREP: Yes, on your servers. I will put that in writing in the doc.\nCLIENT: Good. Friday then.",
+      "expected": {
+        "agent": "transcript-en"
+      }
+    },
+    {
+      "id": "transcript-tidy-support",
+      "split": "train",
+      "input": "transcript from this morning, tidy it:\n\nSUPPORT: Hello, you reported the chatbot answering in Dutch to English customers?\nCLIENT: Yes, since yesterday afternoon, about one in five conversations.\nSUPPORT: Did anything change on your side — a new product page, a language setting?\nCLIENT: We added the German product pages Tuesday.\nSUPPORT: That is likely it. I will roll back the language detector today and confirm by email tonight.\nCLIENT: Please do, we have a campaign starting Monday.",
+      "expected": {
+        "agent": "transcript-en"
+      }
+    },
+    {
+      "id": "transcript-bare",
+      "split": "heldout",
+      "input": "REP: So renewal is up on the 30th. Any changes you want?\nCLIENT: We want to add the second location, same setup.\nREP: That is the plus one seat tier, 20 percent more. I will send the updated order form today.\nCLIENT: Fine. Also the report export is slow, can someone look?\nREP: I will log it with support and copy you.",
+      "expected": {
+        "agent": "transcript-en"
+      }
+    },
+    {
+      "id": "transcript-proper-english",
+      "split": "train",
+      "input": "Can you turn this into a proper summary with action items:\n\nPROSPECT: We looked at three vendors. Yours is the only one that runs on-prem.\nREP: That is the main reason people pick us. What is your timeline?\nPROSPECT: Decision by end of October, go-live in January.\nREP: Then a two-week pilot in November fits. I will send a proposal by the 10th.\nPROSPECT: Include the pricing for 25 users.",
+      "expected": {
+        "agent": "transcript-en"
+      }
+    },
+    {
+      "id": "none-book-train",
+      "split": "train",
+      "input": "Book me a train to Paris next Tuesday morning.",
+      "expected": {
+        "agent": "none"
+      }
+    },
+    {
+      "id": "none-weather",
+      "split": "heldout",
+      "input": "What's the weather in Ghent tomorrow?",
+      "expected": {
+        "agent": "none"
+      }
+    },
+    {
+      "id": "none-generate-invoice-client-bait",
+      "split": "train",
+      "input": "Generate an invoice for Janssens Bakery for 6500 EUR, due in 30 days.",
+      "expected": {
+        "agent": "none"
+      }
+    },
+    {
+      "id": "none-translate-contract-bait",
+      "split": "heldout",
+      "input": "Translate this contract clause to German:\n\nThe client retains ownership of all data processed by the system.",
+      "expected": {
+        "agent": "none"
+      }
+    },
+    {
+      "id": "none-chitchat",
+      "split": "train",
+      "input": "hey are you there?",
+      "expected": {
+        "agent": "none"
+      }
+    },
+    {
+      "id": "none-reminder",
+      "split": "heldout",
+      "input": "Set up a monthly reminder to send invoices on the 1st.",
+      "expected": {
+        "agent": "none"
+      }
+    },
+    {
+      "id": "none-pause-email-bait",
+      "split": "train",
+      "input": "Update the project plan for this:\n\nFrom: karel@vitrine-restaurant.be\nSubject: project on hold\n\nHi, we have to pause the project until January — the kitchen renovation comes first. Sorry for the short notice. Karel",
+      "expected": {
+        "agent": "none"
+      }
+    },
+    {
+      "id": "heavy-two-payloads-reply-wins",
+      "split": "heldout",
+      "input": "Two things. First, draft a reply to Sofie:\n\nFrom: sofie@janssens-bakery.com\nSubject: kickoff\n\nCan we do the kickoff on 16 September at 10:00? Sofie\n\nSecond, remind me later to book the train.",
+      "expected": {
+        "agent": "reply-draft"
+      },
+      "note": "HEAVY BAND (added 2026-09-05 after the 38-case exam tied 2B/4B at 16/16 heldout — gotcha 10): two payloads in one request, a question wrapped around an email, NL/FR requests, an email shaped like a log, write/edit baits. `handover` = the committed span (refuter 2026-09-05: without it the coverage floor made the correct hand-over unpassable; graded by containment via the recap _exp discipline).",
+      "handover": "From: sofie@janssens-bakery.com\nSubject: kickoff\n\nCan we do the kickoff on 16 September at 10:00? Sofie"
+    },
+    {
+      "id": "heavy-question-inside-email-crm",
+      "split": "train",
+      "input": "Before I answer this — what stage is the Peeters Logistics deal in?\n\nFrom: bram@peeters-logistics.be\nSubject: next steps\n\nHi, where do we stand on the quoting assistant? Bram",
+      "expected": {
+        "agent": "crm-followup"
+      },
+      "note": "HEAVY BAND (added 2026-09-05 after the 38-case exam tied 2B/4B at 16/16 heldout — gotcha 10): two payloads in one request, a question wrapped around an email, NL/FR requests, an email shaped like a log, write/edit baits. `handover` = the committed span (refuter 2026-09-05: without it the coverage floor made the correct hand-over unpassable; graded by containment via the recap _exp discipline).",
+      "handover": "what stage is the Peeters Logistics deal in?"
+    },
+    {
+      "id": "heavy-nl-crm-question",
+      "split": "heldout",
+      "input": "Wat is de status van Devos Garage en wie is daar onze contactpersoon?",
+      "expected": {
+        "agent": "crm-followup"
+      },
+      "note": "HEAVY BAND (added 2026-09-05 after the 38-case exam tied 2B/4B at 16/16 heldout — gotcha 10): two payloads in one request, a question wrapped around an email, NL/FR requests, an email shaped like a log, write/edit baits."
+    },
+    {
+      "id": "heavy-fr-expense-line",
+      "split": "train",
+      "input": "Peux-tu classer cette dépense: SNCB billet Bruxelles-Lille 31.50 EUR",
+      "expected": {
+        "agent": "expense-categorization"
+      },
+      "note": "HEAVY BAND (added 2026-09-05 after the 38-case exam tied 2B/4B at 16/16 heldout — gotcha 10): two payloads in one request, a question wrapped around an email, NL/FR requests, an email shaped like a log, write/edit baits."
+    },
+    {
+      "id": "heavy-transcript-named-summarise-not-translate",
+      "split": "heldout",
+      "input": "Summarise the call for my notes — don't translate anything:\n\nREP: Thanks for the time, Marie.\nCLIENT: Sure. We need the chatbot live before the Christmas campaign.\nREP: So early December. I will send a plan with two milestones by Monday.\nCLIENT: Perfect, include the price for French and English.",
+      "expected": {
+        "agent": "transcript-en"
+      },
+      "note": "HEAVY BAND (added 2026-09-05 after the 38-case exam tied 2B/4B at 16/16 heldout — gotcha 10): two payloads in one request, a question wrapped around an email, NL/FR requests, an email shaped like a log, write/edit baits."
+    },
+    {
+      "id": "heavy-email-with-log-shape-triage",
+      "split": "train",
+      "input": "From: kris@boekhouding-vdb.be\nSubject: overview of the week\n\n--- item 1 ---\nQ3 VAT return due 20 October\n--- item 2 ---\nPlease send July-September invoices by 10 October\n\nKris",
+      "expected": {
+        "agent": "email-triage"
+      },
+      "note": "HEAVY BAND (added 2026-09-05 after the 38-case exam tied 2B/4B at 16/16 heldout — gotcha 10): two payloads in one request, a question wrapped around an email, NL/FR requests, an email shaped like a log, write/edit baits."
+    },
+    {
+      "id": "heavy-none-edit-document-client-bait",
+      "split": "train",
+      "input": "Rewrite the intro of the Janssens Bakery proposal so it sounds less formal:\n\nWe are pleased to submit our proposal for a webshop chatbot, covering scope, timeline and pricing.",
+      "expected": {
+        "agent": "none"
+      },
+      "note": "HEAVY BAND (added 2026-09-05 after the 38-case exam tied 2B/4B at 16/16 heldout — gotcha 10): two payloads in one request, a question wrapped around an email, NL/FR requests, an email shaped like a log, write/edit baits."
+    },
+    {
+      "id": "heavy-none-crm-write-bait",
+      "split": "heldout",
+      "input": "Add a note to Devos Garage in the CRM: board meets Monday, scoping doc due Friday.",
+      "expected": {
+        "agent": "none"
+      },
+      "note": "HEAVY BAND (added 2026-09-05 after the 38-case exam tied 2B/4B at 16/16 heldout — gotcha 10): two payloads in one request, a question wrapped around an email, NL/FR requests, an email shaped like a log, write/edit baits."
+    }
+  ]
+}

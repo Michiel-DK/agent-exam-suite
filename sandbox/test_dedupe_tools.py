@@ -545,6 +545,13 @@ def _dedupe_kwarg_seen_by_run_exam(argv: list[str]):
     needs a well-formed fake result and all three can be probed the same way."""
     seen: dict = {}
     real_run_exam, real_argv = runner.run_exam, sys.argv
+    # SNAPSHOT-REPRODUCIBILITY: `check` now runs a pre-inference preflight (a live
+    # /api/version call) and a native-API UNLOAD of the champion before run_exam.
+    # Neither belongs in the deterministic gate: the version call makes this file red
+    # whenever Ollama is down or bumped, and the unload would evict a model out from
+    # under a snapshot run in flight in another shell (breaking its "one load"). Both
+    # are stubbed here; their own behaviour is tested in test_snapshot_reproducibility.
+    real_preflight, real_unload = runner.snapshot_preflight, runner.ollama_unload
 
     def spy(*_a, **kwargs):
         seen["dedupe_tools"] = kwargs.get("dedupe_tools", "<never passed>")
@@ -552,6 +559,8 @@ def _dedupe_kwarg_seen_by_run_exam(argv: list[str]):
 
     try:
         runner.run_exam = spy
+        runner.snapshot_preflight = lambda *_a, **_k: None
+        runner.ollama_unload = lambda *_a, **_k: None
         sys.argv = argv
         with contextlib.redirect_stdout(io.StringIO()):
             try:
@@ -560,6 +569,7 @@ def _dedupe_kwarg_seen_by_run_exam(argv: list[str]):
                 pass
     finally:
         runner.run_exam, sys.argv = real_run_exam, real_argv
+        runner.snapshot_preflight, runner.ollama_unload = real_preflight, real_unload
     return seen.get("dedupe_tools", "<run_exam never reached>")
 
 

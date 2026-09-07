@@ -65,6 +65,7 @@ from typing import NamedTuple
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import taxonomy  # noqa: E402  (the single shared results reader)
+import stats  # noqa: E402  (A3: Wilson interval + paired sign test, single implementation)
 
 ROOT = Path(__file__).resolve().parent.parent
 RESULTS_DIR = ROOT / "results"
@@ -426,6 +427,9 @@ class Verdict(NamedTuple):
     current_exam_status: str = ""   # "routable" | INSUFFICIENT_DATA | "unknown"
     champion: str = ""              # agent.yaml's model, for "this is a swap" framing
     champion_note: str = ""         # where the incumbent sits in the measured cohort
+    # A3: interval + paired lines, printed under ACCURACY. Annotation only — the
+    # noise band above stays the decision rule; these say how wide it really is.
+    stats_evidence: tuple = ()
 
 
 def _pct(n: int, total: int) -> str:
@@ -522,8 +526,24 @@ def route_agent(agent: str, runs_with_keys: list, current: tuple | None,
                   if leader.heldout_passed - r.heldout_passed <= noise_cases
                   and leader.train_passed - r.train_passed <= noise_cases]
     one_case = _pct(1, heldout_total)
+    # A3 — the width behind the verdict. One interval line per model in the band (the
+    # leader first), then a PAIRED line per contender against the leader: only the
+    # cases where the two verdicts differ carry information, and the exact sign test
+    # on those is the honest p. With one runner-up outside the band (a "pick"), the
+    # same paired line is printed for the pick so a 2-case lead on n=18 is never read
+    # as more than it is.
+    stats_lines = [f"{r.model} {r.heldout_passed}/{heldout_total} heldout "
+                   f"[{stats.fmt_ci(r.heldout_passed, heldout_total)}]"
+                   for r in contenders]
+    stats_lines += [stats.fmt_paired(leader.model, r.model,
+                                     set(leader.heldout_failed), set(r.heldout_failed))
+                    for r in contenders if r.model != leader.model]
     if len(contenders) == 1:
         runner_up = next(r for r in ranked if r.model != leader.model)
+        stats_lines.append(f"{runner_up.model} {runner_up.heldout_passed}/{heldout_total} "
+                           f"heldout [{stats.fmt_ci(runner_up.heldout_passed, heldout_total)}]")
+        stats_lines.append(stats.fmt_paired(leader.model, runner_up.model,
+                                            set(leader.heldout_failed), set(runner_up.heldout_failed)))
         gap = leader.heldout_passed - runner_up.heldout_passed
         train_gap = leader.train_passed - runner_up.train_passed
         acc_verdict = "pick"
@@ -816,7 +836,8 @@ def route_agent(agent: str, runs_with_keys: list, current: tuple | None,
         tuple(r.model for r in contenders), leader.model, start, start_basis,
         start_evidence, escalation, esc_evidence, tuple(triggers), unpriced,
         tuple(conflicts), tuple(resolved), others, profile, current_models,
-        current is not None, cur_status, champion, champion_note)
+        current is not None, cur_status, champion, champion_note,
+        stats_evidence=tuple(stats_lines))
 
 
 def failure_categories(results_dir: Path) -> dict:
@@ -912,6 +933,7 @@ def report_lines(verdicts: list, results_dir: Path,
             "",
             f"  ACCURACY: {v.accuracy_verdict}",
             f"    {v.accuracy_evidence}",
+            *[f"    · {line}" for line in v.stats_evidence],
             "",
             f"  START ON: {v.start or '(none — nothing here decides)'}"
             + (f"   [basis: {v.start_basis}]" if v.start_basis else ""),

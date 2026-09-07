@@ -5,6 +5,8 @@
     python3 harness/runner.py run <agent> [--model X] [--provider Y] [--snapshot]
     python3 harness/runner.py check <agent> [--tolerance 0.0]
     python3 harness/runner.py diff <agent> --models m1,m2[,m3]
+    python3 harness/runner.py live <agent> --input "..."      # one agent, through routes.yaml
+    python3 harness/runner.py intake --input "..."            # request -> dispatcher -> agent (exit 0/2/3)
 
 Exam modes (evals/<agent>/cases.json "mode" field) — the complexity ladder:
     labels      exact match on expected fields (classification)         [default]
@@ -25,6 +27,8 @@ import re
 import subprocess
 import sys
 import time
+import urllib.error
+import urllib.request
 from datetime import datetime
 from pathlib import Path
 
@@ -34,10 +38,11 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from judges import load_judge  # noqa: E402
 from numnorm import strip_thousands  # noqa: E402
-from retry import call_with_retry, extract_json  # noqa: E402
-from router import DEFAULT_TIMEOUT_S, TerminationError, get_adapter  # noqa: E402
+from retry import ParseFailure, call_with_retry, extract_json  # noqa: E402
+from router import DEFAULT_TIMEOUT_S, PROVIDERS, TerminationError, get_adapter  # noqa: E402
 import taxonomy  # noqa: E402  (report-only; imports nothing from here at load time)
 import policy  # noqa: E402  (report-only; imports nothing from here at load time)
+import stats  # noqa: E402  (A3: the single interval implementation, shared with route/serve)
 import strategies  # noqa: E402  (E21; imports nothing from here — ctx is injected)
 import probe  # noqa: E402  (report-only; imports nothing from here at load time)
 
@@ -119,6 +124,49 @@ def print_not_verified(exam: dict) -> None:
 # sandbox/test_termination.py, not assumed here.
 DECLARABLE_BUCKETS = ("format", "quality")
 BUCKETS = DECLARABLE_BUCKETS + ("termination",)
+
+
+ROUTES_PATH = ROOT / "routes.yaml"
+
+
+def load_routes(agent_name: str) -> list[dict]:
+    """The ORDERED tier list `live` walks for an agent (LIVE-ROUTING lane, A1).
+    Tier 0 must be the committed champion — evals/test_live_routing.py pins that
+    against agents/<name>/agent.yaml, so the table cannot drift from the exam's
+    snapshot. Returns [] when the file or the agent's entry is absent: the caller
+    then runs exactly the pre-lane single-tier path. A malformed entry RAISES —
+    never a silently-empty table (fail loud, never a placeholder)."""
+    if not ROUTES_PATH.exists():
+        return []
+    table = yaml.safe_load(ROUTES_PATH.read_text()) or {}
+    tiers = table.get(agent_name)
+    if tiers is None:
+        return []
+    if not isinstance(tiers, list) or not tiers:
+        raise ValueError(f"routes.yaml: {agent_name!r} must map to a non-empty list of tiers")
+    out = []
+    for i, t in enumerate(tiers):
+        if not (isinstance(t, dict) and isinstance(t.get("provider"), str)
+                and isinstance(t.get("model"), str)):
+            raise ValueError(f"routes.yaml: {agent_name!r} tier {i} needs string "
+                             f"'provider' and 'model', got {t!r}")
+        entry = {"provider": t["provider"], "model": t["model"]}
+        # HOSTED-TIERS (2026-09-05): a tier may carry `provider_routing` — the creator-
+        # endpoint pin the hosted row was MEASURED under. Without it a live escalation
+        # would run unpinned, i.e. not the configuration the tier was earned on.
+        # Carried verbatim (same raw read as adapter_for's agent.yaml path); any other
+        # key is a typo and RAISES rather than being silently dropped.
+        extra = {k: v for k, v in t.items() if k not in ("provider", "model")}
+        if set(extra) - {"provider_routing"}:
+            raise ValueError(f"routes.yaml: {agent_name!r} tier {i} carries unknown "
+                             f"key(s) {sorted(set(extra) - {'provider_routing'})}")
+        if "provider_routing" in extra:
+            if not isinstance(extra["provider_routing"], dict):
+                raise ValueError(f"routes.yaml: {agent_name!r} tier {i} provider_routing "
+                                 f"must be a mapping, got {extra['provider_routing']!r}")
+            entry["provider_routing"] = extra["provider_routing"]
+        out.append(entry)
+    return out
 
 
 def load_properties(name: str) -> list:
@@ -260,13 +308,31 @@ def call_model(agent, adapter, model, messages) -> tuple[dict, str, dict]:
     (never guessed). The two char counts are E24: they say where the completion budget
     went (answer vs thinking) without inventing a token split no provider reports."""
     start = time.perf_counter()
-    parsed, raw, meta, retries = call_with_retry(
-        lambda: adapter.generate(
-            messages, model,
-            temperature=agent.get("temperature", 0.0),
-            max_tokens=agent.get("max_tokens", 2048)),
-        extract_json)
+    try:
+        parsed, raw, meta, retries = call_with_retry(
+            lambda: adapter.generate(
+                messages, model,
+                temperature=agent.get("temperature", 0.0),
+                max_tokens=agent.get("max_tokens", 2048)),
+            extract_json)
+    except ParseFailure as exc:
+        # R7 gap: the model answered, unparseably, after every re-ask. The call was
+        # real and paid for, so its metrics are built by the SAME function as a
+        # successful call's and ride on the exception for the boundary that catches
+        # it (_run_tool_loop). Callers that don't catch ParseFailure see exactly the
+        # ValueError they always did.
+        exc.metrics = _call_metrics(exc.meta or {},
+                                    round((time.perf_counter() - start) * 1000, 1),
+                                    exc.attempts - 1)
+        raise
     wall_ms = round((time.perf_counter() - start) * 1000, 1)
+    return parsed, raw, _call_metrics(meta, wall_ms, retries)
+
+
+def _call_metrics(meta: dict, wall_ms: float, retries: int) -> dict:
+    """The per-call metrics dict — ONE builder for the success path and the
+    parse-failure path of call_model, so a broken call is metered by the same
+    rules as a clean one (field set, None-never-zero, D1 tripwires)."""
     finish_reason = meta.get("finish_reason")
     content_chars = meta.get("content_chars")
     metrics = {
@@ -295,7 +361,7 @@ def call_model(agent, adapter, model, messages) -> tuple[dict, str, dict]:
         "unanswered_calls": (None if content_chars is None
                              else int(content_chars == 0)),
     }
-    return parsed, raw, metrics
+    return metrics
 
 
 def run_plain_case(agent, case, adapter, model) -> tuple[dict, dict]:
@@ -406,9 +472,36 @@ def _run_tool_loop(agent, messages: list, expected: dict, adapter, model, tools_
     cache: dict = {}   # call key -> the result of that key's first CLEAN execution
     deduped_calls: list = []  # suppressed repeats, for the A/B's exposure count
     termination: dict | None = None  # D2: set only when a call emitted no answer
+    protocol_break: dict | None = None  # R7: set only when a call was unparseable
     for _step in range(max_steps):
         try:
             parsed, raw, metrics = call_model(agent, adapter, model, messages)
+        except ParseFailure as exc:
+            # R7 GAP (2026-09-04). The model ANSWERED — in prose, markdown, anything
+            # extract_json cannot find an object in — and the re-ask did not help.
+            # This used to escape as a bare ValueError all the way to run_exam's
+            # case boundary, which recorded `got = {"error": ...}` and an EMPTY
+            # detail: every tool call, result and token count gathered so far, and
+            # for a `turns` case every OTHER turn's verdict, was wiped. 3 of the 2B
+            # champion's committed crm records and 12 of the 4B's were invisible that
+            # way (results/, check == "error").
+            #
+            # Handled exactly like a D2 death, one clause up: the loop stops, the
+            # evidence survives, and a structured record says what happened. The
+            # call is METERED (call_model built its metrics before re-raising) and
+            # the raw text is appended as the assistant's turn so a later turn's
+            # history is faithful — the model DID say this. parsed is {} so
+            # answer_present co-fires, the same declared co-firing D2 has; the
+            # verdict is unchanged by construction (a parse failure failed the
+            # case before, and _score_one_turn forces it False now).
+            step_metrics.append(exc.metrics)
+            messages.append({"role": "assistant", "content": exc.raw})
+            protocol_break = {"cause": "unparseable", "step": _step,
+                              "retries": exc.attempts - 1,
+                              "content_chars": len(exc.raw or ""),
+                              "raw_head": (exc.raw or "")[:200]}
+            parsed = {}
+            break
         except TerminationError as exc:
             # TERMINATION-DETECT D2, trajectory half. Handled at the SAME call boundary
             # as plain mode and recorded the same way, then the loop stops: a model
@@ -493,6 +586,9 @@ def _run_tool_loop(agent, messages: list, expected: dict, adapter, model, tools_
         # what it was before this lane (asserted against a literal fixture in
         # sandbox/test_dedupe_tools.py:430, which must stay green unchanged).
         trace_extra = {**trace_extra, "termination": termination}
+    if protocol_break is not None:
+        # Same rule: attached only on the event (sandbox/test_protocol_break.py).
+        trace_extra = {**trace_extra, "protocol_break": protocol_break}
     return parsed, {"tools_called": called, "tool_calls": tool_calls,
                      "tool_results": tool_results, "steps": steps,
                      "metrics": combine_metrics(step_metrics), **trace_extra}, step_metrics
@@ -575,11 +671,76 @@ def _score_one_turn(parsed: dict, trace: dict, expected: dict, input_text: str,
         if turn_index is not None:
             entry["turn"] = turn_index
         failed_checks.insert(0, entry)
+    if "protocol_break" in trace:
+        # R7: the model's output could not be parsed — an output-SHAPE fault, so it
+        # files under the declarable "format" bucket, not "termination" (the model
+        # did answer) and not "quality" (there is no answer to judge). Forced False
+        # for the same reason as the death above; answer_present co-fires, declared.
+        passed = False
+        entry = {"bucket": "format", "check": "unparseable"}
+        if turn_index is not None:
+            entry["turn"] = turn_index
+        failed_checks.insert(0, entry)
     return passed, failures, failed_checks
 
 
+ASSEMBLY_MODES = ("full", "scoped")
+
+
+def _scope_tokens(text: str) -> set:
+    """Word tokens (>= 3 chars, lower-cased) used ONLY to decide which prior tool
+    exchanges a scoped turn keeps. Deliberately NOT a scoring normaliser: it never
+    touches grounding, answer_contains or digit checks (CLAUDE.md gotcha 4 — a
+    selection rule and a presence/absence check must never share a helper)."""
+    return {t.lower() for t in re.findall(r"\w+", text) if len(t) >= 3}
+
+
+def _scoped_context(history: list, turn_text: str) -> tuple[list, int]:
+    """E27 scoped assembly — a per-call PROJECTION of the full history, rule-based
+    and deterministic (no model-judged relevance). Returns (context, dropped):
+    context is a NEW list — system prompt, then the retained prior messages in their
+    original order; `history` itself is never mutated, so the next turn scopes from
+    the complete record again.
+
+    Kept: (i) the immediately previous assistant message, when it is a final answer
+    (not a tool call — a turn that died mid-loop leaves no answer to keep); (ii) every
+    prior tool exchange (assistant tool-call + its user tool_result) whose CALL ARGS
+    share a `_scope_tokens` token with the current turn's text — the args are where
+    the company name lives; matching on the 4k-char payloads instead would retain
+    nearly everything and scope nothing. Dropped: every prior user turn, every other
+    exchange and answer. A referential callback ("the FIRST company we discussed")
+    names nothing, so it keeps nothing but the last answer — that silent scope-drop
+    is the failure mode this arm exists to price, not a bug to paper over."""
+    want = _scope_tokens(turn_text)
+    kept: list = [history[0]]
+    dropped = 0
+    i = 1
+    while i < len(history):
+        msg = history[i]
+        nxt = history[i + 1] if i + 1 < len(history) else None
+        is_exchange = (msg["role"] == "assistant" and nxt is not None
+                       and nxt["role"] == "user"
+                       and nxt["content"].startswith('{"tool_result"'))
+        if is_exchange:
+            args = (extract_json(msg["content"]) or {}).get("args", {})
+            arg_text = " ".join(str(v) for v in args.values()) if isinstance(args, dict) else ""
+            if want & _scope_tokens(arg_text):
+                kept.extend((msg, nxt))
+            else:
+                dropped += 2
+            i += 2
+            continue
+        if i == len(history) - 1 and msg["role"] == "assistant":
+            kept.append(msg)   # (i) the previous turn's final answer
+        else:
+            dropped += 1
+        i += 1
+    return kept, dropped
+
+
 def _run_turns(agent, case, adapter, model, tools_mod,
-              dedupe_tools: bool = False) -> tuple[dict, dict, bool, list, list]:
+              dedupe_tools: bool = False,
+              assembly: str = "full") -> tuple[dict, dict, bool, list, list]:
     """Score a `turns`-bearing case: turn k gets its OWN independent tool loop — a
     fresh call to `_run_tool_loop` every turn, which means a fresh step counter and
     a fresh dedupe `cache` every turn BY CONSTRUCTION (this is the NEW loop-internal
@@ -611,6 +772,8 @@ def _run_turns(agent, case, adapter, model, tools_mod,
     accumulated membership corpus clause 4/grounding need, and a NEW
     `tool_results_this_turn` key carries this turn's own results, correctly
     aligned with `tool_calls`, for clause 1's index-paired lookup."""
+    if assembly not in ASSEMBLY_MODES:
+        raise ValueError(f"assembly must be one of {ASSEMBLY_MODES}, got {assembly!r}")
     messages = [{"role": "system", "content": _trajectory_system_prompt(agent, case)}]
     turn_texts: list = []
     scoring_tool_results: list = []
@@ -624,10 +787,24 @@ def _run_turns(agent, case, adapter, model, tools_mod,
     for k, turn_text in enumerate(case["turns"]):
         expected_k = _turn_expected(case, k, turn_text)
         turn_texts.append(turn_text)
-        messages.append({"role": "user", "content": turn_text})
+        # E27 SCOPED-ASSEMBLY: `messages` stays the FULL history (the record every
+        # turn scopes from); under "scoped" a turn k >= 1 hands the model a fresh
+        # projection of it instead, and whatever the loop appends to that projection
+        # (this turn's user message, exchanges, answer) is spliced back onto the
+        # full history afterwards. Under "full" — and at turn 0 in either mode —
+        # `context is messages`, the very same list object the pre-E27 code mutated,
+        # so the default path is byte-identical by construction, not by test alone.
+        if assembly == "scoped" and k >= 1:
+            context, dropped_k = _scoped_context(messages, turn_text)
+        else:
+            context, dropped_k = messages, 0
+        splice_from = len(context)
+        context.append({"role": "user", "content": turn_text})
         parsed_k, trace_k, step_metrics_k = _run_tool_loop(
-            agent, messages, expected_k, adapter, model, tools_mod,
+            agent, context, expected_k, adapter, model, tools_mod,
             dedupe_tools=dedupe_tools)
+        if context is not messages:
+            messages.extend(context[splice_from:])
         last_parsed = parsed_k
         scoring_tool_results.extend(trace_k["tool_results"])
         # P1 fix (pass 3, criterion 2a): "tool_results" is overwritten with the
@@ -665,6 +842,16 @@ def _run_turns(agent, case, adapter, model, tools_mod,
             all_deduped_calls.extend(trace_k["deduped_calls"])
         if "termination" in trace_k:
             entry["termination"] = trace_k["termination"]
+        if "protocol_break" in trace_k:
+            # R7: the marker sits on the turn that broke; later turns still run.
+            entry["protocol_break"] = trace_k["protocol_break"]
+        if assembly != "full":
+            # Gated like deduped_calls: a scoped results file is self-describing
+            # (every turn says which arm and how much history it lost), while a
+            # "full" run adds NO key anywhere — its records stay byte-identical to
+            # master's (that is the E27 baseline arm, and the committed snapshot).
+            entry["assembly"] = assembly
+            entry["history_msgs_dropped"] = dropped_k
         turn_entries.append(entry)
         all_failures.extend(f"turn {k}: {f}" for f in failures_k)
         all_failed_checks.extend(failed_checks_k)
@@ -690,7 +877,8 @@ def _run_turns(agent, case, adapter, model, tools_mod,
 
 
 def score_case(agent, case, adapter, model, tools_mod,
-              dedupe_tools: bool = False) -> tuple[dict, dict, bool, list, list]:
+              dedupe_tools: bool = False,
+              assembly: str = "full") -> tuple[dict, dict, bool, list, list]:
     """THE single chokepoint (criterion 9): the ONLY function that produces a
     trajectory-mode case's (passed, failures, failed_checks). attempt()'s
     trajectory branch assigns `passed`/`failures` from this function's return and
@@ -713,7 +901,10 @@ def score_case(agent, case, adapter, model, tools_mod,
         passed, failures, failed_checks = _score_one_turn(
             parsed, trace, case["expected"], case["input"], turn_index=None)
         return parsed, trace, passed, failures, failed_checks
-    return _run_turns(agent, case, adapter, model, tools_mod, dedupe_tools=dedupe_tools)
+    # `assembly` is consumed ONLY here: a no-`turns` case has no history to scope,
+    # so run_trajectory_case never sees the knob (E27 criterion 4 by construction).
+    return _run_turns(agent, case, adapter, model, tools_mod, dedupe_tools=dedupe_tools,
+                      assembly=assembly)
 
 
 def _date_parts(tok: str):
@@ -1011,6 +1202,18 @@ def score_trajectory(parsed: dict, trace: dict, expected: dict,
     if any_needles and not any(_needle_matches(n, answer, norm_answer)
                                for n in any_needles):
         failures.append(f"answer missing all of answer_contains_any: {any_needles}")
+    # ABSENCE needle (2026-09-04): a string that must NOT appear — the decoy-detail
+    # leak. Witnessed on the train case decoy-owner-after-deals-devos: the champion
+    # names the right contact (answer_contains 'De Vos' passes, crm_lookup was
+    # called, every number grounded) and attaches OUR REP's email lifted from the
+    # deals_list envelope, 3/3 same-day runs. No existing check could see it.
+    # Deliberately NOT _needle_matches and NOT norm_answer (CLAUDE.md gotcha 4:
+    # presence and absence checks never share a helper) — a plain case-insensitive
+    # substring on the raw answer, no digit normalization, so a needle is exactly
+    # the text it forbids. Mirrors tools_not_called, the tool-side blacklist.
+    for needle in expected.get("answer_not_contains", []):
+        if str(needle).lower() in answer.lower():
+            failures.append(f"answer contains forbidden {needle!r}")
     for tool in expected.get("tools_called", []):
         if tool not in trace["tools_called"]:
             failures.append(f"never called tool {tool!r}")
@@ -1111,6 +1314,7 @@ _TRAJECTORY_FAILURE_CHECKS = (
     ("no final answer emitted", "answer_present"),
     ("answer missing all of answer_contains_any", "answer_contains_any"),
     ("answer missing ", "answer_contains"),
+    ("answer contains forbidden ", "answer_not_contains"),
     ("never called tool ", "tools_called"),
     ("called forbidden tool ", "tools_not_called"),
     ("called disallowed tool ", "tools_allowed"),
@@ -1145,7 +1349,8 @@ def _judge_check_id(failure: str) -> str:
 
 
 def run_exam(agent: dict, exam: dict, provider: str, model: str,
-             timeout: int | None = None, dedupe_tools: bool = False) -> dict:
+             timeout: int | None = None, dedupe_tools: bool = False,
+             assembly: str = "full") -> dict:
     adapter = adapter_for(agent, provider, timeout)
     mode = exam.get("mode", "labels")
     props = load_properties(agent["name"])
@@ -1177,7 +1382,8 @@ def run_exam(agent: dict, exam: dict, provider: str, model: str,
             # into _score_one_turn (called by score_case). This line is the ONLY
             # `passed`/`failures` assignment in this branch.
             parsed, trace, passed, failures, failed_checks = score_case(
-                agent, case, adapter, model, tools_mod, dedupe_tools=dedupe_tools)
+                agent, case, adapter, model, tools_mod, dedupe_tools=dedupe_tools,
+                assembly=assembly)
             # metrics always; deduped_calls only when the guard ran; termination only
             # on a death — which is how the tool evidence gathered before the death
             # reaches the record (D2). For a `turns` case, trace also carries a
@@ -1305,6 +1511,16 @@ def run_exam(agent: dict, exam: dict, provider: str, model: str,
                              if k in term)
             reasons.insert(0, f"termination: {term.get('cause')}"
                               + (f" ({bits})" if bits else ""))
+        # R7: same console-only courtesy for a parse break — a `turns` case carries
+        # the marker on the turn that broke, a single-turn case at the top level.
+        # Nothing here reaches per_case either.
+        pbs = ([(None, detail.get("protocol_break"))] if isinstance(detail, dict) else []) + \
+              [(t.get("turn"), t.get("protocol_break"))
+               for t in ((detail or {}).get("turns") or []) if isinstance(t, dict)]
+        for turn_no, pb in pbs:
+            if pb and not passed:
+                where = f" turn {turn_no}" if turn_no is not None else ""
+                reasons.insert(0, f"unparseable{where}: {pb.get('raw_head', '')[:60]!r}")
         extra = f"  ({'; '.join(reasons)})" if reasons and not passed else ""
         print(f"  [{mark}] {case['id']} ({split}){extra}")
 
@@ -1346,6 +1562,110 @@ def run_exam(agent: dict, exam: dict, provider: str, model: str,
 
 # ---------------------------------------------------------------- commands
 
+def _ollama_native_base_url() -> str:
+    """The OpenAI-compat base_url in PROVIDERS ends '/v1'; the native Ollama API
+    (/api/version, /api/generate, /api/ps) is the same host without it. Reads
+    PROVIDERS from router.py rather than hardcoding the host — out of scope is
+    editing router.py, not reading it."""
+    url = PROVIDERS["ollama"]["base_url"]
+    return url[:-3] if url.endswith("/v1") else url
+
+
+def ollama_version() -> str:
+    """GET /api/version -> the running Ollama server's version string. stdlib
+    urllib only, no shell-out. Raises on any failure (bad JSON, no 'version' key,
+    connection refused, timeout) — never a placeholder version."""
+    url = _ollama_native_base_url() + "/api/version"
+    with urllib.request.urlopen(url, timeout=10) as resp:
+        data = json.loads(resp.read())
+    return data["version"]
+
+
+def ollama_unload(model: str) -> None:
+    """POST /api/generate {model, keep_alive: 0} to unload the model, then GET
+    /api/ps and raise if it is still listed there. stdlib urllib only, no
+    shell-out. A `check` on the load that just took the snapshot would agree
+    trivially — this is what forces a genuinely fresh load before every
+    reproduction run."""
+    base = _ollama_native_base_url()
+    body = json.dumps({"model": model, "keep_alive": 0}).encode()
+    req = urllib.request.Request(
+        base + "/api/generate", data=body,
+        headers={"Content-Type": "application/json"}, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            resp.read()
+    except urllib.error.HTTPError as exc:
+        if exc.code != 404:
+            raise
+        # 404 here means Ollama has never heard of `model` (verified against a
+        # live server: {"error": "model 'x' not found"}) — it cannot possibly be
+        # resident either, so the /api/ps check below (the actual invariant)
+        # still runs and will correctly find it absent. Any OTHER failure
+        # (connection refused, timeout, 5xx) still raises — this is the one
+        # documented exception to "raise on any failure", not a swallow-all.
+        pass
+    with urllib.request.urlopen(base + "/api/ps", timeout=10) as resp:
+        ps = json.loads(resp.read())
+    loaded = [m.get("model") or m.get("name") for m in ps.get("models", [])]
+    if model in loaded:
+        raise RuntimeError(
+            f"ollama_unload({model!r}): still listed in /api/ps after unload "
+            f"(keep_alive=0 request accepted, but the model did not leave "
+            f"residency): {loaded}")
+
+
+def aggregate_loads(results: list[dict]) -> dict:
+    """PURE. Input: N `run_exam` results of the SAME exam (same case-id set, same
+    order). Output: one result-shaped dict — same top-level shape as a single
+    `run_exam` result — whose cases carry the MAJORITY `passed` verdict (N is
+    always odd in the CLI path, so a majority always exists; a caller feeding an
+    even N, as this pure function's own tests do, gets `passed=False` on a tie —
+    documented, not gated on by any command), `stable` (True iff every load
+    agreed), and `failed_checks`/`detail`/etc. taken from the FIRST load that
+    voted with the majority (so a drifting case's printed reason is real
+    evidence, not fabricated). `train_score`/`heldout_score` are recomputed from
+    the majority verdicts over ALL cases — the denominator never moves, so a
+    published 'n/18' stays comparable whether or not this function ran.
+
+    Raises on N < 2 (a single load proves no stability) or on a case-id mismatch
+    between loads (loads must be of the identical exam)."""
+    if len(results) < 2:
+        raise ValueError(f"aggregate_loads needs >= 2 loads, got {len(results)}")
+    id_lists = [[c["id"] for c in r["cases"]] for r in results]
+    if any(ids != id_lists[0] for ids in id_lists[1:]):
+        raise ValueError("aggregate_loads: case-id set/order mismatch between loads")
+    agg_cases = []
+    for i in range(len(id_lists[0])):
+        votes = [r["cases"][i]["passed"] for r in results]
+        n_pass = sum(1 for v in votes if v)
+        n_fail = len(votes) - n_pass
+        majority_passed = n_pass > n_fail   # a tie (only possible on even N) is False
+        stable = n_fail == 0 or n_pass == 0
+        first_majority = next(r["cases"][i] for r in results
+                              if r["cases"][i]["passed"] == majority_passed)
+        case = dict(first_majority)
+        case["passed"] = majority_passed
+        case["stable"] = stable
+        agg_cases.append(case)
+
+    def _score(split: str) -> dict:
+        subset = [c for c in agg_cases if c["split"] == split]
+        passed = sum(1 for c in subset if c["passed"])
+        total = len(subset)
+        return {"passed": passed, "total": total,
+                "score": round(passed / total, 4) if total else None}
+
+    agg = dict(results[0])
+    # metrics_totals belongs to ONE load, not the aggregate of N — writing it here
+    # unmarked would be gotcha 13's shape (a partial total presented as complete).
+    agg.pop("metrics_totals", None)
+    agg["cases"] = agg_cases
+    agg["train"] = _score("train")
+    agg["heldout"] = _score("heldout")
+    return agg
+
+
 def _harness_sha() -> str | None:
     """Pinned harness submodule SHA, read from the git index — works even when the
     submodule isn't checked out locally. Never fabricate a placeholder; null on failure."""
@@ -1383,8 +1703,16 @@ def _snapshot_case(case: dict) -> dict:
     totals), added REGARDLESS of pass/fail, so input-growth-per-turn is computable
     from the committed file alone for every multi-turn case. A case with no
     "turns" key in its detail (all 28 pre-existing cases, always) gets no new key
-    at all — the criterion 6 zero-diff requirement for those records."""
+    at all — the criterion 6 zero-diff requirement for those records.
+
+    SNAPSHOT-REPRODUCIBILITY: the SECOND addition, same pattern as turn_metrics —
+    conditional on the input case dict carrying a "stable" key, so every
+    pre-lane caller (including test_observability's fixtures, which never set
+    it) gets byte-identical output. `aggregate_loads` is the only producer of a
+    case dict with "stable" in it; that is what makes the key appear here."""
     entry = {"id": case["id"], "split": case["split"], "passed": case["passed"]}
+    if "stable" in case:
+        entry["stable"] = case["stable"]
     if not case["passed"]:
         deduped: list = []
         for failed in case.get("failed_checks", []):
@@ -1401,7 +1729,8 @@ def _snapshot_case(case: dict) -> dict:
     return entry
 
 
-def snapshot_payload(agent: dict, exam: dict, provider: str, model: str, result: dict) -> dict:
+def snapshot_payload(agent: dict, exam: dict, provider: str, model: str, result: dict,
+                     *, loads: int | None = None, runtime: dict | None = None) -> dict:
     """Evidence bundle written by --snapshot. Additive over the original
     {provider, model, train_score, heldout_score} — cmd_check only ever reads those
     four keys, so old snapshots without this bundle remain valid.
@@ -1409,8 +1738,16 @@ def snapshot_payload(agent: dict, exam: dict, provider: str, model: str, result:
     "cases" (D6) answers 'which check failed on which case' WITHOUT a rerun —
     the question that blocked diagnosis twice on 2026-07-22 (reply-draft
     0.25 -> 0.5, conference-heldout-en). See _snapshot_case for what it will
-    never contain."""
-    return {
+    never contain.
+
+    SNAPSHOT-REPRODUCIBILITY: `loads`/`runtime` are keyword-only and OMITTED
+    from the payload when not passed (None), rather than always-present with a
+    null value — test_observability.py's `test_d6_snapshot_answers_...` asserts
+    an EXACT top-level key set via `set(snap) == {...}` on a direct call that
+    passes neither, and that test is out of this lane's declared file set. Only
+    `cmd_run`/`cmd_run_all --snapshot` (via `take_snapshot_loads`) ever pass
+    them; every legacy call site keeps its exact old output."""
+    payload = {
         "provider": provider, "model": model,
         "train_score": result["train"]["score"],
         "heldout_score": result["heldout"]["score"],
@@ -1421,6 +1758,11 @@ def snapshot_payload(agent: dict, exam: dict, provider: str, model: str, result:
         "harness_sha": _harness_sha(),
         "cases": [_snapshot_case(c) for c in result["cases"]],
     }
+    if loads is not None:
+        payload["loads"] = loads
+    if runtime is not None:
+        payload["runtime"] = runtime
+    return payload
 
 
 def refuse_snapshot_on_outage(result: dict) -> None:
@@ -1453,13 +1795,23 @@ def refuse_snapshot_on_outage(result: dict) -> None:
             f"trivially. Fix the backend and rerun; the results file was still written.")
 
 
-def save_result(result: dict) -> Path:
-    RESULTS_DIR.mkdir(exist_ok=True)
+def save_result(result: dict, *, subdir: str | None = None,
+                suffix: str | None = None) -> Path:
+    d = RESULTS_DIR if subdir is None else RESULTS_DIR / subdir
+    d.mkdir(parents=True, exist_ok=True)
     safe_model = result["model"].replace("/", "_").replace(":", "_")
     safe_provider = result["provider"].replace("/", "_").replace(":", "_")
     # Provider in the filename: a --provider stub run must never overwrite the real
     # scoreboard row for the same model name (it silently clobbered one 2026-07-21).
-    path = RESULTS_DIR / f"{result['agent']}__{safe_provider}__{safe_model}.json"
+    name = f"{result['agent']}__{safe_provider}__{safe_model}"
+    if suffix:
+        # SNAPSHOT-REPRODUCIBILITY: a per-load result (results/snapshot_loads/,
+        # __loadK). The SUBDIR is load-bearing, not cosmetic — taxonomy.py and
+        # policy.py glob top-level results/*.json ONLY (same convention probe.py
+        # already uses for results/probe/); N per-load files sitting at the top
+        # level would N-fold every case's weight in their rollups.
+        name += f"__{suffix}"
+    path = d / f"{name}.json"
     path.write_text(json.dumps(result, indent=2, ensure_ascii=False))
     return path
 
@@ -1472,6 +1824,59 @@ def _summary_line(result: dict) -> str:
     return line
 
 
+def _validate_loads(n: int) -> None:
+    """Refused BEFORE any inference or native-API call. Odd and >= 3 (criterion
+    v3, halt 2): odd so a majority always exists on every case with no tie
+    convention needed; >= 3 so a single disagreement can't already be a 2-of-3
+    minority-of-one mistaken for consensus. Called unconditionally by cmd_run /
+    cmd_run_all (not only under --snapshot) — the default (3) always passes, so
+    this cannot break the non-snapshot path, and it removes any question of
+    whether `run <agent> --loads 2` without --snapshot should be let through."""
+    if n < 3 or n % 2 == 0:
+        raise SystemExit(
+            f"error: --loads must be an odd integer >= 3 so a majority vote is "
+            f"always defined (got {n})")
+
+
+def take_snapshot_loads(agent: dict, exam: dict, provider: str, model: str, loads: int,
+                        *, timeout: int | None = None, dedupe_tools: bool = False,
+                        assembly: str = "full") -> tuple[dict, dict]:
+    """The ONE mechanism `cmd_run --snapshot` and `cmd_run_all --snapshot` both
+    go through (criterion v3's closing sentence on clause 2). Runs `loads` full
+    passes of the exam — unloading the model via the native API before each pass
+    when `provider == "ollama"`; for any other provider, no unload runs and the
+    console says these are N samples, not N model loads (the hosted-provider
+    decision in the brief). Every load's outage guard runs before the next load
+    starts (refuse_snapshot_on_outage — D4 hardening, unchanged semantics), and
+    every load is saved to results/snapshot_loads/ with a __loadK suffix before
+    the aggregate is computed, so a crash mid-run still leaves the completed
+    loads on disk. Returns (aggregate_result, runtime) — runtime is
+    {"name": provider, "version": ollama_version() or None} per criterion v3."""
+    is_ollama = provider == "ollama"
+    runtime = {"name": provider, "version": ollama_version() if is_ollama else None}
+    load_results = []
+    for k in range(1, loads + 1):
+        if is_ollama:
+            ollama_unload(model)
+        else:
+            print(f"  load {k}/{loads}: provider {provider!r} is hosted — this is "
+                  f"sample {k} of {loads}, not a model reload")
+        result = run_exam(agent, exam, provider, model, timeout=timeout,
+                          dedupe_tools=dedupe_tools, assembly=assembly)
+        # Save BEFORE the outage guard, same order cmd_run always used (D4's own
+        # docstring promises "the results file was still written" on refusal) —
+        # an operator diagnosing an outage needs the evidence, not just the cause.
+        save_result(result, subdir="snapshot_loads", suffix=f"load{k}")
+        refuse_snapshot_on_outage(result)   # D4 hardening, per load
+        print(f"  load {k}/{loads}: {_summary_line(result)}")
+        load_results.append(result)
+    aggregate = aggregate_loads(load_results)
+    # The aggregate is also the "current result" other read-only tools (taxonomy,
+    # route) glob at the top level — unsuffixed, same convention as a plain run.
+    save_result(aggregate)
+    return aggregate, runtime
+
+
 def cmd_run(args) -> int:
     agent = load_agent(args.agent)
     provider = args.provider or agent["provider"]
@@ -1480,39 +1885,164 @@ def cmd_run(args) -> int:
     print(f"exam: {args.agent}  mode={exam.get('mode', 'labels')}  "
           f"provider={provider}  model={model}")
     print_not_verified(exam)
-    result = run_exam(agent, exam, provider, model, timeout=args.timeout,
-                      dedupe_tools=args.dedupe_tools)
-    path = save_result(result)
-    print(f"{_summary_line(result)}  -> {path.relative_to(ROOT)}")
+    _validate_loads(args.loads)
+    if args.snapshot and args.assembly != "full":
+        # The committed snapshot IS the "full" arm (and what `check` reproduces);
+        # a scoped snapshot would silently redefine the gate. Refused up front,
+        # before any inference is spent.
+        raise SystemExit(f"--snapshot requires --assembly full (got {args.assembly!r}): "
+                         f"the committed snapshot is always a full-history run")
     if args.snapshot:
-        refuse_snapshot_on_outage(result)   # D4 hardening — see that function
+        aggregate, runtime = take_snapshot_loads(
+            agent, exam, provider, model, args.loads, timeout=args.timeout,
+            dedupe_tools=args.dedupe_tools, assembly=args.assembly)
+        print(f"{_summary_line(aggregate)}  (aggregate of {args.loads} loads)")
+        unstable = [c["id"] for c in aggregate["cases"] if not c.get("stable", True)]
+        print(f"unstable {len(unstable)}/{len(aggregate['cases'])}"
+              + (f": {', '.join(unstable)}" if unstable else ""))
         snap_path = ROOT / "evals" / args.agent / "snapshot.json"
         snap_path.write_text(json.dumps(
-            snapshot_payload(agent, exam, provider, model, result), indent=2))
+            snapshot_payload(agent, exam, provider, model, aggregate,
+                             loads=args.loads, runtime=runtime), indent=2))
         print(f"snapshot written -> {snap_path.relative_to(ROOT)}")
+        return 0
+    result = run_exam(agent, exam, provider, model, timeout=args.timeout,
+                      dedupe_tools=args.dedupe_tools, assembly=args.assembly)
+    path = save_result(result)
+    print(f"{_summary_line(result)}  -> {path.relative_to(ROOT)}")
     return 0
 
 
-def cmd_check(args) -> int:
-    snap_path = ROOT / "evals" / args.agent / "snapshot.json"
+def _load_snapshot(agent_name: str) -> dict:
+    snap_path = ROOT / "evals" / agent_name / "snapshot.json"
     if not snap_path.exists():
-        sys.exit(f"error: no snapshot for {args.agent!r}; run with --snapshot first")
-    snap = json.loads(snap_path.read_text())
+        sys.exit(f"error: no snapshot for {agent_name!r}; run with --snapshot first")
+    return json.loads(snap_path.read_text())
+
+
+def snapshot_preflight(snap: dict, exam: dict, version_fn=None) -> str | None:
+    """PURE-ish (one native-API call, ZERO model inference). The three
+    pre-inference refusals shared by `cmd_check` and `cmd_check_all`: no
+    `runtime` block; live ollama version differs from the snapshot's (ollama
+    snapshots only — a hosted snapshot's runtime.version is always None per
+    criterion v3, and would be refused forever if compared unconditionally,
+    which is exactly halt 2's finding); the exam's case-id set differs from the
+    snapshot's. Returns the refusal cause (RUNTIME:/VERSION:/CASES: prefixed) or
+    None when the snapshot is fit to check against.
+
+    `version_fn` defaults to `ollama_version` and is called ONLY when
+    `snap["provider"] == "ollama"` — injected so a test can assert a
+    non-ollama snapshot never touches the network at all (pass a version_fn
+    that raises if invoked)."""
+    if version_fn is None:
+        version_fn = ollama_version
+    if "runtime" not in snap:
+        return "RUNTIME: snapshot has no runtime block; re-snapshot"
+    if snap.get("provider") == "ollama":
+        live = version_fn()
+        want = snap["runtime"].get("version")
+        if live != want:
+            return (f"VERSION: live ollama {live!r} != snapshot runtime.version "
+                    f"{want!r}; re-snapshot")
+    snap_ids = {c["id"] for c in snap["cases"]}
+    exam_ids = {c["id"] for c in exam["cases"]}
+    if snap_ids != exam_ids:
+        return (f"CASES: exam case-id set differs from snapshot (snapshot-only: "
+                f"{sorted(snap_ids - exam_ids)}, exam-only: "
+                f"{sorted(exam_ids - snap_ids)}); re-snapshot")
+    return None
+
+
+def compare_to_snapshot(snap: dict, result: dict, tolerance: float = 0.0) -> dict:
+    """PURE. Shared by `cmd_check` and `cmd_check_all` (criterion v3 clause 3):
+    the ONE comparison both commands gate exit 1 on. `result` is a single fresh
+    run (NOT an aggregate — `check` reproduces the snapshot on one load, per the
+    brief's rule).
+
+    Returns {"drift": [(id, snap_passed, now_passed, now_failed_checks), ...]
+    over STABLE snapshot cases only, in either direction (a stable PASS->FAIL is
+    exactly as much a non-reproduction as a stable FAIL->PASS — no directional
+    bias, unlike a build that only checks for regressions), "exempt": [(id,
+    now_passed), ...] for UNSTABLE snapshot cases, "regression": the existing
+    aggregate heldout-tolerance check UNCHANGED in its tolerance semantics,
+    "ok": not drift and not regression, plus the pieces the caller needs to
+    print a message without recomputing them: "tolerance", "snap_heldout",
+    "now_heldout", "n_stable", "n_unstable"}.
+
+    Raises on a case-id set mismatch (snapshot_preflight already refuses this
+    before `result` exists on the real cmd_check/cmd_check_all path; this stays
+    defensive since the function is exported and reusable)."""
+    snap_by_id = {c["id"]: c for c in snap["cases"]}
+    result_by_id = {c["id"]: c for c in result["cases"]}
+    if set(snap_by_id) != set(result_by_id):
+        raise ValueError(
+            f"compare_to_snapshot: case-id set mismatch (snapshot-only: "
+            f"{sorted(set(snap_by_id) - set(result_by_id))}, result-only: "
+            f"{sorted(set(result_by_id) - set(snap_by_id))})")
+    drift: list = []
+    exempt: list = []
+    for cid, scase in snap_by_id.items():
+        rcase = result_by_id[cid]
+        if not scase.get("stable", True):
+            exempt.append((cid, rcase["passed"]))
+            continue
+        if scase["passed"] != rcase["passed"]:
+            drift.append((cid, scase["passed"], rcase["passed"],
+                         rcase.get("failed_checks", [])))
+    snap_h = snap["heldout_score"]
+    now_h = result["heldout"]["score"] or 0.0
+    regression = (snap_h - now_h) > tolerance
+    return {
+        "drift": drift, "exempt": exempt, "regression": regression,
+        "ok": not drift and not regression,
+        "tolerance": tolerance, "snap_heldout": snap_h, "now_heldout": now_h,
+        "n_stable": len(snap_by_id) - len(exempt), "n_unstable": len(exempt),
+    }
+
+
+def _print_verdict(verdict: dict) -> bool:
+    """Per-case table (drift rows first, then exempt), then the aggregate line —
+    states which of (a) drift / (b) regression fired when either did. Returns
+    verdict['ok'] for the caller's exit code."""
+    for cid, was, now, failures in verdict["drift"]:
+        checks = "; ".join(f.get("check", "?") for f in failures)
+        print(f"  DRIFT  {cid}: snapshot={was} now={now}"
+              + (f"  ({checks})" if checks else ""))
+    for cid, now in verdict["exempt"]:
+        print(f"  exempt {cid}: unstable in snapshot, now={now}")
+    if verdict["ok"]:
+        print(f"ok: heldout {verdict['now_heldout']} vs snapshot "
+              f"{verdict['snap_heldout']} ({verdict['n_stable']} stable, "
+              f"{verdict['n_unstable']} unstable exempt)")
+        return True
+    fired = []
+    if verdict["drift"]:
+        fired.append("DRIFT")
+    if verdict["regression"]:
+        fired.append("REGRESSION")
+        print(f"REGRESSION: heldout {verdict['now_heldout']} < snapshot "
+              f"{verdict['snap_heldout']} (tolerance {verdict['tolerance']})")
+    print(f"FAILED: {' + '.join(fired)}")
+    return False
+
+
+def cmd_check(args) -> int:
+    snap = _load_snapshot(args.agent)
     agent = load_agent(args.agent)
     exam = load_exam(args.agent)
+    cause = snapshot_preflight(snap, exam)
+    if cause:
+        sys.exit(f"error: {cause}")
     print(f"exam: {args.agent}  mode={exam.get('mode', 'labels')}  "
           f"provider={snap['provider']}  model={snap['model']}")
     print_not_verified(exam)
     print(f"check: {args.agent} against snapshot ({snap['model']})")
+    if snap["provider"] == "ollama":
+        ollama_unload(snap["model"])
     result = run_exam(agent, exam, snap["provider"], snap["model"],
                       dedupe_tools=args.dedupe_tools)
-    drift = snap["heldout_score"] - (result["heldout"]["score"] or 0.0)
-    if drift > args.tolerance:
-        print(f"REGRESSION: heldout {result['heldout']['score']} < snapshot "
-              f"{snap['heldout_score']} (tolerance {args.tolerance})")
-        return 1
-    print(f"ok: heldout {result['heldout']['score']} vs snapshot {snap['heldout_score']}")
-    return 0
+    verdict = compare_to_snapshot(snap, result, tolerance=args.tolerance)
+    return 0 if _print_verdict(verdict) else 1
 
 
 def _diff_metrics_cols(result: dict) -> tuple[str, str]:
@@ -1704,7 +2234,7 @@ def cmd_diff(args) -> int:
         model = model.strip()
         print(f"\n--- {model} ---")
         result = run_exam(agent, exam, provider, model, timeout=args.timeout,
-                          dedupe_tools=args.dedupe_tools)
+                          dedupe_tools=args.dedupe_tools, assembly=args.assembly)
         save_result(result)
         rows.append(result)
     champion = agent["model"]
@@ -1718,13 +2248,16 @@ def cmd_diff(args) -> int:
 
     # Columns widened to fit "cost-unknown": a metrics block that is missing or
     # incomplete now says so in the table instead of printing a partial total.
-    print(f"\n{'model':<28} {'train':>7} {'heldout':>9} {'tok/case':>13} "
+    # A3: the heldout 95% Wilson interval sits beside the fraction it belongs to —
+    # on n=9..18 it is 0.3-0.4 wide, which is the honest width behind every "tie".
+    print(f"\n{'model':<28} {'train':>7} {'heldout':>9} {'95% CI':>11} {'tok/case':>13} "
           f"{'ms/case':>13} {'think%':>7}")
     for r in rows:
         tag = "  <- current" if r["model"] == champion else ""
         tok, ms = _diff_metrics_cols(r)
+        lo, hi = stats.wilson(r['heldout']['passed'], r['heldout']['total'])
         print(f"{r['model']:<28} {r['train']['passed']}/{r['train']['total']:>4}"
-              f" {r['heldout']['passed']}/{r['heldout']['total']:>6}"
+              f" {r['heldout']['passed']}/{r['heldout']['total']:>6} {lo:.2f}-{hi:.2f}"
               f" {tok:>13} {ms:>13} {_think_share_col(r):>7}{tag}")
     if champ_snap:
         # Snapshots predate the metrics totals block (they capture scores only) —
@@ -1743,25 +2276,30 @@ def _all_agents() -> list[str]:
 
 
 def cmd_run_all(args) -> int:
-    """Run every agent's exam with its champion config."""
+    """Run every agent's exam with its champion config. --snapshot goes through
+    the SAME `take_snapshot_loads` mechanism as `cmd_run --snapshot` (criterion
+    v3's closing sentence on clause 2) — one implementation, not two."""
+    _validate_loads(args.loads)
     failed = []
     for name in _all_agents():
         agent = load_agent(name)
         exam = load_exam(name)
         print(f"\n=== {name} ({exam.get('mode', 'labels')}) — "
               f"{agent['provider']}/{agent['model']} ===")
-        result = run_exam(agent, exam, agent["provider"], agent["model"])
-        save_result(result)
-        print(_summary_line(result))
         if args.snapshot:
-            # Same guard as cmd_run, and MORE load-bearing here: run-all is the
-            # command most likely to be running unattended when a backend goes down,
-            # and it would otherwise rewrite every agent's snapshot to a floor.
-            refuse_snapshot_on_outage(result)
+            aggregate, runtime = take_snapshot_loads(
+                agent, exam, agent["provider"], agent["model"], args.loads)
+            print(f"{_summary_line(aggregate)}  (aggregate of {args.loads} loads)")
             snap_path = ROOT / "evals" / name / "snapshot.json"
             snap_path.write_text(json.dumps(
-                snapshot_payload(agent, exam, agent["provider"], agent["model"], result),
+                snapshot_payload(agent, exam, agent["provider"], agent["model"],
+                                 aggregate, loads=args.loads, runtime=runtime),
                 indent=2))
+            result = aggregate
+        else:
+            result = run_exam(agent, exam, agent["provider"], agent["model"])
+            save_result(result)
+            print(_summary_line(result))
         if (result["heldout"]["score"] or 0) < 1.0:
             failed.append(name)
     print(f"\n{len(_all_agents()) - len(failed)}/{len(_all_agents())} agents at 100% heldout"
@@ -1770,8 +2308,11 @@ def cmd_run_all(args) -> int:
 
 
 def cmd_check_all(args) -> int:
-    """Regression gate over every snapshotted agent — exit 1 if any drifted."""
-    regressions = []
+    """Regression gate over every snapshotted agent — exit 1 if any exam was
+    REFUSED (pre-inference), drifted, or regressed. Same `snapshot_preflight` /
+    `compare_to_snapshot` pair `cmd_check` uses (criterion v3 clause 3); the
+    pre-existing "skip: no snapshot" branch is unchanged and stays uncounted."""
+    problems = []
     for name in _all_agents():
         snap_path = ROOT / "evals" / name / "snapshot.json"
         if not snap_path.exists():
@@ -1779,20 +2320,82 @@ def cmd_check_all(args) -> int:
             continue
         snap = json.loads(snap_path.read_text())
         agent = load_agent(name)
+        exam = load_exam(name)
         print(f"\n=== check {name} vs snapshot ({snap['model']}) ===")
-        result = run_exam(agent, load_exam(name), snap["provider"], snap["model"])
-        drift = snap["heldout_score"] - (result["heldout"]["score"] or 0.0)
-        if drift > args.tolerance:
-            print(f"REGRESSION: heldout {result['heldout']['score']} "
-                  f"< snapshot {snap['heldout_score']}")
-            regressions.append(name)
-        else:
-            print(f"ok: heldout {result['heldout']['score']}")
-    if regressions:
-        print(f"\nFAILED: regressions in {', '.join(regressions)}")
+        cause = snapshot_preflight(snap, exam)
+        if cause:
+            print(f"REFUSED: {cause}")
+            problems.append(name)
+            continue
+        if snap["provider"] == "ollama":
+            ollama_unload(snap["model"])
+        result = run_exam(agent, exam, snap["provider"], snap["model"])
+        verdict = compare_to_snapshot(snap, result, tolerance=args.tolerance)
+        if not _print_verdict(verdict):
+            problems.append(name)
+    if problems:
+        print(f"\nFAILED: {', '.join(problems)}")
         return 1
     print("\nall snapshots hold")
     return 0
+
+
+def _live_attempt(agent: dict, agent_name: str, exam: dict, provider: str, model: str,
+                  text: str, pin: dict | None = None) -> tuple[dict, dict | None]:
+    """ONE live run on ONE (provider, model): the body live_run_and_log used to inline.
+    Returns (record, termination) — record is the {output, trace|metrics} slice, and
+    termination is the death record or None. Behaviour per mode is unchanged from the
+    pre-lane code (see live_run_and_log's docstring for the D2 rationale)."""
+    # A tier's own provider_routing (hosted pin) overrides the agent's for this attempt
+    # only — the agent dict is not mutated, so the next tier starts clean.
+    adapter = adapter_for({**agent, **({"provider_routing": pin} if pin is not None else {})},
+                          provider)
+    case = {"input": text, "expected": {"max_steps": 6}}
+    if exam.get("mode") == "trajectory":
+        tools_mod = load_tools(agent_name, for_exam=False)
+        parsed, trace = run_trajectory_case(agent, case, adapter, model, tools_mod)
+        return {"output": parsed, "trace": trace}, trace.get("termination")
+    try:
+        parsed, metrics = run_plain_case(agent, case, adapter, model)
+    except TerminationError as exc:
+        return {"output": {}, "metrics": None}, {"cause": "no_answer", **exc.details}
+    return {"output": parsed, "metrics": metrics}, None
+
+
+def live_output_checks(agent_name: str, exam: dict, output: dict, trace: dict | None,
+                       text: str) -> list[str]:
+    """LIVE-ROUTING A2b: the EXPECTATION-FREE subset of the exam's own checks, run on a
+    live output so a wrong answer (not just a dead one) can trigger escalation. No new
+    checker is defined here — every line reuses the single existing implementation:
+      trajectory  -> score_trajectory with an EMPTY expected block, which leaves
+                     exactly: answer present, step budget (live's 6), every number
+                     grounded in the tool results or the input, no fabricated name.
+      properties  -> evals/<agent>/properties.py check_* (input, output), which never
+                     take an expected block at all.
+      labels/fields -> structural only for the label half: the output must carry the
+                     keys the exam scores —
+                     read off the committed exam (the key set of its first case's
+                     expected block: `label`, `category`+`recurring`, `agent`), never
+                     a hand-kept map (A4, 2026-09-04: the map said `label` for every
+                     labels exam and would have flagged every task-intake answer).
+                     Vocabulary lives in the prompt, not in any committed schema, so
+                     it is NOT checked here (declared gap, not a silent pass). PLUS
+                     the exam's properties.py when it has one — run_exam runs
+                     properties for every mode, so a labels exam that grades a second
+                     half through properties (task-intake's hand-over) is graded the
+                     same way live. An exam without properties.py adds nothing.
+    Returns the failure strings (empty = passed)."""
+    mode = exam.get("mode", "labels")
+    if mode == "trajectory":
+        _, failures = score_trajectory(output, trace, {"max_steps": 6}, text)
+        return list(failures)
+    prop_failures = [f"{name}: {msg}" for name, fn in load_properties(agent_name)
+                     for ok, msg in [fn(text, output)] if not ok]
+    if mode == "properties":
+        return prop_failures
+    cases = exam.get("cases") or []
+    keys = tuple((cases[0].get("expected") or {}).keys()) if cases else ()
+    return [f"output missing {key!r}" for key in keys if key not in output] + prop_failures
 
 
 def live_run_and_log(agent_name: str, text: str, provider: str | None = None,
@@ -1828,27 +2431,56 @@ def live_run_and_log(agent_name: str, text: str, provider: str | None = None,
     if not text.strip():
         raise ValueError("no input: refusing to run an agent on empty text")
     agent = load_agent(agent_name)
-    provider = provider or agent["provider"]
-    model = model or agent["model"]
-    adapter = adapter_for(agent, provider)
     exam = load_exam(agent_name)
-    case = {"input": text, "expected": {"max_steps": 6}}
-    termination: dict | None = None
-    if exam.get("mode") == "trajectory":
-        tools_mod = load_tools(agent_name, for_exam=False)
-        parsed, trace = run_trajectory_case(agent, case, adapter, model, tools_mod)
-        record = {"output": parsed, "trace": trace}  # trace already carries "metrics"
-        termination = trace.get("termination")
+    # LIVE-ROUTING (A1/A2/A2b). An explicit provider/model is a SINGLE-TIER override:
+    # the table is never consulted, and a death on it raises without any fallback
+    # (evals/test_live_routing.py test_2b). Otherwise walk routes.yaml's tiers (tier 0
+    # == the champion, test-pinned) and escalate on a DEAD run or an output that FAILS
+    # the expectation-free checks. Schema, stated precisely (the correctness refuter
+    # caught a wider claim here): a HEALTHY answer and a DEAD run log exactly the
+    # pre-lane line; `attempts`/`tier` appear only when a second tier actually ran;
+    # `checks_failed` appears on EVERY path — single-tier included — whenever the
+    # final answer fails the checks, and cmd_live then exits 2. That last part is a
+    # deliberate behaviour change: a live answer with a fabricated number used to
+    # exit 0, which is the silent pass this repo bans. Exceptions other than
+    # TerminationError (a tools.py error, an unknown provider or an unpulled model on
+    # any tier, a parse ValueError in PLAIN mode) PROPAGATE immediately — no
+    # escalation, no log line — exactly as before the lane; loud, but a multi-tier
+    # run forfeits its fallback on them (declared, not handled here). R7 (2026-09-04)
+    # closed one of those for TRAJECTORY mode: a tier that answers in prose now
+    # returns parsed={} with a protocol_break record, fails answer_present in
+    # live_output_checks, and escalates like any other failed answer.
+    if provider or model:
+        tiers = [{"provider": provider or agent["provider"], "model": model or agent["model"]}]
     else:
-        try:
-            parsed, metrics = run_plain_case(agent, case, adapter, model)
-        except TerminationError as exc:
-            termination = {"cause": "no_answer", **exc.details}
-            record = {"output": {}, "metrics": None}
-        else:
-            record = {"output": parsed, "metrics": metrics}
+        tiers = load_routes(agent_name) or [{"provider": agent["provider"], "model": agent["model"]}]
+    attempts: list = []
+    for k, tier in enumerate(tiers):
+        record, termination = _live_attempt(agent, agent_name, exam, tier["provider"],
+                                            tier["model"], text,
+                                            pin=tier.get("provider_routing"))
+        checks_failed = ([] if termination is not None else
+                         live_output_checks(agent_name, exam, record["output"],
+                                            record.get("trace"), text))
+        protocol_break = (record.get("trace") or {}).get("protocol_break")
+        attempt = {"tier": k, "provider": tier["provider"], "model": tier["model"],
+                   **({"termination": termination} if termination is not None else {}),
+                   # R7: say WHY a tier's answer was empty when it wrote prose — the
+                   # reader of a flagged/escalated line otherwise sees only
+                   # "no final answer emitted" for a model that answered at length.
+                   **({"protocol_break": protocol_break} if protocol_break else {}),
+                   **({"checks_failed": checks_failed} if checks_failed else {})}
+        attempts.append(attempt)
+        if termination is None and not checks_failed:
+            break            # healthy answer: stop here, never escalate further
+        # dead or failed checks: try the next tier, if there is one
+    provider, model = tier["provider"], tier["model"]
+    if checks_failed:
+        record = {**record, "checks_failed": checks_failed}
     if termination is not None:
         record = {**record, "termination": termination}
+    if len(attempts) > 1:
+        record = {**record, "tier": k, "attempts": attempts}
     entry = {"ts": datetime.now().isoformat(timespec="seconds"),
              "model": model, "provider": provider, "input": text,
              **(extra or {}), **record}
@@ -1888,6 +2520,68 @@ def cmd_live(args) -> int:
         sys.exit(f"error: {args.agent} emitted no answer — {exc.details}. "
                  f"The run was still logged to results/live/{args.agent}.jsonl.")
     print(json.dumps(record, indent=2, ensure_ascii=False))
+    if record.get("checks_failed"):
+        # LIVE-ROUTING A2b: every tier answered but the LAST answer still fails the
+        # expectation-free checks. The output is printed (it exists, and the operator
+        # may want it) but the exit is non-zero — a flagged answer must never look
+        # like a clean one to a caller reading only the exit code.
+        print(f"error: {args.agent}'s final answer failed live output checks: "
+              f"{record['checks_failed']} (tier {record.get('tier', 0)}; logged to "
+              f"results/live/{args.agent}.jsonl)", file=sys.stderr)
+        return 2
+    return 0
+
+
+INTAKE_AGENT = "task-intake"
+EXIT_FLAGGED = 2        # an answer that failed its live checks (never reported clean)
+EXIT_NO_SPECIALIST = 3  # the dispatcher abstained ('none'): nothing was run
+
+
+def cmd_intake(args) -> int:
+    """A4: the request pipeline. ONE free-form request -> the dispatcher (`task-intake`,
+    through routes.yaml like any live run) names a specialist and hands over its
+    verbatim input -> that specialist runs live, through ITS tiers -> its record is
+    printed. Two logged lines (results/live/task-intake.jsonl and
+    results/live/<specialist>.jsonl, the second carrying `via`/`request` provenance),
+    one exit code:
+      0  the specialist answered and passed its live checks
+      2  a FLAGGED answer — the dispatcher's hand-over failed its checks (never
+         dispatched: a paraphrased or invented hand-over must not reach a specialist),
+         or the specialist's final answer failed its own checks
+      3  the dispatcher said 'none' — no specialist fits; the request is printed back
+         and nothing else runs (a declared abstention is not an error)
+      1  a dead run on every tier (TerminationError -> sys.exit sentence, as `live`)
+    Nothing here is a new checker or a new router: both stages ARE live_run_and_log."""
+    text = args.input if args.input else sys.stdin.read()
+    if not text.strip():
+        sys.exit("error: no input (use --input or pipe text on stdin)")
+    try:
+        _entry, verdict = live_run_and_log(INTAKE_AGENT, text)
+    except TerminationError as exc:
+        sys.exit(f"error: {INTAKE_AGENT} emitted no answer — {exc.details}. Logged to "
+                 f"results/live/{INTAKE_AGENT}.jsonl.")
+    out = verdict.get("output") or {}
+    if verdict.get("checks_failed"):
+        print(json.dumps(verdict, indent=2, ensure_ascii=False))
+        print(f"error: {INTAKE_AGENT}'s hand-over failed live output checks: "
+              f"{verdict['checks_failed']} — not dispatched", file=sys.stderr)
+        return EXIT_FLAGGED
+    agent, handed = out.get("agent"), out.get("input", "")
+    if agent == "none":
+        print(json.dumps({"agent": "none", "request": text}, indent=2, ensure_ascii=False))
+        print(f"{INTAKE_AGENT}: no specialist fits this request", file=sys.stderr)
+        return EXIT_NO_SPECIALIST
+    try:
+        _entry, record = live_run_and_log(agent, handed,
+                                          extra={"via": INTAKE_AGENT, "request": text})
+    except TerminationError as exc:
+        sys.exit(f"error: {agent} emitted no answer — {exc.details}. Logged to "
+                 f"results/live/{agent}.jsonl.")
+    print(json.dumps({"agent": agent, "input": handed, **record}, indent=2, ensure_ascii=False))
+    if record.get("checks_failed"):
+        print(f"error: {agent}'s final answer failed live output checks: "
+              f"{record['checks_failed']} (via {INTAKE_AGENT})", file=sys.stderr)
+        return EXIT_FLAGGED
     return 0
 
 
@@ -1954,6 +2648,21 @@ def cmd_promote(args) -> int:
     return 0
 
 
+def cmd_worker(args) -> int:
+    """Lane 0: thin passthrough to sandbox/worker.py — `run` (fetch+triage a real
+    inbox, read-only) and `digest` (render the daily needs-you markdown) live there
+    with their own argparse; this adapter parses nothing itself.
+
+    The `import worker` MUST be lazy (inside this function body), never hoisted to
+    this file's top-level imports: `worker.py` imports `shadow_gmail`, and
+    `shadow_gmail.py` does `import runner` at ITS top level — a top-level
+    `import worker` here would close that into a circular import
+    (runner -> worker -> shadow_gmail -> runner), reproduced when tried.
+    """
+    import worker
+    return worker.main(args.args)
+
+
 def cmd_taxonomy(args) -> int:
     """E9: roll recorded failures up into model x category counts.
 
@@ -1993,6 +2702,18 @@ def cmd_list(_args) -> int:
         if exam_path.exists():
             exam = json.loads(exam_path.read_text())
             status = f"exam ok, mode={exam.get('mode', 'labels')}"
+            # SNAPSHOT-REPRODUCIBILITY: read straight from the per-case field, not
+            # recomputed — "-" when the snapshot predates it, so a stale snapshot
+            # (pre-this-lane, or never re-taken) is visible here rather than
+            # silently reading as "0 unstable".
+            snap_path = ROOT / "evals" / cfg["name"] / "snapshot.json"
+            if snap_path.exists():
+                cases = json.loads(snap_path.read_text()).get("cases", [])
+                if cases and all("stable" in c for c in cases):
+                    k = sum(1 for c in cases if not c["stable"])
+                    status += f", unstable {k}/{len(cases)}"
+                else:
+                    status += ", unstable -"
         else:
             status = "NO EXAM"
         print(f"{cfg['name']:<24} {cfg['provider']}/{cfg['model']:<28} [{status}]")
@@ -2176,15 +2897,32 @@ def main() -> int:
             sp.add_argument("--timeout", type=int, default=None,
                             help="per-request seconds (default: agent.yaml timeout_s, "
                                  f"else {DEFAULT_TIMEOUT_S})")
+            # E27: the context-assembly arm for `turns`-bearing cases. Off `check`
+            # for the same reason --timeout is: the gate must reproduce the
+            # committed snapshot, which is a "full" run. CLI-only — never an
+            # agent.yaml field (champion fields are operator-signed).
+            sp.add_argument("--assembly", choices=list(ASSEMBLY_MODES), default="full",
+                            help="multi-turn context assembly: full history (default, "
+                                 "byte-identical to before) or a rule-scoped slice "
+                                 "(E27 A/B arm; single-turn cases and turn 0 unaffected)")
         if name == "run":
             sp.add_argument("--model")
             sp.add_argument("--snapshot", action="store_true")
+            # SNAPSHOT-REPRODUCIBILITY: default 3, validated (odd, >= 3) in
+            # cmd_run via _validate_loads BEFORE any inference. Only --snapshot
+            # runs the multi-load protocol; a plain `run` ignores this flag.
+            sp.add_argument("--loads", type=int, default=3,
+                            help="fresh model loads to aggregate under --snapshot "
+                                 "(default 3; must be odd and >= 3)")
         if name == "check":
             sp.add_argument("--tolerance", type=float, default=0.0)
         if name == "diff":
             sp.add_argument("--models", required=True)
     sp = sub.add_parser("run-all")
     sp.add_argument("--snapshot", action="store_true")
+    sp.add_argument("--loads", type=int, default=3,
+                    help="fresh model loads to aggregate under --snapshot "
+                         "(default 3; must be odd and >= 3)")
     sp.set_defaults(fn=cmd_run_all)
     sp = sub.add_parser("check-all")
     sp.add_argument("--tolerance", type=float, default=0.0)
@@ -2195,6 +2933,9 @@ def main() -> int:
     sp.add_argument("--model")
     sp.add_argument("--provider")
     sp.set_defaults(fn=cmd_live)
+    sp = sub.add_parser("intake")
+    sp.add_argument("--input")
+    sp.set_defaults(fn=cmd_intake)
     sp = sub.add_parser("promote")
     sp.add_argument("agent")
     sp.add_argument("line", type=int)
@@ -2204,6 +2945,19 @@ def main() -> int:
     sp.set_defaults(fn=cmd_promote)
     # No --split here, deliberately: this subcommand has no code path that can write
     # anything but split="train" (see cmd_promote docstring).
+    # Lane 0: a thin REMAINDER passthrough to sandbox/worker.py — `run`/`digest` and
+    # all their flags are worker.py's OWN argparse. add_help stays at its default
+    # (True) deliberately: argparse's REMAINDER has a known limitation where a
+    # LEADING option-looking token (nothing but `--help` — no `run`/`digest` before
+    # it) is never absorbed into REMAINDER and is reported as unrecognized instead
+    # (reproduced: `add_help=False` here made bare `worker --help` exit 2). Keeping
+    # this parser's own `-h`/`--help` catches exactly that bare case (exits 0, if
+    # with this parser's own generic text); `worker run --help` / `worker digest
+    # --help` are unaffected — `run`/`digest` is a real token first, so REMAINDER
+    # still grabs `--help` and forwards it to worker.py's own, more useful, -h.
+    sp = sub.add_parser("worker")
+    sp.add_argument("args", nargs=argparse.REMAINDER)
+    sp.set_defaults(fn=cmd_worker)
     sp = sub.add_parser("list")
     sp.set_defaults(fn=cmd_list)
     # Report, not a gate: deliberately absent from check-all, and it never writes.

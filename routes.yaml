@@ -1,0 +1,46 @@
+# Live routing table — the ORDERED tier list `runner.py live` walks per agent.
+#
+# Tier 0 is the committed champion and MUST equal agents/<name>/agent.yaml
+# (provider + model) — enforced by evals/test_live_routing.py, so this file can never
+# silently disagree with the exam's snapshot. Later tiers are FALLBACKS: `live` moves to
+# the next tier only when a run is DEAD (termination) or its output FAILS the
+# expectation-free checks (see runner.live_output_checks). A healthy tier-0 run never
+# escalates, and an explicit `--model`/`--provider` on the CLI bypasses this table.
+#
+# Every fallback below is the cheapest model that MEASURED equal-or-better than the
+# champion on the case shape the champion fails, on this repo's own exams — not a guess:
+#   docs/probes/multiturn-ladder-2026-09-03/RESULTS.md   (crm threads: qwen3-8b 3/4)
+#   `python3 sandbox/runner.py route`                     (29–31 Aug hosted matrix + local)
+# Editing a tier is a config change with the same standing as a champion swap
+# (operator-signed; PR-required). HOSTED tiers (provider openrouter, pinned to the
+# creator endpoint via agent.yaml provider_routing at run time — see the probe) sit
+# LAST, behind every local tier: data leaves the laptop only when every local model is
+# dead or flagged. Earned only where a hosted row, measured the SAME DAY as the local
+# reference and confirmed on a second same-day rep, passes a heldout case NO local tier
+# passes (docs/probes/hosted-sameday-2026-09-04/RESULTS.md, 2026-09-05). Where a local
+# fallback already covers the case (expense: qwen3:8b passes anthropic-api) no hosted
+# tier is added — it would add cost, not coverage. crm-followup: both hosted flagships
+# measured BELOW the local 2B same-day (13/18, 10/18 vs 15/18); no hosted tier.
+crm-followup:
+  - {provider: ollama, model: gemma4-e2b-ctx16k}     # champion 09-04: 15/18 (16k window; Modelfile in agents/crm-followup/)
+  - {provider: ollama, model: qwen3-8b-ctx16k}       # threads: 3/4 multi-turn (ladder row 5)
+email-triage:
+  - {provider: ollama, model: gemma4:e2b-it-qat}     # champion 10/11 (snapshot refreshed 4 Sep, PR #71)
+  - {provider: ollama, model: llama3.1:latest}       # 10/11, ties the flagships within noise, 217 tok/case
+  - {provider: openrouter, model: z-ai/glm-5.3, provider_routing: {order: [z-ai], allow_fallbacks: false}}   # 11/11 → 10/11 same-day reps, pinned; passes recruiter-fake-urgency (llama does not)
+expense-categorization:
+  - {provider: ollama, model: gemma4:e2b-it-qat}     # champion 8/9
+  - {provider: ollama, model: qwen3:8b}              # 9/9, at the ceiling with 11 others
+recap:
+  - {provider: ollama, model: gemma4:e4b-it-qat}     # champion 7/10 — the ceiling; nobody beats it
+  - {provider: ollama, model: qwen3:8b}              # 7/10, different failure mix (drops items vs length)
+reply-draft:
+  - {provider: ollama, model: gemma4:e2b-it-qat}     # 10/10, exam saturated
+  - {provider: ollama, model: gemma4:e4b-it-qat}     # 10/10
+transcript-en:
+  - {provider: ollama, model: gemma4:e4b-it-qat}     # champion 8/13 — route says move off; operator call
+  - {provider: ollama, model: qwen3:8b}              # 10/13, within noise of the flagship leader
+  - {provider: openrouter, model: moonshotai/kimi-k3, provider_routing: {order: [moonshotai], allow_fallbacks: false}}   # 10/13 both same-day reps, pinned; adds support-heldout-long (qwen does not)
+task-intake:
+  - {provider: ollama, model: gemma4:e2b-it-qat}     # champion 19/20 heldout (46-case exam, 5 Sep)
+  - {provider: ollama, model: gemma4:e4b-it-qat}     # 19/20 heldout, same train score; different train miss
