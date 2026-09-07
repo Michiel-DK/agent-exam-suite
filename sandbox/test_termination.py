@@ -944,12 +944,19 @@ def test_snapshot_is_REFUSED_when_cases_died_of_timeouts():
     one_case = {**full, "cases": full["cases"][:1]}
     real_post, real_adapter_for = router.requests.post, runner.adapter_for
     real_load_exam, real_argv = runner.load_exam, sys.argv
+    # SNAPSHOT-REPRODUCIBILITY: `--snapshot` now stamps the live Ollama version and
+    # unloads the model via the native API before each load. Neither belongs in a
+    # deterministic test — it passed here only while a local Ollama happened to be up,
+    # and failed in the public repo's CI (no server: "Connection refused", 7 Sep).
+    real_version, real_unload = runner.ollama_version, runner.ollama_unload
     rc, exited, after = None, None, None
     try:
         router.requests.post = post
         runner.adapter_for = lambda *a, **k: ChatCompletionsAdapter("http://c/v1",
                                                                     timeout=3)
         runner.load_exam = lambda _name: one_case
+        runner.ollama_version = lambda: "0.0.0-test"
+        runner.ollama_unload = lambda model: None
         sys.argv = ["runner.py", "run", "reply-draft", "--model", "canned",
                     "--snapshot"]
         with contextlib.redirect_stdout(io.StringIO()):
@@ -962,6 +969,7 @@ def test_snapshot_is_REFUSED_when_cases_died_of_timeouts():
         router.requests.post = real_post
         runner.adapter_for = real_adapter_for
         runner.load_exam = real_load_exam
+        runner.ollama_version, runner.ollama_unload = real_version, real_unload
         sys.argv = real_argv
         if snap_path.read_bytes() != before:    # only writes when the guard failed
             snap_path.write_bytes(before)
