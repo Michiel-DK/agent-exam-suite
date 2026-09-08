@@ -38,7 +38,7 @@ reply-draft:
   - {provider: ollama, model: gemma4:e2b-it-qat}     # 10/10, exam saturated
   - {provider: ollama, model: gemma4:e4b-it-qat}     # 10/10
 transcript-en:
-  - {provider: ollama, model: gemma4:e4b-it-qat}     # champion 8/13 — route says move off; operator call
+  - {provider: ollama, model: gemma4-e4b-ctx16k}     # champion PROPOSED 2026-09-06 (window not weights, longcall-* band; operator signs at merge)
   - {provider: ollama, model: qwen3:8b}              # 10/13, within noise of the flagship leader
   - {provider: openrouter, model: moonshotai/kimi-k3, provider_routing: {order: [moonshotai], allow_fallbacks: false}}   # 10/13 both same-day reps, pinned; adds support-heldout-long (qwen does not)
 task-intake:

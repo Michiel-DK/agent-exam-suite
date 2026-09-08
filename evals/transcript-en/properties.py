@@ -288,3 +288,217 @@ def check_abstention(input_text, output):
 
 
 check_abstention.bucket = "quality"
+
+
+# ------------------------------------------------------------- quality (lane 1, longcall-*)
+
+_LEAD_DELIMS = (" to ", " will ", ":")
+
+_PARENTHETICAL_RE = re.compile(r"\([^)]*\)")
+
+
+def _leading_owner_token(item: str) -> str | None:
+    """The text before the FIRST of ' to ' / ' will ' / ':' in an action item,
+    lowercased, stripped, and with any parenthetical asides removed — the
+    leading segment check_action_owner's whole-word owner search reads.
+    None when no delimiter is found at all (an item with no recognisable shape).
+
+    LEADING SEGMENT, NEVER ANYWHERE-SUBSTRING (step-0's own scorer bug,
+    RESULTS.md finding 3): an anywhere-substring match on 'customer' or 'rep'
+    collides with words like 'report' or a mid-sentence mention of "the
+    customer's ops manager" in a REP-owned item. Reading only the text before
+    the first delimiter is what makes the isolation fixture's wrong-build twin
+    (test_2j) fail the way it's supposed to.
+
+    PASS-2 PARSER BUG (ledger 041, pass 3 fix): this function used to be the
+    exact string check_action_owner tested for SET-EQUALITY against a fixed
+    token ("rep", "sana", ...) — so a leading segment that is a whole clause
+    ('after confirming budget with finance, sana') or carries a parenthetical
+    aside ('customer (callan)') never equalled any token and silently read as
+    unrecognised on real Kimi output. Parentheticals are stripped HERE (after
+    the leading segment is sliced, so a parenthetical containing a delimiter
+    word never shifts where the segment ends); the WHOLE-WORD search against
+    each side's token set now lives in check_action_owner, which is what
+    lets 'customer (callan)' and 'after confirming budget with finance, sana
+    will ...' resolve without also matching an anywhere-substring hit.
+    """
+    lower = item.lower()
+    idxs = [lower.find(d) for d in _LEAD_DELIMS]
+    idxs = [i for i in idxs if i != -1]
+    if not idxs:
+        return None
+    leading = lower[: min(idxs)]
+    leading = _PARENTHETICAL_RE.sub(" ", leading)
+    return leading.strip()
+
+
+def _leading_owner_segment(item: str, known_tokens: set) -> str | None:
+    """`_leading_owner_token`, plus ONE tolerance the pass-3 review found missing
+    (8 Sep, correctness refuter): a TOPIC LABEL before the owner — "Escalation:
+    Rep to open a ticket" — where the earliest delimiter is the label's colon and
+    the segment before it ("escalation") names nobody. When that segment carries
+    NO known owner token, the label is dropped and the item is re-sliced after
+    the colon, so the segment becomes "rep". "Rep: send the SLA document" is
+    untouched: its pre-colon segment DOES carry a token, so it is the owner, not
+    a label. Still leading-segment only — never an anywhere-substring search."""
+    leading = _leading_owner_token(item)
+    if leading is None:
+        return None
+    lower = item.lower()
+    colon = lower.find(":")
+    first = min(i for i in (lower.find(d) for d in _LEAD_DELIMS) if i != -1)
+    if colon != -1 and colon == first and not _owner_side_tokens_present(leading, known_tokens):
+        rest = _leading_owner_token(item[colon + 1:])
+        if rest is not None:
+            return rest
+    return leading
+
+
+def _owner_side_tokens_present(leading: str, tokens: set) -> bool:
+    """True iff any token in `tokens` occurs in `leading` as a whole word (or,
+    for a multi-word token like 'the rep' or a full name, a whole phrase) —
+    never as a substring of a longer word ('report' must not match 'rep').
+    `leading` is expected to already be `_leading_owner_token`'s output
+    (lowercased, delimiter-sliced, parenthetical-stripped)."""
+    for tok in tokens:
+        if not tok:
+            continue
+        if re.search(r"(?<!\w)" + re.escape(tok) + r"(?!\w)", leading):
+            return True
+    return False
+
+
+def check_action_owner(input_text, output):
+    """PRESENCE-CONDITIONAL attribution check, NEW for lane 1 (the long-call
+    band): fills the declared gap "speaker attribution correctness (REP vs
+    CUSTOMER) is not checked" (this file's own `not_verified`, pre-lane-1).
+
+    Expected keys on a case: `speakers` ({"rep": <name>, "customer": <name>})
+    and `commit_owner` ({<must_commit substring>: "rep" | "customer"}, keys a
+    SUBSET of that case's `must_commit`). For each `commit_owner` entry: find
+    the action items containing the substring (case-insensitive); if NONE,
+    PASS — presence is check_action_items' job, and this is what makes the two
+    checks isolable from each other (this file's directionality-rule
+    docstring).
+
+    ANY-HIT-CORRECT (pass 2 fix; ledger 041 finding 1 — was every-hit): a key
+    with >= 1 hit PASSES that key iff AT LEAST ONE hit's LEADING segment
+    (`_leading_owner_token`) carries the declared owner's tokens — rep:
+    {"rep", "the rep", <speakers.rep>}; customer: {"customer", "the
+    customer", "client", "the client", <speakers.customer>}. It FAILS that
+    key only when every hit's leading segment misses the declared owner's set.
+    Every-hit (require ALL hits correctly owned) rejected a genuinely correct
+    output on the champion's real longcall-support-heldout-2 run, where both
+    "Rep to follow up" and "Customer to follow up" legitimately contain the
+    same `commit_owner` substring — duplicate correct mentions are not an
+    attribution error. Each key is evaluated independently; the check as a
+    whole fails if any key fails. Reads only `action_items` and
+    `speakers`/`commit_owner` from the case's `expected` block; no number
+    normalisation of any kind (this is a text-attribution check, not a
+    grounding check).
+
+    WHOLE-WORD, ONE SIDE ONLY (pass 3 fix, `_owner_side_tokens_present`): a
+    hit counts as carrying the declared owner iff that owner's tokens appear
+    in the leading segment as a WHOLE WORD/PHRASE and the OTHER side's tokens
+    do not. Set-equality against the whole leading segment (pass 2's rule)
+    silently read 'customer (callan)' and 'after confirming budget with
+    finance, sana' as unrecognised, because neither string equals a bare
+    token — real Kimi/model output that is a clause or carries a
+    parenthetical name never gets a fair check under set-equality. A leading
+    segment naming BOTH sides (e.g. "rep and customer") is deliberately
+    treated as unrecognised for either owner, not as a match for whichever
+    owner happens to be declared — an ambiguous lead is not evidence.
+    """
+    exp = _exp(input_text)
+    commit_owner = exp.get("commit_owner")
+    if not commit_owner:
+        return True, ""
+    speakers = exp.get("speakers") or {}
+    rep_name = str(speakers.get("rep") or "").strip().lower()
+    cust_name = str(speakers.get("customer") or "").strip().lower()
+    # A case's `speakers` may carry a full name ("sana malik"); a model's action
+    # item leading token is realistically a FIRST name ("Sana to ..."), never the
+    # full string. Every individual word of the declared name is added to that
+    # side's token set (never split across sides — rep and customer names are
+    # always distinct people in a case), alongside the full string itself.
+    rep_tokens = {"rep", "the rep"} | ({rep_name} if rep_name else set()) | set(rep_name.split())
+    cust_tokens = {"customer", "the customer", "client", "the client"} | (
+        {cust_name} if cust_name else set()) | set(cust_name.split())
+    items = _action_items(output)
+    items_lower = [str(i).lower() for i in items]
+    bad = []
+    for substring, owner in commit_owner.items():
+        owner = str(owner).strip().lower()
+        if owner == "rep":
+            want, orig = rep_tokens, items
+        elif owner == "customer":
+            want, orig = cust_tokens, items
+        else:
+            raise ValueError(
+                f"check_action_owner: commit_owner[{substring!r}] must be "
+                f"'rep' or 'customer', got {owner!r} — a cases.json authoring bug")
+        needle = str(substring).lower()
+        hits = [it for it, low in zip(orig, items_lower) if needle in low]
+        if not hits:
+            continue  # absence is check_action_items' job, not this check's
+        other = cust_tokens if want is rep_tokens else rep_tokens
+        leadings = [_leading_owner_segment(it, rep_tokens | cust_tokens) for it in hits]
+        matched = any(
+            leading is not None
+            and _owner_side_tokens_present(leading, want)
+            and not _owner_side_tokens_present(leading, other)
+            for leading in leadings)
+        if not matched:
+            bad.append(f"{substring!r} expected owner {owner!r}, no hit carried "
+                      f"that owner's leading token — leading token(s) seen: "
+                      f"{leadings!r} across item(s) {hits!r}")
+    if bad:
+        return False, "; ".join(bad)
+    return True, ""
+
+
+check_action_owner.bucket = "quality"
+
+
+def check_withdrawn_excluded(input_text, output):
+    """ABSENCE check, NEW for lane 1: fills the declared gap "does not check
+    that action_items excludes ungrounded or duplicate items" (this file's own
+    `not_verified`, pre-lane-1) for the WITHDRAWN-proposal case specifically —
+    the crm `answer_not_contains` pattern (PR #72), unchanged, scoped to
+    `action_items` the same way check_action_items is.
+
+    Expected key: `must_not_commit` (a list of plain lowercase substrings). A
+    proposal that was explicitly withdrawn on the call must not resurface as a
+    commitment. Every `must_not_commit` substring is required, by the case-
+    authoring rule (docs/transcript-long-brief-2026-09-06.md), to (a) appear in
+    the transcript, (b) be cleanly cancelled at its LAST mention (never a
+    hedge), and (c) appear in none of the same case's `must_commit` — (a) and
+    (c) are asserted mechanically over every committed `longcall-*` case in
+    evals/test_transcript_en.py; (b) is a per-case authorial judgment recorded
+    in that case's `why` string. Case-insensitive substring, no number
+    normalisation — this checks text presence of a cancelled proposal, not a
+    figure.
+
+    NORMALIZATION IS DIRECTIONAL (this file's own directionality-rule
+    docstring, CLAUDE.md gotcha 4; ledger 041 finding 3): this is an ABSENCE
+    check, so it builds its OWN joined/lowercased `action_items` string right
+    here rather than calling `_action_items_text` — the PRESENCE join that
+    `check_grounded` and `check_action_items` both call. Over-normalizing an
+    absence check with a helper built for presence matching is exactly the
+    hole that let a shared join slip through pass 1. The raw list accessor
+    `_action_items(output)` is fine to reuse (it performs no joining or
+    normalisation of its own); the join itself must stay private to this
+    check.
+    """
+    forbidden = _exp(input_text).get("must_not_commit") or []
+    if not forbidden:
+        return True, ""
+    text = " | ".join(str(i) for i in _action_items(output)).lower()
+    present = [str(t) for t in forbidden if str(t).lower() in text]
+    if present:
+        return False, ("withdrawn proposal(s) present in action_items: "
+                       f"{', '.join(present)}")
+    return True, ""
+
+
+check_withdrawn_excluded.bucket = "quality"

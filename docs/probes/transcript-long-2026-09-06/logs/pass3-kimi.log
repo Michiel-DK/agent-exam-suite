@@ -1,0 +1,16 @@
+scratch: /var/folders/3l/70h6qcrd72q0j5x4sscw7qn40000gn/T/tmp.CNYVQc0yD4
+/var/folders/3l/70h6qcrd72q0j5x4sscw7qn40000gn/T/tmp.CNYVQc0yD4/repo/evals/transcript-en/cases.json: filtered to 10 longcall-* cases
+exam: transcript-en  mode=properties  provider=openrouter  model=moonshotai/kimi-k3
+  not verified: READABILITY / prose quality is not measured — no judge, judge-free by repo decision. Speaker attribution correctness (REP vs CUSTOMER) is checked by check_action_owner (lane 1, 2026-09-06) ONLY where a case declares `commit_owner` -- a gate against regression, not a ranker (step-0 measured both champion candidates near-perfect on attribution; see docs/probes/transcript-long-step0-2026-09-06/RESULTS.md). check_action_items is PRESENCE-only on required substrings — it does not check duplicate items, and excludes ungrounded NUMBERS only via check_grounded; a withdrawn-but-non-numeric proposal resurfacing as a commitment is checked by check_withdrawn_excluded (lane 1, 2026-09-06) ONLY where a case declares `must_not_commit`. Multi-call history / relationship across calls is out of scope, this exam is single-call only, matching recap's single-shot scope. CASE TEXT IS SYNTHETIC, hand-authored, no real client or the lead data. check_compression fired on ZERO of 13 heldout cases against this champion (measured, snapshot.json) — its falsifiability rests on the echo adversarial fixture (test_transcript_en.py test_4) and the isolation test (test_2e), not on any live case, because the champion's output already stays under every corrected limit. It is a guard against a future degenerate padding strategy, not a current discriminator; the two long-band cases carrying the tightest ratios (discovery-heldout-long, support-heldout-long) both failed on check_coverage instead.
+  [PASS] longcall-quiet-train-1 (train)
+  [FAIL] longcall-discovery-train-1 (train)  (check_coverage: omitted required item(s) from summary: Renata)
+  [PASS] longcall-renewal-train-1 (train)
+  [FAIL] longcall-support-train-1 (train)  (check_compression: summary is 790 chars vs limit 723 (0.05 x 14466 source chars))
+  [FAIL] longcall-pricing-heldout-1 (heldout)  (check_action_items: commitment(s) missing from action_items: sign-off)
+  [FAIL] longcall-scoping-heldout-1 (heldout)  (check_coverage: omitted required item(s) from summary: eight locations)
+  [PASS] longcall-discovery-heldout-2 (heldout)
+  [FAIL] longcall-renewal-heldout-2 (heldout)  (check_action_items: commitment(s) missing from action_items: budget sign-off)
+  [PASS] longcall-support-heldout-2 (heldout)
+  [FAIL] longcall-mixed-heldout-3 (heldout)  (check_action_items: commitment(s) missing from action_items: confirm the exact new headcount, updated quote)
+train   2/4  heldout 2/6  -> results/transcript-en__openrouter__moonshotai_kimi-k3.json
+copied -> /Users/michieldekoninck/code/Michiel-DK/agent-sandbox/.claude/worktrees/wf_98de11d8-714-3/docs/probes/transcript-long-2026-09-06/results/kimi-k3-longcall.json

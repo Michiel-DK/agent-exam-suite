@@ -25,7 +25,7 @@ NOTES = {
     "reply-draft": "saturated, useless for ranking",
     "crm-followup": "production-size payloads; 4 multi-turn cases; champion swapped 4B to 2B (PR #60)",
     "recap": "the hardest exam, on purpose",
-    "transcript-en": "English call transcripts; a long-call band is in review",
+    "transcript-en": "English call transcripts incl. a 10-case long-call band (12k-33k chars); local 4B ties Kimi-K3 2/6 on it",
     "task-intake": "seventh agent: routes a typed request to the right specialist, or refuses",
 }
 

@@ -1,7 +1,21 @@
 name: transcript-en
 description: Summarise one English business call transcript (discovery, renewal, support, pricing, check-in) into a grounded recap with action items
 provider: ollama
-model: gemma4:e4b-it-qat
+model: gemma4-e4b-ctx16k
+# CHAMPION CHANGE 2026-09-06 — WINDOW, not weights: gemma4:e4b-it-qat at num_ctx
+# 16384 (agents/transcript-en/Modelfile; `ollama create gemma4-e4b-ctx16k -f` it
+# first — crm-followup's 2026-09-04 champion change is the template). Step-0
+# (docs/probes/transcript-long-step0-2026-09-06/RESULTS.md) measured the previous
+# champion DEAD on every long call under Ollama's 4,096-token default window: a
+# 19.6k-char transcript is 5,317 prompt tokens, past the ceiling — finish_reason
+# =length / 0 content chars on one arm, truncated-system-prompt prose on the
+# other. Same weights at 16k: 41.0s/41.8s wall on the 11.8k/19.6k probe
+# transcripts, well under the untunable 120s `check` ceiling. The new
+# `longcall-*` band (evals/transcript-en/cases.json, PROPOSED lane 1,
+# docs/transcript-long-brief-2026-09-06.md) is unscoreable without this swap —
+# not a tuning, a precondition. 22 pre-existing cases re-run on it in the same
+# commit; the flip list (if any) is in the PR body. Champion field itself is
+# PROPOSED — operator signs at merge.
 tier: local
 temperature: 0.0
 max_tokens: 2048

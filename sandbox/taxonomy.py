@@ -135,6 +135,16 @@ CATEGORY_BY_CHECK: dict[str, str] = {
     # input per-exam (same reasoning the recap block above states for
     # check_coverage/check_grounded).
     "check_action_items": "answer-content",
+    # check_action_owner / check_withdrawn_excluded (transcript-en lane 1,
+    # 2026-09-06, the long-call band): check_action_owner mis-attributes a
+    # commitment to the wrong side (rep vs customer) — a label mismatch on the
+    # action item's owner, the same failure shape as `labels`/`fields` above,
+    # so it gets no new row. check_withdrawn_excluded is an ABSENCE check
+    # (a withdrawn proposal resurfacing as a commitment) — the same failure as
+    # `answer_not_contains` above: material attributed to the call that the
+    # call itself retracted, filed as fabrication rather than a new category.
+    "check_action_owner": "label-mismatch",
+    "check_withdrawn_excluded": "fabrication",
     # --- infrastructure, not capability
     "error": "harness-error",
 }

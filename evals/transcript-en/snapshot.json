@@ -1,12 +1,12 @@
 {
   "provider": "ollama",
-  "model": "gemma4:e4b-it-qat",
-  "train_score": 0.5556,
-  "heldout_score": 0.6154,
+  "model": "gemma4-e4b-ctx16k",
+  "train_score": 0.5385,
+  "heldout_score": 0.5263,
   "temperature": 0.0,
   "max_tokens": 2048,
   "judge": null,
-  "date": "2026-09-07T12:43:40",
+  "date": "2026-09-08T00:23:57",
   "harness_sha": "26e991c19b73d399c5d1edb3f61f21aee146158d",
   "cases": [
     {
@@ -198,6 +198,110 @@
       "split": "heldout",
       "passed": true,
       "stable": true
+    },
+    {
+      "id": "longcall-quiet-train-1",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "longcall-discovery-train-1",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "check_action_items"
+        },
+        {
+          "bucket": "quality",
+          "check": "check_coverage"
+        }
+      ]
+    },
+    {
+      "id": "longcall-renewal-train-1",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "check_coverage"
+        }
+      ]
+    },
+    {
+      "id": "longcall-support-train-1",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "longcall-pricing-heldout-1",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "check_action_items"
+        }
+      ]
+    },
+    {
+      "id": "longcall-scoping-heldout-1",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "check_coverage"
+        },
+        {
+          "bucket": "quality",
+          "check": "check_grounded"
+        }
+      ]
+    },
+    {
+      "id": "longcall-discovery-heldout-2",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "longcall-renewal-heldout-2",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "check_grounded"
+        }
+      ]
+    },
+    {
+      "id": "longcall-support-heldout-2",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "longcall-mixed-heldout-3",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "check_action_items"
+        }
+      ]
     }
   ],
   "loads": 3,
