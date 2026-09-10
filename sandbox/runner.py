@@ -45,6 +45,7 @@ import policy  # noqa: E402  (report-only; imports nothing from here at load tim
 import stats  # noqa: E402  (A3: the single interval implementation, shared with route/serve)
 import strategies  # noqa: E402  (E21; imports nothing from here — ctx is injected)
 import probe  # noqa: E402  (report-only; imports nothing from here at load time)
+import library  # noqa: E402  (E6-train; imports nothing from here at load time)
 
 ROOT = Path(__file__).resolve().parent.parent
 RESULTS_DIR = ROOT / "results"
@@ -58,6 +59,20 @@ def load_agent(name: str) -> dict:
         sys.exit(f"error: no agent at {agent_dir}")
     cfg = yaml.safe_load((agent_dir / "agent.yaml").read_text())
     cfg["system_prompt"] = (agent_dir / "prompt.md").read_text()
+    # E6-train: an optional `library:` key (filename relative to the agent dir)
+    # turns lesson injection ON for this agent. No committed agent.yaml sets it
+    # (asserted in sandbox/test_library.py, the router-knobs pattern), so every
+    # existing gate loads a byte-identical config. The leak guard runs HERE, at
+    # load time, against the agent's own cases — a leaky library can never reach
+    # a scored run, not merely a failing test. Fail loud: a missing/malformed/
+    # leaky library file raises rather than silently running without lessons.
+    lib_name = cfg.get("library")
+    if lib_name is not None:
+        lib_path = agent_dir / lib_name
+        cases = json.loads((ROOT / "evals" / name / "cases.json").read_text())["cases"]
+        cfg["_lessons"] = library.load_library(lib_path, cases)
+        cfg["library_sha"] = library.library_sha(lib_path)
+        cfg["library_k"] = int(cfg.get("library_k", 2))
     return cfg
 
 
@@ -364,8 +379,34 @@ def _call_metrics(meta: dict, wall_ms: float, retries: int) -> dict:
     return metrics
 
 
+def _with_lessons(agent: dict, system: str, case_input: str) -> str:
+    """E6-train: append retrieved lessons to a fully-assembled system prompt.
+
+    AFTER everything static, because prompt-prefix reuse is real and large on our
+    router path — a varying prefix costs ~+4.7 s/call (~60% of wall) at a 2k-token
+    prompt (docs/probes/prefix-cache-2026-09-09/RESULTS.md). Lessons vary per case,
+    so they go last; the frozen block stays cache-hot.
+
+    When the agent has no library (every committed agent today), or retrieval
+    finds nothing relevant, the return value is BYTE-IDENTICAL to `system` —
+    the same zero-diff contract _trajectory_system_prompt keeps for
+    `tools_offered`, and what keeps every existing score untouched.
+
+    KNOWN GAP, on purpose: the E21 bake-off path (_BakeoffCtx.call_*) builds its
+    system prompts directly and does NOT pass through here — bake-off is a
+    read-only probe that writes no snapshot and moves no gate. If an agent with
+    a library is ever bake-off-tested, its lessons will silently not inject
+    there; wire it through this function in that lane, not before."""
+    lessons = agent.get("_lessons")
+    if not lessons:
+        return system
+    picked = library.retrieve(lessons, case_input, agent.get("library_k", 2))
+    return system + library.render(picked)
+
+
 def run_plain_case(agent, case, adapter, model) -> tuple[dict, dict]:
-    messages = [{"role": "system", "content": agent["system_prompt"]},
+    messages = [{"role": "system",
+                 "content": _with_lessons(agent, agent["system_prompt"], case["input"])},
                 {"role": "user", "content": case["input"]}]
     parsed, _raw, metrics = call_model(agent, adapter, model, messages)
     return parsed, metrics
@@ -606,7 +647,9 @@ def run_trajectory_case(agent, case, adapter, model, tools_mod,
     sandbox/test_error_recovery_falsepos.py, `runner.py live`'s
     live_run_and_log) are unchanged: this function's signature and return shape
     are exactly what they were before this lane."""
-    messages = [{"role": "system", "content": _trajectory_system_prompt(agent, case)},
+    messages = [{"role": "system",
+                 "content": _with_lessons(agent, _trajectory_system_prompt(agent, case),
+                                          case["input"])},
                 {"role": "user", "content": case["input"]}]
     parsed, trace, _step_metrics = _run_tool_loop(
         agent, messages, case["expected"], adapter, model, tools_mod,
@@ -774,7 +817,14 @@ def _run_turns(agent, case, adapter, model, tools_mod,
     aligned with `tool_calls`, for clause 1's index-paired lookup."""
     if assembly not in ASSEMBLY_MODES:
         raise ValueError(f"assembly must be one of {ASSEMBLY_MODES}, got {assembly!r}")
-    messages = [{"role": "system", "content": _trajectory_system_prompt(agent, case)}]
+    # E6-train: a turns-bearing case has no "input" key — retrieval keys on the
+    # full turn sequence (the system prompt is built ONCE, before turn 1, so the
+    # whole case is the honest similarity target; keying on turn 1 alone would
+    # retrieve against a greeting). Caught by evals/test_multiturn.py going red
+    # on a case["input"] KeyError in this lane's first gate run.
+    messages = [{"role": "system",
+                 "content": _with_lessons(agent, _trajectory_system_prompt(agent, case),
+                                          "\n".join(case["turns"]))}]
     turn_texts: list = []
     scoring_tool_results: list = []
     all_step_metrics: list = []
@@ -1762,6 +1812,13 @@ def snapshot_payload(agent: dict, exam: dict, provider: str, model: str, result:
         payload["loads"] = loads
     if runtime is not None:
         payload["runtime"] = runtime
+    # E6-train: the library pin (spec constraint 2 — retrieval changes the prompt,
+    # so the gate must refuse to compare across library versions). Same
+    # omitted-when-absent pattern as loads/runtime, for the same reason: the
+    # exact-key-set assertion in test_observability, and byte-identical legacy
+    # snapshots for every agent without a library (all of them today).
+    if agent.get("library_sha") is not None:
+        payload["library_sha"] = agent["library_sha"]
     return payload
 
 
@@ -1920,15 +1977,25 @@ def _load_snapshot(agent_name: str) -> dict:
     return json.loads(snap_path.read_text())
 
 
-def snapshot_preflight(snap: dict, exam: dict, version_fn=None) -> str | None:
-    """PURE-ish (one native-API call, ZERO model inference). The three
+def snapshot_preflight(snap: dict, exam: dict, version_fn=None,
+                       library_sha: str | None = None) -> str | None:
+    """PURE-ish (one native-API call, ZERO model inference). The four
     pre-inference refusals shared by `cmd_check` and `cmd_check_all`: no
     `runtime` block; live ollama version differs from the snapshot's (ollama
     snapshots only — a hosted snapshot's runtime.version is always None per
     criterion v3, and would be refused forever if compared unconditionally,
     which is exactly halt 2's finding); the exam's case-id set differs from the
-    snapshot's. Returns the refusal cause (RUNTIME:/VERSION:/CASES: prefixed) or
-    None when the snapshot is fit to check against.
+    snapshot's; the agent's lesson-library pin differs from the snapshot's
+    (E6-train — retrieval changes the prompt, so comparing across library
+    versions is comparing two different prompts and calling it drift). Returns
+    the refusal cause (RUNTIME:/VERSION:/CASES:/LIBRARY: prefixed) or None when
+    the snapshot is fit to check against.
+
+    `library_sha` is the CURRENT agent's pin (None = no library, the legacy
+    state). Compared with != so every asymmetry refuses: library added since
+    the snapshot, removed since it, or changed — all three redefine the prompt
+    the snapshot measured. Both-None (every pre-lane snapshot + agent) passes
+    untouched.
 
     `version_fn` defaults to `ollama_version` and is called ONLY when
     `snap["provider"] == "ollama"` — injected so a test can assert a
@@ -1944,6 +2011,10 @@ def snapshot_preflight(snap: dict, exam: dict, version_fn=None) -> str | None:
         if live != want:
             return (f"VERSION: live ollama {live!r} != snapshot runtime.version "
                     f"{want!r}; re-snapshot")
+    if snap.get("library_sha") != library_sha:
+        return (f"LIBRARY: agent library_sha {library_sha!r} != snapshot's "
+                f"{snap.get('library_sha')!r} — the library is part of the prompt; "
+                f"re-snapshot")
     snap_ids = {c["id"] for c in snap["cases"]}
     exam_ids = {c["id"] for c in exam["cases"]}
     if snap_ids != exam_ids:
@@ -2030,7 +2101,7 @@ def cmd_check(args) -> int:
     snap = _load_snapshot(args.agent)
     agent = load_agent(args.agent)
     exam = load_exam(args.agent)
-    cause = snapshot_preflight(snap, exam)
+    cause = snapshot_preflight(snap, exam, library_sha=agent.get("library_sha"))
     if cause:
         sys.exit(f"error: {cause}")
     print(f"exam: {args.agent}  mode={exam.get('mode', 'labels')}  "
@@ -2322,7 +2393,7 @@ def cmd_check_all(args) -> int:
         agent = load_agent(name)
         exam = load_exam(name)
         print(f"\n=== check {name} vs snapshot ({snap['model']}) ===")
-        cause = snapshot_preflight(snap, exam)
+        cause = snapshot_preflight(snap, exam, library_sha=agent.get("library_sha"))
         if cause:
             print(f"REFUSED: {cause}")
             problems.append(name)
@@ -2737,11 +2808,23 @@ class _BakeoffCtx:
         self.triage_adapter = triage_adapter
         self.triage_model = triage_model
 
-    def call_recap(self, day_text):
-        msgs = [{"role": "system", "content": self.agent["system_prompt"]},
-                {"role": "user", "content": day_text}]
-        parsed, _raw, metrics = call_model(self.agent, self.adapter, self.model, msgs)
+    def call(self, system_prompt, user_text, max_tokens=None):
+        """One raw model call under the agent's own model/adapter, with a caller-chosen
+        system prompt — the primitive a multi-call strategy (E28) needs and call_recap
+        already had inline. Discards the raw string exactly as call_recap always did.
+
+        `max_tokens`, when given, overrides the agent's own budget for THIS call only
+        (E30's extraction step wants more room than the champion's own generation call) —
+        the default `None` leaves `self.agent` untouched, so every existing caller
+        (call_recap, commit_list_then_write's two calls) is byte-identical to before."""
+        msgs = [{"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_text}]
+        agent = self.agent if max_tokens is None else dict(self.agent, max_tokens=max_tokens)
+        parsed, _raw, metrics = call_model(agent, self.adapter, self.model, msgs)
         return parsed, metrics
+
+    def call_recap(self, day_text):
+        return self.call(self.agent["system_prompt"], day_text)
 
     def call_triage(self, item_text):
         """-> (label, metrics). An unparseable label is treated as NOT-ignore: the
