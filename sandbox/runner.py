@@ -1338,7 +1338,7 @@ def score_trajectory(parsed: dict, trace: dict, expected: dict,
             failures.append(f"ungrounded number {tok!r}: appears in the answer but in "
                             f"no tool result and not in the input")
 
-    # Redundancy monitor (Stage 3, first ReasonBlocks-style monitor): the same tool
+    # Redundancy monitor (Stage 3, the first governor-class mid-run monitor): the same tool
     # called twice with the SAME canonicalized args is wasted work and fails the case;
     # the same tool with different args is a legitimate multi-lookup and passes.
     # The key comes from _call_key, the same function the runtime dedupe guard uses:
