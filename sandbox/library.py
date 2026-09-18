@@ -44,6 +44,28 @@ _STOPWORDS = frozenset(
 
 _REQUIRED_LESSON_KEYS = ("situation", "what_went_wrong", "fix")
 
+# E33 (2026-09-16, docs/2026-09-16-openviking-steal-list.md points 1-4): a second
+# library schema, selected PER FILE by a top-level `"schema": "e33"` key. Absent key =
+# "e6", and every e6 code path below is byte-identical to before — the E6 arm is the
+# same-day CONTROL in sprint B and must not move. e33 differs in four measured ways:
+#   anchor    one line, the ONLY retrieval key (never the situation body — E6's keyword
+#             retrieval over full text fired on shared vocabulary);
+#   excludes  "does not apply when ..." rendered next to the lesson, so the reader can
+#             gate (E6's mechanism: a rule true for its source case over-applied);
+#   approach  what a SUCCESSFUL train trajectory did (extraction from PASSED cases);
+#   render    opens with a scope block: advisory; never copy identifiers/amounts/dates.
+SCHEMAS = ("e6", "e33")
+_E33_LESSON_KEYS = ("anchor", "situation", "approach", "excludes")
+_E33_REQUIRED_NONEMPTY = ("anchor", "situation", "approach")   # excludes may be ""
+MAX_ANCHOR_CHARS = 120
+
+
+def _lesson_text(lesson: dict) -> str:
+    """Every authored text field of a lesson, per its schema — the leak guard's
+    input. A field the guard does not read is a field the answer key can hide in."""
+    keys = _E33_LESSON_KEYS if lesson.get("_schema") == "e33" else _REQUIRED_LESSON_KEYS
+    return " ".join(str(lesson.get(k, "")) for k in keys)
+
 
 def _norm(text: str) -> str:
     """NFKC + lower-case + collapse whitespace. NFKC folds compatibility
@@ -90,16 +112,34 @@ def load_library(path: Path, cases: list) -> list:
     LOAD time means a leaky library can never produce a scored run — not just a
     failing test."""
     data = json.loads(path.read_text())
+    schema = data.get("schema", "e6")
+    if schema not in SCHEMAS:
+        raise ValueError(f"library {path}: unknown schema {schema!r} (known: {SCHEMAS})")
     lessons = data.get("lessons")
     if not isinstance(lessons, list) or not lessons:
         raise ValueError(f"library {path}: 'lessons' must be a non-empty list")
     for i, lesson in enumerate(lessons):
         if not isinstance(lesson, dict):
             raise ValueError(f"library {path}: lesson {i} is not a dict")
-        for key in _REQUIRED_LESSON_KEYS:
-            if not isinstance(lesson.get(key), str) or not lesson[key].strip():
-                raise ValueError(
-                    f"library {path}: lesson {i} missing/empty required key {key!r}")
+        if schema == "e33":
+            for key in _E33_LESSON_KEYS:
+                if not isinstance(lesson.get(key), str):
+                    raise ValueError(f"library {path}: lesson {i} missing key {key!r} "
+                                     f"(e33 schema needs {_E33_LESSON_KEYS})")
+            for key in _E33_REQUIRED_NONEMPTY:
+                if not lesson[key].strip():
+                    raise ValueError(f"library {path}: lesson {i} empty required key {key!r}")
+            anchor = lesson["anchor"]
+            if "\n" in anchor or len(anchor) > MAX_ANCHOR_CHARS:
+                raise ValueError(f"library {path}: lesson {i} anchor must be ONE line of "
+                                 f"<= {MAX_ANCHOR_CHARS} chars — it is the retrieval key, "
+                                 f"not a description")
+        else:
+            for key in _REQUIRED_LESSON_KEYS:
+                if not isinstance(lesson.get(key), str) or not lesson[key].strip():
+                    raise ValueError(
+                        f"library {path}: lesson {i} missing/empty required key {key!r}")
+        lesson["_schema"] = schema
     validate_library(lessons, cases, source=str(path))
     return lessons
 
@@ -114,7 +154,7 @@ def validate_library(lessons: list, cases: list, source: str = "library") -> Non
             if len(ns) >= MIN_LEAK_CHARS:
                 fragments.append((case["id"], ns))
     for i, lesson in enumerate(lessons):
-        body = _norm(" ".join(lesson[k] for k in _REQUIRED_LESSON_KEYS))
+        body = _norm(_lesson_text(lesson))
         for cid, frag in fragments:
             # whole-fragment containment AND windowed containment: a lesson
             # quoting the middle of a long expected string must also trip.
@@ -138,13 +178,22 @@ def _shares_window(frag: str, body: str) -> bool:
                for j in range(0, len(frag) - MIN_LEAK_CHARS + 1))
 
 
-def extract_lessons(result_cases: list, exam_cases: list) -> list:
+def anchor_of(text: str) -> str:
+    """A default one-line anchor for a skeleton: the first sentence, clipped. The
+    author replaces it at measurement time; retrieval keys on it, nothing else."""
+    first = re.split(r"(?<=[.!?])\s", text.strip(), maxsplit=1)[0]
+    return first[:MAX_ANCHOR_CHARS].strip()
+
+
+def extract_lessons(result_cases: list, exam_cases: list, schema: str = "e6") -> list:
     """Lesson SKELETONS from failing TRAIN cases of one run's per-case results
     (situation = the case input, what_went_wrong = its failed checks, fix = empty,
     authored by a human at measurement time from the failing OUTPUT — never from
     `expected`). Raises on a non-train case id in `result_cases`: the caller
     filters to train first, and a heldout id reaching this function is a leak in
     the making, not an item to skip."""
+    if schema not in SCHEMAS:
+        raise ValueError(f"extract_lessons: unknown schema {schema!r}")
     by_id = {c["id"]: c for c in exam_cases}
     lessons: list = []
     for rc in result_cases:
@@ -154,7 +203,25 @@ def extract_lessons(result_cases: list, exam_cases: list) -> list:
         if case.get("split") != "train":
             raise ValueError(
                 f"extract_lessons: case {rc['id']!r} is split={case.get('split')!r} "
-                f"— lessons source from TRAIN failures only")
+                f"— lessons source from TRAIN cases only")
+        if schema == "e33":
+            # e33 lessons come from SUCCESSFUL train trajectories (OpenViking
+            # train_skip_failed_sessions); the approach is authored from the passing
+            # OUTPUT at measurement time — never from `expected`.
+            if not rc.get("passed"):
+                continue
+            # Anchor on the SAME text the runtime retrieves on: runner._with_lessons
+            # keys a turns-bearing case on "\n".join(turns), not on case["input"]
+            # (A2 correctness refuter: every committed turns case happens to mirror
+            # the two, which is a fact about the authors, not the code). `_schema`
+            # is stamped here too, so a skeleton handed straight to retrieve/render
+            # is e33 rather than silently scored on its situation body.
+            key_text = "\n".join(case["turns"]) if case.get("turns") else case["input"]
+            lessons.append({"anchor": anchor_of(key_text),
+                            "situation": key_text, "approach": "", "excludes": "",
+                            "source_case": case["id"], "source": "success",
+                            "_schema": "e33"})
+            continue
         if rc.get("passed"):
             continue
         lessons.append({
@@ -178,7 +245,9 @@ def retrieve(lessons: list, case_input: str, k: int) -> list:
     case_toks = _tokens(case_input)
     scored = []
     for i, lesson in enumerate(lessons):
-        score = len(case_toks & _tokens(lesson["situation"]))
+        # e33: the anchor is the ONLY retrieval key; the situation body never scores.
+        key = lesson["anchor"] if lesson.get("_schema") == "e33" else lesson["situation"]
+        score = len(case_toks & _tokens(key))
         if score > 0:
             scored.append((-score, i, lesson))
     scored.sort()
@@ -191,10 +260,35 @@ def render(lessons: list) -> str:
     must be a true no-op)."""
     if not lessons:
         return ""
+    if all(lesson.get("_schema") == "e33" for lesson in lessons):
+        return _render_e33(lessons)
+    if any(lesson.get("_schema") == "e33" for lesson in lessons):
+        raise ValueError("render: e6 and e33 lessons in one injection — a library has "
+                         "one schema")
     lines = ["\n\n## Lessons from past failures on similar inputs",
              "Apply these where they fit; they never override the task rules above."]
     for lesson in lessons:
         lines.append(f"- Situation: {lesson['situation'][:300]}\n"
                      f"  What went wrong: {lesson['what_went_wrong']}\n"
                      f"  Fix: {lesson['fix']}")
+    return "\n".join(lines)
+
+
+E33_SCOPE_BLOCK = (
+    "These are advisory examples from past cases, not rules and not facts about this "
+    "task. Use one only when its situation matches AND none of its 'does not apply "
+    "when' conditions match; if any does, discard it entirely. Never copy names, "
+    "amounts, dates, identifiers or action choices from a lesson — every figure in "
+    "your answer comes from this task's input or tool results. If a lesson conflicts "
+    "with the task rules above, the input, or a tool result, ignore the lesson.")
+
+
+def _render_e33(lessons: list) -> str:
+    lines = ["\n\n## Lessons from past cases (advisory)", E33_SCOPE_BLOCK]
+    for lesson in lessons:
+        excl = lesson["excludes"].strip() or "no exclusions recorded"
+        lines.append(f"- When: {lesson['anchor']}\n"
+                     f"  Situation: {lesson['situation'][:300]}\n"
+                     f"  Approach that worked: {lesson['approach']}\n"
+                     f"  Does not apply when: {excl}")
     return "\n".join(lines)

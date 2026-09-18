@@ -684,7 +684,8 @@ def _turn_expected(case: dict, k: int, turn_text: str) -> dict:
 
 
 def _score_one_turn(parsed: dict, trace: dict, expected: dict, input_text: str,
-                    turn_index: int | None = None) -> tuple[bool, list, list]:
+                    turn_index: int | None = None, known_entities: tuple = (),
+                    scope_text: str | None = None) -> tuple[bool, list, list]:
     """The ONE call site of score_trajectory( in this file (criterion 9) — every
     trajectory-mode verdict, single-turn or per-turn, is produced here. Relocates
     BOTH pre-MULTITURN-EXAM pieces of attempt()'s trajectory branch verbatim: the
@@ -700,7 +701,9 @@ def _score_one_turn(parsed: dict, trace: dict, expected: dict, input_text: str,
     failed_checks entry names its turn"), while the no-turns call keeps the
     original two-key {"bucket", "check"} shape byte-identical for every entry
     (criterion 1/(9a))."""
-    passed, failures = score_trajectory(parsed, trace, expected, input_text)
+    passed, failures = score_trajectory(parsed, trace, expected, input_text,
+                                        known_entities=known_entities,
+                                        scope_text=scope_text)
     failed_checks = [{"bucket": "quality", "check": _trajectory_check_id(f),
                       **({"turn": turn_index} if turn_index is not None else {})}
                      for f in failures]
@@ -869,7 +872,8 @@ def _run_turns(agent, case, adapter, model, tools_mod,
         scoring_trace = {**trace_k, "tool_results": list(scoring_tool_results),
                          "tool_results_this_turn": trace_k["tool_results"]}
         passed_k, failures_k, failed_checks_k = _score_one_turn(
-            parsed_k, scoring_trace, expected_k, "\n".join(turn_texts), turn_index=k)
+            parsed_k, scoring_trace, expected_k, "\n".join(turn_texts), turn_index=k,
+            known_entities=_known_entities(tools_mod), scope_text=turn_texts[k])
         all_step_metrics.extend(step_metrics_k)
         turn_metrics_k = combine_metrics(step_metrics_k) if step_metrics_k else None
         entry = {
@@ -949,7 +953,8 @@ def score_case(agent, case, adapter, model, tools_mod,
         parsed, trace = run_trajectory_case(agent, case, adapter, model, tools_mod,
                                             dedupe_tools=dedupe_tools)
         passed, failures, failed_checks = _score_one_turn(
-            parsed, trace, case["expected"], case["input"], turn_index=None)
+            parsed, trace, case["expected"], case["input"], turn_index=None,
+            known_entities=_known_entities(tools_mod))
         return parsed, trace, passed, failures, failed_checks
     # `assembly` is consumed ONLY here: a no-`turns` case has no history to scope,
     # so run_trajectory_case never sees the knob (E27 criterion 4 by construction).
@@ -1234,7 +1239,8 @@ def _error_recovery_failures(er: dict, answer: str, trace: dict,
 
 
 def score_trajectory(parsed: dict, trace: dict, expected: dict,
-                     input_text: str) -> tuple[bool, list]:
+                     input_text: str, known_entities: tuple = (),
+                     scope_text: str | None = None) -> tuple[bool, list]:
     failures = []
     answer = str(parsed.get("answer", ""))
     if not answer:
@@ -1286,6 +1292,32 @@ def score_trajectory(parsed: dict, trace: dict, expected: dict,
             if tool not in allowed:
                 failures.append(f"called disallowed tool {tool!r}: not in "
                                 f"tools_allowed {allowed}")
+
+    # Scope coverage (E33 A1, 2026-09-16) — EXPECTATION-FREE, so it also runs live:
+    # every KNOWN entity the scoped input names must be mentioned in the answer, by
+    # ANY of its aliases (name, head token, contact name, contact surname), whole-word,
+    # case-insensitive. Witness: the 31 Aug heavy-band
+    # FB1 trajectory (docs/probes/crm-heavyband-feasibility-2026-08-31), where the
+    # then-champion answered a three-company roundup for Janssens ONLY and passed
+    # every expectation-free check — silent scope-drop, invisible to `live`. A name
+    # mentioned in an honest gap report ("could not retrieve Mertens") COUNTS: this
+    # is coverage, not correctness. `known_entities` comes from the tools module's
+    # known_companies() (mock for exams, real for live) — with none, the check is
+    # inert, declared, never a silent pass of a different kind. `scope_text` is the
+    # CURRENT turn for multi-turn cases (the joined thread would make "And Devos
+    # Garage?" demand a mention of Janssens); it defaults to input_text. Fires only
+    # when the scoped input names TWO OR MORE entities: scope-drop is answering a
+    # SUBSET of a multi-entity request; a terse "6500 EUR" to a one-company question
+    # omits a name, not a company (evals/test_live_routing.py test_8 is that shape).
+    # ONE failure string naming every dropped entity, so failed_checks gains exactly
+    # one entry.
+    scoped = input_text if scope_text is None else scope_text
+    aliases = _entity_aliases(known_entities)
+    named = [e for e, al in aliases.items() if any(_word_in(a, scoped) for a in al)]
+    dropped = [e for e in named if not any(_word_in(a, answer) for a in aliases[e])]
+    if len(named) >= 2 and dropped:
+        failures.append(f"scope drop: input names {dropped}, answer never mentions "
+                        f"{'it' if len(dropped) == 1 else 'them'}")
 
     # Error recovery (E10 rung A) — see _error_recovery_failures for the contract.
     er = expected.get("error_recovery")
@@ -1360,8 +1392,38 @@ def score_trajectory(parsed: dict, trace: dict, expected: dict,
 # table maps each string back to the check that emitted it, by the literal prefix
 # used at its emission site above. Order matters: the answer_contains_any prefix
 # must be tried before the shorter answer_contains one.
+def _entity_head(entity: str) -> str:
+    """The distinguishing first token of a registry name ("janssens bakery" ->
+    "janssens"): what a model actually writes when it names the company."""
+    return entity.split()[0].lower()
+
+
+def _word_in(token: str, text: str) -> bool:
+    return re.search(rf"(?<![\w])(?:{re.escape(token)})(?![\w])", text, re.IGNORECASE) is not None
+
+
+def _known_entities(tools_mod):
+    """The entity registry a tools module exposes: known_entities() (canonical ->
+    aliases) preferred, known_companies() (names only) accepted; a module with
+    neither yields () and the scope check stays inert for that agent."""
+    fn = getattr(tools_mod, "known_entities", None)
+    if callable(fn):
+        return dict(fn())
+    fn = getattr(tools_mod, "known_companies", None)
+    return tuple(fn()) if callable(fn) else ()
+
+
+def _entity_aliases(known_entities) -> dict:
+    """Normalize either registry shape to {canonical: [aliases...]}: a names-only
+    tuple gets the head token as its single alias (the original A1 rule)."""
+    if isinstance(known_entities, dict):
+        return {str(k): [str(a).lower() for a in v] for k, v in known_entities.items()}
+    return {str(e): [_entity_head(str(e))] for e in known_entities}
+
+
 _TRAJECTORY_FAILURE_CHECKS = (
     ("no final answer emitted", "answer_present"),
+    ("scope drop: ", "scope_coverage"),
     ("answer missing all of answer_contains_any", "answer_contains_any"),
     ("answer missing ", "answer_contains"),
     ("answer contains forbidden ", "answer_not_contains"),
@@ -2195,6 +2257,41 @@ def _cost_tiebreak(tied: list) -> tuple[dict | None, str]:
 
 def diff_recommendation(rows: list, champion: str,
                         champ_snap: dict | None = None) -> list[str]:
+    """The `diff` verdict, as lines, closed by the selection denominator: how many
+    candidates the verdict ran over (rows, plus the snapshot champion when it stood in
+    for an un-run incumbent). The deciding sign-test p is the accuracy leader against
+    the best of the rest, and only when accuracy alone decided (a unique leader) — a
+    cost-broken tie names no p. Annotation: `_diff_verdict` is the whole decision."""
+    lines = _diff_verdict(rows, champion, champ_snap)
+    ranked = sorted(rows, key=_acc_key, reverse=True)
+    deciding_p = None
+    # A p is printed only when a row-vs-row HELDOUT comparison is what decided the
+    # head line. The head line is about the CHAMPION (keep it / swap off it), so the
+    # pair is leader-vs-champion when swapping, and champion-vs-runner-up when the
+    # champion is the leader — never leader-vs-runner-up under a swap (second-pass
+    # refuter: champion 3rd of 3, A-vs-B p=0.50 printed under "swap champ -> A"
+    # while A-vs-champ was p=0.016). Conditions: a unique leader, the pair separated
+    # on heldout (a TRAIN-only win leaves the heldout sign test at a fixed p=1.0),
+    # no SNAPSHOT (no per-case data), champion among the rows (else the head line
+    # is an explicit "none").
+    champ_row = next((r for r in rows if r["model"] == champion), None)
+    if (champ_snap is None and champ_row is not None and len(ranked) >= 2
+            and _acc_key(ranked[0]) > _acc_key(ranked[1])):
+        other = ranked[1] if ranked[0] is champ_row else champ_row
+        if (ranked[0]["heldout"]["score"] or 0) > (other["heldout"]["score"] or 0):
+            deciding_p = stats.paired(_heldout_fails(ranked[0]),
+                                      _heldout_fails(other))["p"]
+    n = len(rows) + (1 if champ_snap else 0)
+    return lines + ["  " + stats.fmt_comparisons(n, deciding_p)]
+
+
+def _heldout_fails(result: dict) -> set:
+    return {str(c.get("id")) for c in result["cases"]   # KeyError on purpose: fail loud
+            if c.get("split") == "heldout" and not c.get("passed")}
+
+
+def _diff_verdict(rows: list, champion: str,
+                  champ_snap: dict | None = None) -> list[str]:
     """The `diff` verdict, as lines. Pure function of (rows, champion, snapshot).
 
     Accuracy first, cost only as a TIEBREAK (E12 / `docs/experiments.md`): the
@@ -2458,7 +2555,11 @@ def live_output_checks(agent_name: str, exam: dict, output: dict, trace: dict | 
     Returns the failure strings (empty = passed)."""
     mode = exam.get("mode", "labels")
     if mode == "trajectory":
-        _, failures = score_trajectory(output, trace, {"max_steps": 6}, text)
+        # Real tools.py here (for_exam=False): live scope coverage uses the registry
+        # the live agent actually answers from, not the exam mock's.
+        _, failures = score_trajectory(
+            output, trace, {"max_steps": 6}, text,
+            known_entities=_known_entities(load_tools(agent_name, for_exam=False)))
         return list(failures)
     prop_failures = [f"{name}: {msg}" for name, fn in load_properties(agent_name)
                      for ok, msg in [fn(text, output)] if not ok]

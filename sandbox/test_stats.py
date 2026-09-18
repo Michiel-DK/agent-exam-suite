@@ -121,6 +121,55 @@ class TestRouteCarriesTheStats(unittest.TestCase):
                          policy.report_lines([v], Path("results")))
 
 
+class TestComparisons(unittest.TestCase):
+    """The selection denominator (docs/2026-09-11 ... section 3). Hand values:
+    7 discordant cases all one way -> p = 2*C(7,0)/2^7 = 0.015625; Bonferroni over 4
+    comparisons = 0.05/4 = 0.0125, over 1 = 0.05."""
+
+    def test_bonferroni_hand_values_and_fail_loud(self):
+        self.assertEqual(stats.bonferroni(4), 0.0125)
+        self.assertEqual(stats.bonferroni(1), 0.05)
+        with self.assertRaises(ValueError):
+            stats.bonferroni(0)
+        with self.assertRaises(ValueError):
+            stats.fmt_comparisons(0)
+
+    def test_same_p_flips_only_on_the_candidate_count(self):
+        """THE isolating case: identical deciding p, only N changes. WRONG BUILD: a
+        line that prints the count but compares p against a fixed 0.05 (presence
+        without effect)."""
+        p = stats.paired(set(), {"h0", "h1", "h2", "h3", "h4", "h5", "h6"})["p"]
+        self.assertAlmostEqual(p, 0.015625)
+        five = stats.fmt_comparisons(5, p)
+        two = stats.fmt_comparisons(2, p)
+        self.assertIn("compared: 5 candidates", five)
+        self.assertIn("Bonferroni threshold 0.05/4 = 0.0125", five)
+        self.assertIn("p=0.0156 is NOT distinguishable after correction", five)
+        self.assertIn("compared: 2 candidates", two)
+        self.assertIn("Bonferroni threshold 0.05/1 = 0.0500", two)
+        self.assertIn("p=0.0156 is distinguishable after correction", two)
+        self.assertNotIn("NOT", two)
+
+    def test_word_is_decided_from_the_printed_digits(self):
+        """Correctness refuter 2026-09-15: at 3 dp, p=0.0034 printed as 0.003 beside a
+        0.0033 threshold and the word "NOT distinguishable" — digits contradicting the
+        word. Now both print at 4 dp and the word is derived from those rounded values.
+        Hand values: 16 candidates -> 0.05/15 = 0.00333.. -> 0.0033; p = 0.003418."""
+        line = stats.fmt_comparisons(16, 0.003418)
+        self.assertIn("threshold 0.05/15 = 0.0033", line)
+        self.assertIn("p=0.0034 is NOT distinguishable", line)
+        # Rounded-equal reads as clearing the bar — the printed digits are the rule.
+        self.assertIn("p=0.0033 is distinguishable", stats.fmt_comparisons(16, 0.00334))
+        # The line never claims a pick: it also prints under cannot-distinguish.
+        self.assertNotIn("pick", stats.fmt_comparisons(12))
+
+    def test_no_p_means_no_claim_and_one_candidate_is_no_pick(self):
+        line = stats.fmt_comparisons(3)
+        self.assertIn("compared: 3 candidates", line)
+        self.assertNotIn("sign-test", line)
+        self.assertIn("no comparison was made", stats.fmt_comparisons(1))
+
+
 class TestServePayload(unittest.TestCase):
     def test_results_endpoint_serves_ci95_from_the_single_implementation(self):
         """Functional and SELF-SUFFICIENT (the refuter caught a skipTest on a clean

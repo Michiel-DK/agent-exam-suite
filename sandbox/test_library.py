@@ -271,6 +271,131 @@ for name in sorted(p.name for p in (ROOT / "agents").iterdir() if p.is_dir()):
     check(f"{name}: load_agent adds no library keys without the yaml key",
           "_lessons" not in cfg and "library_sha" not in cfg)
 
+# ------------------------------------------------------------- E33 schema (A2)
+print("\nE33 schema — anchor-only retrieval, exclusions, success-only extraction, scope block")
+
+E33_LESSON = {"anchor": "status roundup across several companies with amounts",
+              "situation": "the user asks for a roundup of open deals across three companies "
+                           "and wants amount and stage for each",
+              "approach": "one deals_list call per company named, then one answer section "
+                          "per company, gaps reported by name",
+              "excludes": "a single-company question; a question about contacts rather than deals"}
+
+with tempfile.TemporaryDirectory() as td:
+    p = Path(td) / "lib.json"
+    p.write_text(json.dumps({"schema": "e99", "lessons": [E33_LESSON]}))
+    ok, msg = raises(lambda: L.load_library(p, REAL_CASES), "unknown schema")
+    check("e33: unknown schema raises", ok, msg)
+    p.write_text(json.dumps({"schema": "e33", "lessons": [{k: v for k, v in E33_LESSON.items() if k != "anchor"}]}))
+    ok, msg = raises(lambda: L.load_library(p, REAL_CASES), "missing key 'anchor'")
+    check("e33: lesson without anchor raises", ok, msg)
+    p.write_text(json.dumps({"schema": "e33", "lessons": [dict(E33_LESSON, anchor="two\nlines")]}))
+    ok, msg = raises(lambda: L.load_library(p, REAL_CASES), "one line")
+    check("e33: multi-line anchor raises (it is a key, not a description)", ok, msg)
+    p.write_text(json.dumps({"schema": "e33", "lessons": [dict(E33_LESSON, approach="")]}))
+    ok, msg = raises(lambda: L.load_library(p, REAL_CASES), "empty required key 'approach'")
+    check("e33: empty approach raises", ok, msg)
+    p.write_text(json.dumps({"schema": "e33", "lessons": [dict(E33_LESSON, excludes="")]}))
+    loaded = L.load_library(p, REAL_CASES)
+    check("e33: empty excludes is allowed and the schema is stamped on the lesson",
+          loaded[0]["_schema"] == "e33" and loaded[0]["excludes"] == "")
+    # The leak guard reads EVERY e33 field: the answer key hidden in `excludes`,
+    # `approach` or `anchor` must trip it (RED against a real committed expected string).
+    for field in ("excludes", "approach", "anchor"):
+        leaky = dict(E33_LESSON, **{field: _REAL_EXPECTED[:L.MAX_ANCHOR_CHARS]})
+        p.write_text(json.dumps({"schema": "e33", "lessons": [leaky]}))
+        ok, msg = raises(lambda: L.load_library(p, REAL_CASES), "expected-answer text")
+        check(f"e33: leak guard reads the {field} field", ok, msg)
+    # An e6 file (no schema key) still loads exactly as before and is stamped e6.
+    p.write_text(json.dumps({"lessons": [GOOD_LESSON]}))
+    check("e6: file without schema key loads as e6", L.load_library(p, REAL_CASES)[0]["_schema"] == "e6")
+
+# Retrieval: the anchor is the ONLY key. Same lesson, same case input: under e33 the
+# situation body's shared vocabulary must NOT retrieve it; under e6 it does. This is
+# the isolating pair for "retrieve on a one-line anchor, never on the rule body".
+case_text = "give me a status check on three companies before the pipeline review"
+shared_body = dict(E33_LESSON, anchor="unrelated anchor zzz",
+                   situation="status check on three companies before the pipeline review")
+e33_lesson = dict(shared_body, _schema="e33")
+e6_lesson = {"situation": shared_body["situation"], "what_went_wrong": "x", "fix": "y"}
+check("e33: shared SITUATION vocabulary does not retrieve (anchor is the only key)",
+      L.retrieve([e33_lesson], case_text, 2) == [])
+check("e6: the same situation text DOES retrieve under e6 (control)",
+      L.retrieve([e6_lesson], case_text, 2) == [e6_lesson])
+anchored = dict(E33_LESSON, _schema="e33", anchor="status check on three companies")
+check("e33: anchor overlap retrieves", L.retrieve([anchored], case_text, 2) == [anchored])
+
+# Extraction: e33 skeletons come from PASSED train cases; failed ones are skipped;
+# a heldout id still raises; the skeleton carries source=success and an anchor.
+train_pass = {"id": "t-pass", "split": "train", "input": "First sentence here. Second one.", "expected": {}}
+train_fail = {"id": "t-fail", "split": "train", "input": "Failing input.", "expected": {}}
+held = {"id": "h", "split": "heldout", "input": "held", "expected": {}}
+sk = L.extract_lessons([{"id": "t-pass", "passed": True}, {"id": "t-fail", "passed": False}],
+                       [train_pass, train_fail, held], schema="e33")
+check("e33: extraction yields one skeleton from the PASSED case only",
+      len(sk) == 1 and sk[0]["source_case"] == "t-pass" and sk[0]["source"] == "success", str(sk))
+check("e33: skeleton anchor is the first sentence", sk and sk[0]["anchor"] == "First sentence here.")
+check("e33: skeleton approach and excludes are empty (authored at measurement time)",
+      sk and sk[0]["approach"] == "" and sk[0]["excludes"] == "")
+check("e33: skeleton is stamped e33 (a skeleton fed to retrieve scores on its anchor, not its body)",
+      sk and sk[0].get("_schema") == "e33"
+      and L.retrieve(sk, "Second one only", 1) == []          # body overlap does not retrieve
+      and L.retrieve(sk, "First sentence here", 1) == sk)     # anchor overlap does
+turns_case = {"id": "t-turns", "split": "train", "input": "IGNORED mirror text",
+              "turns": ["What about Devos?", "And the amount?"], "expected": {}}
+sk2 = L.extract_lessons([{"id": "t-turns", "passed": True}], [turns_case], schema="e33")
+check("e33: a turns case anchors on the joined turns, the text the runtime retrieves on",
+      sk2 and sk2[0]["anchor"] == "What about Devos?" and sk2[0]["situation"].startswith("What about Devos?")
+      and "IGNORED" not in sk2[0]["anchor"])
+ok, msg = raises(lambda: L.extract_lessons([{"id": "h", "passed": True}], [train_pass, held], schema="e33"),
+                 "TRAIN cases only")
+check("e33: extraction still raises on a heldout id", ok, msg)
+old_sk = L.extract_lessons([{"id": "t-pass", "passed": True}, {"id": "t-fail", "passed": False, "failures": ["f"]}],
+                           [train_pass, train_fail, held])
+check("e6: default extraction unchanged (failed case only, fix empty)",
+      len(old_sk) == 1 and old_sk[0]["source_case"] == "t-fail" and old_sk[0]["fix"] == "")
+
+# Render: the e6 block is pinned byte-for-byte (it is sprint B's control); the e33
+# block opens with the scope text and shows the exclusions per lesson; mixing raises.
+E6_RENDER_PIN = ("\n\n## Lessons from past failures on similar inputs\n"
+                 "Apply these where they fit; they never override the task rules above.\n"
+                 "- Situation: customer retracts an offer mid-call and it resurfaces\n"
+                 "  What went wrong: withdrawn item listed as a commitment\n"
+                 "  Fix: when a speaker cancels an item, drop it and do not mention it")
+check("e6: render byte-identical to the pre-E33 block", L.render([GOOD_LESSON]) == E6_RENDER_PIN)
+r33 = L.render([dict(E33_LESSON, _schema="e33")])
+check("e33: render opens with the scope block", L.E33_SCOPE_BLOCK in r33 and r33.startswith("\n\n## Lessons from past cases (advisory)"))
+check("e33: render shows the anchor, approach and exclusions",
+      "When: status roundup across several companies" in r33
+      and "Approach that worked: one deals_list call" in r33
+      and "Does not apply when: a single-company question" in r33)
+check("e33: empty excludes renders as 'no exclusions recorded'",
+      "Does not apply when: no exclusions recorded" in L.render([dict(E33_LESSON, _schema="e33", excludes="")]))
+check("e33: render never contains the e6 wording",
+      "What went wrong" not in r33 and "past failures" not in r33)
+ok, msg = raises(lambda: L.render([GOOD_LESSON, dict(E33_LESSON, _schema="e33")]), "one schema")
+check("mixed e6 + e33 in one injection raises", ok, msg)
+
+# Through the REAL entry point (gotcha 1): an e33 library loaded from disk, injected
+# by run_plain_case after the static block; a zero-overlap case injects nothing.
+with tempfile.TemporaryDirectory() as td:
+    p = Path(td) / "lib.json"
+    p.write_text(json.dumps({"schema": "e33", "lessons": [E33_LESSON]}))
+    lib33 = L.load_library(p, REAL_CASES)
+ad = _CapturingAdapter()
+runner.run_plain_case(dict(base_agent, _lessons=lib33, library_k=2),
+                      {"id": "c3", "input": "status roundup of our companies with amounts", "expected": {}}, ad, "m")
+sysmsg = ad.messages[0]["content"]
+check("e33 through run_plain_case: scope block in the OUTGOING prompt, after the static block",
+      sysmsg.startswith("STATIC-BLOCK-TEXT") and sysmsg.find(L.E33_SCOPE_BLOCK) > len("STATIC-BLOCK-TEXT"))
+check("e33 through run_plain_case: exclusions reach the prompt",
+      "Does not apply when: a single-company question" in sysmsg)
+ad = _CapturingAdapter()
+runner.run_plain_case(dict(base_agent, _lessons=lib33, library_k=2),
+                      {"id": "c4", "input": "disjoint zzz", "expected": {}}, ad, "m")
+check("e33 zero-overlap case -> prompt byte-identical to the static block",
+      ad.messages[0]["content"] == "STATIC-BLOCK-TEXT")
+
 print()
 if FAILED:
     print(f"FAILED ({len(FAILED)}): " + "; ".join(FAILED))

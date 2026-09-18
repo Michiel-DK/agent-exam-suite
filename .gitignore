@@ -9,3 +9,4 @@ results/
 .claude/worktrees/
 e8_*.log
 sweep_*.log
+.cache/

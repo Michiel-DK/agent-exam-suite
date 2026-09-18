@@ -21,6 +21,15 @@
 # fallback already covers the case (expense: qwen3:8b passes anthropic-api) no hosted
 # tier is added — it would add cost, not coverage. crm-followup: both hosted flagships
 # measured BELOW the local 2B same-day (13/18, 10/18 vs 15/18); no hosted tier.
+# SELECTION DENOMINATOR (2026-09-15, PR #89): every champion and tier
+# here is the argmax of a model x exam matrix. `runner.py route` now prints how many
+# candidates each leader was chosen FROM and the Bonferroni threshold that count
+# implies; `runner.py diff` closes with the same line. Measured on this box's corpus,
+# 15 Sep 2026: 110 exam x model cells, 23 distinct models, 12–16 candidates per exam,
+# and all 6 routable exams read cannot-distinguish on accuracy — so no tier below is an
+# accuracy pick over its cohort; each was taken on the mechanism its comment names
+# (window, cost, same-day rep, a case no local tier passes). Read the fractions with
+# that width, never as a ranking of the whole matrix.
 crm-followup:
   - {provider: ollama, model: gemma4-e2b-ctx16k}     # champion 09-04: 15/18 (16k window; Modelfile in agents/crm-followup/)
   - {provider: ollama, model: qwen3-8b-ctx16k}       # threads: 3/4 multi-turn (ladder row 5)

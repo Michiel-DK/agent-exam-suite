@@ -855,5 +855,173 @@ class TestReportIsStable(unittest.TestCase):
         self.assertIn("n=1, single run", text)
 
 
+# ----------------------------------------- the selection denominator (2026-09-15)
+
+def _five_model_corpus():
+    """A 18-heldout cohort: leader A 18/18; runner-up B 11/18 (7 fails, all cases A
+    passes -> one-sided sign test p = 0.015625); C, D, E at 10/18. Noise band 1 ->
+    A is a 'pick' by 7 cases."""
+    seven = tuple(f"h{i}" for i in range(7))
+    eight = seven + ("h7",)
+    return _corpus(
+        ("A", (6, 6), (18, 18), (), GEMMA_TOTALS),
+        ("B", (6, 6), (18, 18), seven, LLAMA_TOTALS),
+        ("C", (6, 6), (18, 18), eight, LLAMA_TOTALS),
+        ("D", (6, 6), (18, 18), eight, LLAMA_TOTALS),
+        ("E", (6, 6), (18, 18), eight, LLAMA_TOTALS),
+    )
+
+
+class TestSelectionDenominator(unittest.TestCase):
+    """Every pick prints how many candidates it was chosen FROM, and the deciding p
+    is read against the Bonferroni threshold that count implies. The count changes
+    the ANNOTATION only — the noise band still decides, and that is pinned too."""
+
+    def test_route_pick_prints_count_and_corrected_verdict(self):
+        corpus = _five_model_corpus()
+        v = policy.route_agent("email-triage", corpus, None)
+        self.assertEqual(v.accuracy_verdict, "pick")
+        first = v.stats_evidence[0]
+        self.assertIn("compared: 5 candidates", first)
+        self.assertIn("0.05/4 = 0.0125", first)
+        self.assertIn("p=0.0156 is NOT distinguishable after correction", first)
+        text = "\n".join(policy.report_lines([v], Path("results")))
+        self.assertIn("· compared: 5 candidates", text)
+
+    def test_same_lead_two_candidates_clears_the_corrected_bar(self):
+        """Same A vs B, nobody else measured: the pick is unchanged and the SAME p now
+        clears the threshold. WRONG BUILD: a count that never reaches the p clause."""
+        two = [(k, r) for k, r in _five_model_corpus() if r.model in ("A", "B")]
+        v = policy.route_agent("email-triage", two, None)
+        self.assertEqual(v.accuracy_verdict, "pick")
+        self.assertIn("compared: 2 candidates", v.stats_evidence[0])
+        self.assertIn("p=0.0156 is distinguishable after correction", v.stats_evidence[0])
+
+    def test_diff_pairs_the_leader_against_the_champion_not_the_runner_up(self):
+        """Second-pass refuter 2026-09-15: A 9/10, B 7/10, champ 2/10. The head line
+        is "swap champ -> A"; the p that supports it is A-vs-champ (7 discordant one
+        way, p = 2/128 = 0.0156, clears 0.05/2 = 0.025), NOT A-vs-B (p = 0.5). Pre-fix
+        the line printed p=0.5000 NOT distinguishable under the swap."""
+        rows = [_row("A", heldout=(9, 10), totals=GEMMA_TOTALS),
+                _row("B", heldout=(7, 10), totals=LLAMA_TOTALS),
+                _row("champ", heldout=(2, 10), totals=LLAMA_TOTALS)]
+        out = diff_recommendation(rows, "champ")
+        self.assertIn("swap champ -> A", out[0])
+        self.assertIn("threshold 0.05/2 = 0.0250", out[-1])
+        self.assertIn("p=0.0156 is distinguishable after correction", out[-1])
+        # Champion IS the leader: the pair is champion vs runner-up (B, p=0.5).
+        out2 = diff_recommendation(rows, "A")
+        self.assertIn("keep A", out2[0])
+        self.assertIn("p=0.5000 is NOT distinguishable after correction", out2[-1])
+
+    def test_train_only_pick_names_no_deciding_p(self):
+        """Python reviewer 2026-09-15: heldout tied 4/4, train 6/6 vs 3/6 -> a pick
+        cleared on TRAIN alone. The heldout sign test is then p=1.0 by construction
+        and must not be printed as "deciding". Same rule in diff."""
+        corpus = _corpus(("lead", (6, 6), (4, 4), (), GEMMA_TOTALS),
+                         ("weak", (3, 6), (4, 4), (), LLAMA_TOTALS))
+        v = policy.route_agent("email-triage", corpus, None)
+        self.assertEqual(v.accuracy_verdict, "pick")
+        self.assertIn("cleared on train", v.accuracy_evidence)
+        self.assertIn("compared: 2 candidates", v.stats_evidence[0])
+        self.assertNotIn("deciding sign-test", v.stats_evidence[0])
+        rows = [_row("lead", train=(6, 6), totals=GEMMA_TOTALS),
+                _row("weak", train=(3, 6), totals=LLAMA_TOTALS)]
+        out = diff_recommendation(rows, "weak")
+        self.assertIn("swap weak -> lead", out[0])
+        self.assertNotIn("deciding sign-test", out[-1])
+
+    def test_cannot_distinguish_prints_count_without_a_deciding_p(self):
+        corpus = _corpus(
+            ("cheap", (6, 6), (4, 4), ("h3",), LLAMA_TOTALS),
+            ("dear", (6, 6), (4, 4), (), GEMMA_TOTALS),
+            ("third", (6, 6), (4, 4), ("h2",), LLAMA_TOTALS),
+        )
+        v = policy.route_agent("email-triage", corpus, None)
+        self.assertEqual(v.accuracy_verdict, policy.CANNOT_DISTINGUISH)
+        self.assertIn("compared: 3 candidates", v.stats_evidence[0])
+        self.assertNotIn("deciding sign-test", v.stats_evidence[0])
+        self.assertNotIn("pick", v.stats_evidence[0])   # refuter: no pick was made
+
+    def test_diff_closes_with_the_count_and_counts_the_snapshot(self):
+        rows = [_row("A", heldout=(18, 18), totals=GEMMA_TOTALS)]
+        for m in ("B", "C", "D", "E"):
+            r = _row(m, heldout=(18, 18), totals=LLAMA_TOTALS)
+            fails = 7 if m == "B" else 8
+            for c in r["cases"]:
+                if c["split"] == "heldout" and int(c["id"][1:]) < fails:
+                    c["passed"] = False
+            r["heldout"]["passed"] = 18 - fails
+            r["heldout"]["score"] = round((18 - fails) / 18, 4)
+            rows.append(r)
+        out = diff_recommendation(rows, "B")
+        self.assertIn("swap B -> A", out[0])                     # verdict unchanged
+        self.assertIn("compared: 5 candidates", out[-1])
+        self.assertIn("p=0.0156 is NOT distinguishable after correction", out[-1])
+        # A lone challenger against the snapshot: the snapshot IS a candidate.
+        snap = {"train_score": 0.5, "heldout_score": 0.5, "model": "champ"}
+        out2 = diff_recommendation([rows[0]], "champ", snap)
+        self.assertIn("compared: 2 candidates", out2[-1])
+        self.assertNotIn("deciding sign-test", out2[-1])       # one row: nothing to pair
+        # Two rows PLUS a snapshot: the keep/swap was decided against the snapshot, so
+        # a p between the two rows did not decide anything and is not printed.
+        out3 = diff_recommendation(rows[:2], "champ", snap)
+        self.assertIn("compared: 3 candidates", out3[-1])
+        self.assertNotIn("deciding sign-test", out3[-1])
+        # Champion never run and no snapshot: the head line is an explicit "none", so
+        # no p may sit under it claiming to have decided (A vs B here is p=0.0156).
+        out4 = diff_recommendation(rows[:2], "champ-not-run", None)
+        self.assertIn("recommendation: none", out4[0])
+        self.assertIn("compared: 2 candidates", out4[-1])
+        self.assertNotIn("deciding sign-test", out4[-1])
+        # An accuracy tie broken on cost names no deciding p either.
+        tie = [_row("gemma4:e2b-it-qat", totals=GEMMA_TOTALS),
+               _row("llama3.1:latest", totals=LLAMA_TOTALS)]
+        self.assertNotIn("deciding sign-test",
+                         diff_recommendation(tie, "gemma4:e2b-it-qat")[-1])
+
+    def test_route_entry_point_prints_the_matrix_size(self):
+        """Through the REAL entry point (policy.run, what `runner.py route` calls):
+        two files for one exam x model pair are ONE cell; the header says so. WRONG
+        BUILD: corpus_summary present but never wired into run()."""
+        import contextlib
+        import io
+        import json
+        import tempfile
+        from types import SimpleNamespace
+        with tempfile.TemporaryDirectory() as tmp:
+            d = Path(tmp)
+            a = _row("A", totals=GEMMA_TOTALS)
+            b = _row("B", heldout=(2, 4), totals=LLAMA_TOTALS)
+            (d / "email-triage__ollama__A.json").write_text(json.dumps(a))
+            (d / "email-triage__ollama__A_rerun.json").write_text(json.dumps(a))
+            (d / "email-triage__ollama__B.json").write_text(json.dumps(b))
+            # A bake-off report (runner.py bakeoff, E28/E30) has no `cases` block and
+            # sits at the top level of results/. Pre-fix this single file made the
+            # whole route raise (master, 2026-09-15, this box's corpus).
+            (d / "bakeoff__email-triage__A.json").write_text(json.dumps(
+                {"agent": "email-triage", "model": "A", "long_min": 0, "report": []}))
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                rc = policy.run(SimpleNamespace(results=str(d), agent=None))
+            self.assertEqual(rc, 0)
+            text = buf.getvalue()
+            self.assertIn("matrix searched on this box: 2 exam x model cells "
+                          "(2 distinct models across 1 exam(s), 3 results files)", text)
+            self.assertIn("compared: 2 candidates", text)
+            # --agent scopes the header to that exam's rows, not the whole corpus.
+            (d / "recap__ollama__Z.json").write_text(json.dumps(
+                {**_row("Z", totals=GEMMA_TOTALS), "agent": "recap"}))
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                policy.run(SimpleNamespace(results=str(d), agent="email-triage"))
+            self.assertIn("2 exam x model cells (2 distinct models across 1 exam(s), "
+                          "3 results files)", buf.getvalue())
+        # Without a corpus the report has no header line (report_lines stays pure).
+        v = policy.route_agent("email-triage", _five_model_corpus(), None)
+        self.assertNotIn("matrix searched",
+                         "\n".join(policy.report_lines([v], Path("results"))))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -34,6 +34,32 @@ def _norm(company: str) -> str:
     return company.strip().lower()
 
 
+def known_companies() -> list[str]:
+    """Every company this registry can answer about. Registry keys, already
+    normalized; sorted for determinism."""
+    return sorted(set(_CRM) | set(_DEALS))
+
+
+def known_entities() -> dict[str, list[str]]:
+    """E33 A1 scope-coverage registry: canonical company -> the strings that count as
+    a MENTION of it (any one, whole-word, case-insensitive): the full name, its head
+    token, and the CRM contact's full name and surname. The contact aliases exist
+    because a correct answer may identify a company by its contact alone — five
+    committed model outputs on briefing-devos say "Jan De Vos" and never "Devos"
+    (correctness refuter, 2026-09-16). Sorted; deterministic."""
+    out = {}
+    for name in known_companies():
+        aliases = [name, name.split()[0]]
+        contact = str((_CRM.get(name) or {}).get("contact", "")).strip().lower()
+        if contact:
+            parts = contact.split()
+            aliases.append(contact)
+            if len(parts) > 1:
+                aliases.append(" ".join(parts[1:]))   # surname, incl. particles ("de vos")
+        out[name] = sorted(set(aliases))
+    return out
+
+
 def crm_lookup(company: str = "") -> dict:
     return _CRM.get(_norm(company), {"error": f"no CRM record for {company!r}"})
 

@@ -147,6 +147,118 @@ def test_same_tool_different_args_passes():
     check("same tool + different args passes", ok, "; ".join(failures))
 
 
+# ------------------------------------------- scope coverage (E33 A1, 2026-09-16)
+#
+# The 31 Aug heavy-band FB1 trajectory, verbatim from
+# docs/probes/crm-heavyband-feasibility-2026-08-31/results.json: the then-champion
+# (gemma4:e4b-it-qat) made ONE deals_list call and answered a three-company roundup
+# for Janssens only. Every pre-existing expectation-free check passes it.
+
+_FB1_Q = ("Give me a status roundup of our open deals with Janssens Bakery, Devos "
+          "Garage and Vitrine Restaurant - amount and stage for each, and flag "
+          "anything that needs attention.")
+_FB1_4B_ANSWER = ("Janssens Bakery has one open deal:\n- **Webshop chatbot**: \u20ac6,500, "
+                  "Stage: Proposal Sent\n\n*Note: The CRM record for Janssens Bakery does "
+                  "not contain any specific flags requiring immediate attention "
+                  "regarding this deal.*")
+_FB1_4B_TRACE = _trace(
+    tool_calls=[{"tool": "deals_list", "args": {"company": "Janssens Bakery"}}],
+    tool_results=[[{"deal": "Webshop chatbot", "amount_eur": 6500, "stage": "proposal sent"}]],
+    steps=2)
+_ENTITIES = _load_module(ROOT / "evals" / "crm-followup" / "tools_mock.py",
+                         "tools_mock_scope_test").known_entities()
+_LIVE_EXPECTED = {"max_steps": 6}   # live_output_checks' empty-expected shape
+
+
+def test_scope_drop_is_the_only_failure_on_the_fb1_witness():
+    """THE isolating case (CLAUDE.md gotcha 3): the stored scope-drop answer passes
+    every other expectation-free check and fails ONLY scope_coverage, as ONE failure
+    naming both dropped companies. FAILS on the pre-A1 scorer (returns ok=True)."""
+    ok, failures = score_trajectory({"answer": _FB1_4B_ANSWER}, _FB1_4B_TRACE,
+                                    _LIVE_EXPECTED, _FB1_Q, known_entities=_ENTITIES)
+    check("scope: FB1 4B answer fails", not ok)
+    check("scope: exactly one failure", len(failures) == 1, "; ".join(failures))
+    check("scope: failure names devos and vitrine, not janssens",
+          failures and failures[0].startswith("scope drop: ") and "devos garage" in failures[0]
+          and "vitrine restaurant" in failures[0] and "janssens" not in failures[0],
+          "; ".join(failures))
+    check("scope: no entities -> inert (declared)",
+          score_trajectory({"answer": _FB1_4B_ANSWER}, _FB1_4B_TRACE, _LIVE_EXPECTED,
+                           _FB1_Q)[0])
+
+
+def test_scope_full_roundup_and_honest_gap_report_pass():
+    """Coverage, not correctness: naming a company inside a gap report counts."""
+    trace = _trace(
+        tool_calls=[{"tool": "deals_list", "args": {"company": c}}
+                    for c in ("Janssens Bakery", "Devos Garage", "Vitrine Restaurant")],
+        tool_results=[[{"deal": "Webshop chatbot", "amount_eur": 6500, "stage": "proposal sent"}],
+                      [{"deal": "Phase 2", "amount_eur": 9000, "stage": "negotiation"}],
+                      {"error": "CRM backend timeout fetching 'Vitrine Restaurant'"}],
+        steps=4)
+    ok, failures = score_trajectory(
+        {"answer": "Janssens: webshop chatbot, 6500, proposal sent. Devos: phase 2, "
+                   "9000, negotiation. Vitrine: could not retrieve — backend timeout."},
+        trace, _LIVE_EXPECTED, _FB1_Q, known_entities=_ENTITIES)
+    check("scope: honest three-company answer passes", ok, "; ".join(failures))
+    # A ONE-company question with a terse answer is not a scope drop (the live test_8
+    # shape: "6500 EUR" to "what is our Janssens deal worth" — a name omitted, not a
+    # company). The check needs >= 2 named entities to fire at all.
+    ok1, f1 = score_trajectory(
+        {"answer": "6500 EUR"},
+        _trace(tool_calls=[{"tool": "deals_list", "args": {"company": "Janssens Bakery"}}],
+               tool_results=[[{"deal": "Webshop chatbot", "amount_eur": 6500}]], steps=2),
+        _LIVE_EXPECTED, "What is our open deal with Janssens Bakery worth?",
+        known_entities=_ENTITIES)
+    check("scope: single-entity question, terse answer passes", ok1, "; ".join(f1))
+    # Correctness refuter 2026-09-16: a company identified ONLY by its CRM contact is
+    # covered. "Jan De Vos" shares no token with "devos"; the alias registry carries the
+    # contact's full name and surname, so this correct answer passes.
+    ok2, f2 = score_trajectory(
+        {"answer": "Janssens Bakery: webshop chatbot, 6500, proposal sent. Jan De Vos "
+                   "confirmed the phase 2 quote (9000, negotiation). Vitrine: backend timeout."},
+        trace, _LIVE_EXPECTED, _FB1_Q, known_entities=_ENTITIES)
+    check("scope: company named only by its contact (Jan De Vos) counts as covered", ok2,
+          "; ".join(f2))
+    check("scope: alias registry carries the contact surname for devos garage",
+          "de vos" in _ENTITIES["devos garage"] and "jan de vos" in _ENTITIES["devos garage"])
+    # The names-only registry shape (known_companies) still works, with the head-token rule.
+    ok3, f3 = score_trajectory({"answer": _FB1_4B_ANSWER}, _FB1_4B_TRACE, _LIVE_EXPECTED,
+                               _FB1_Q, known_entities=tuple(_ENTITIES))
+    check("scope: names-only registry shape still fires on the FB1 witness",
+          not ok3 and f3[0].startswith("scope drop"))
+    # A company the input does NOT name is never demanded (Mertens, Peeters are in the
+    # registry but not in this question).
+    check("scope: unnamed registry companies are not demanded",
+          not any("mertens" in f or "peeters" in f for f in failures))
+
+
+def test_scope_uses_the_current_turn_not_the_joined_thread():
+    """Multi-turn: turn 1 is "And Devos Garage?" — the answer is about Devos only,
+    and must NOT be asked to mention Janssens from turn 0. `scope_text` is the current
+    turn; `input_text` stays the joined thread (grounding still sees all of it)."""
+    thread = "What's our open deal with Janssens Bakery?\nAnd Devos Garage?"
+    trace = _trace(tool_calls=[{"tool": "deals_list", "args": {"company": "Devos Garage"}}],
+                   tool_results=[[{"deal": "Phase 2", "amount_eur": 9000, "stage": "negotiation"}]],
+                   steps=2)
+    ok, failures = score_trajectory({"answer": "Devos Garage: Phase 2, 9000, negotiation."},
+                                    trace, _LIVE_EXPECTED, thread, known_entities=_ENTITIES,
+                                    scope_text="And Devos Garage?")
+    check("scope: current-turn scoping passes a Devos-only answer", ok, "; ".join(failures))
+    ok2, failures2 = score_trajectory({"answer": "Devos Garage: Phase 2, 9000, negotiation."},
+                                      trace, _LIVE_EXPECTED, thread, known_entities=_ENTITIES)
+    check("scope: WITHOUT scope_text the joined thread would demand Janssens (the bug "
+          "scope_text exists to prevent)", not ok2 and "janssens" in failures2[0])
+    ok3, failures3 = score_trajectory(
+        {"answer": "Janssens 6500 proposal; Devos 9000 negotiation."}, trace, _LIVE_EXPECTED,
+        thread + "\nGive me a full roundup — Janssens, Devos and Peeters.",
+        known_entities=_ENTITIES,
+        scope_text="Give me a full roundup — Janssens, Devos and Peeters.")
+    check("scope: a recap turn that drops Peeters fails on scope",
+          not ok3 and any(f.startswith("scope drop") and "peeters" in f for f in failures3),
+          "; ".join(failures3))
+
+
 # ------------------------------------------- error recovery (E10 rung A, v2)
 #
 # expected.error_recovery is an OBJECT: {"tool": <the tool the case forces to fail>,

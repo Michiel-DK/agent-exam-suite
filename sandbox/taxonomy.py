@@ -145,6 +145,13 @@ CATEGORY_BY_CHECK: dict[str, str] = {
     # call itself retracted, filed as fabrication rather than a new category.
     "check_action_owner": "label-mismatch",
     "check_withdrawn_excluded": "fabrication",
+    # scope_coverage (E33 A1, 2026-09-16): a multi-entity request answered for a
+    # SUBSET of the entities, correctly — the "silent scope-drop" the 31 Aug heavy-
+    # band probe named (docs/probes/crm-heavyband-feasibility-2026-08-31/RESULTS.md).
+    # Its own category: not fabrication (nothing invented), not no-answer (an answer
+    # exists), not answer-content (the needles a case carries can pass while a
+    # company is missing) — a distinct routing signature.
+    "scope_coverage": "scope-drop",
     # --- infrastructure, not capability
     "error": "harness-error",
 }
@@ -262,11 +269,19 @@ def load_result_file(path: Path) -> dict:
 
 def find_result_files(results_dir: Path) -> list[Path]:
     """Top-level *.json only, sorted. `results/live/` holds shadow-run JSONL traces
-    (a different schema, no pass/fail verdicts) and is deliberately out of scope."""
+    (a different schema, no pass/fail verdicts) and is deliberately out of scope.
+
+    `bakeoff__*.json` is out of scope too: `runner.py bakeoff` (E28/E30) writes a
+    strategy report ({agent, model, long_min, report}, no `cases`) at the top level,
+    and one such file made `route` and `taxonomy` raise on the whole corpus from
+    2026-09-08 until 2026-09-15 (verified on master against this box's results/).
+    Excluded by name prefix. (Probe records are kept out by a different mechanism:
+    they live under `results/probe/`, which this non-recursive glob never reaches.)"""
     if not results_dir.exists():
         raise ValueError(f"no results directory at {results_dir} — run "
                          f"`python3 sandbox/runner.py run <agent>` first")
-    return sorted(results_dir.glob("*.json"))
+    return sorted(p for p in results_dir.glob("*.json")
+                  if not p.name.startswith("bakeoff__"))
 
 
 def case_findings(data: dict, case: dict, file: str = "?") -> list[Finding]:

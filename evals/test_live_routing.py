@@ -282,6 +282,40 @@ def test_8_trajectory_checks_catch_a_fabricated_number_and_pass_a_grounded_one()
     assert bad and "6500" in bad[0], bad
 
 
+def test_8b_live_trajectory_checks_catch_a_silent_scope_drop_with_the_real_registry():
+    """E33 A1 through the LIVE entry point: the 31 Aug FB1 scope-drop answer (one
+    company of three) must be flagged so `live` escalates, using agents/crm-followup/
+    tools.py's known_companies() — the real registry, not the exam mock. Pre-A1 this
+    returned [] and the live run exited 0 with a silently truncated answer."""
+    exam = load_exam("crm-followup")
+    q = ("Give me a status roundup of our open deals with Janssens Bakery, Devos Garage "
+         "and Vitrine Restaurant - amount and stage for each.")
+    trace = {"tools_called": ["deals_list"],
+             "tool_calls": [{"tool": "deals_list", "args": {"company": "Janssens Bakery"}}],
+             "tool_results": [[{"deal": "Webshop chatbot", "amount_eur": 6500,
+                                "stage": "proposal sent"}]], "steps": 2}
+    dropped = live_output_checks("crm-followup", exam,
+                                 {"answer": "Janssens Bakery: webshop chatbot, 6500, proposal sent."},
+                                 trace, q)
+    assert len(dropped) == 1 and dropped[0].startswith("scope drop: "), dropped
+    assert "devos garage" in dropped[0] and "vitrine restaurant" in dropped[0], dropped
+    full = live_output_checks("crm-followup", exam,
+                              {"answer": "Janssens 6500 proposal sent; Devos: no record; "
+                                         "Vitrine: no record."}, trace, q)
+    assert full == [], full
+    # THE pin for "real registry, not the mock" (test-honesty refuter, 2026-09-16: the
+    # three companies above exist in BOTH registries, so they could not tell them
+    # apart). Peeters Logistics is MOCK-ONLY: live must not demand it, so an answer
+    # that never names Peeters passes here — and goes RED if the production call ever
+    # flips to for_exam=True.
+    q2 = ("Status roundup for Janssens Bakery, Devos Garage and Peeters Logistics — "
+          "amount and stage for each.")
+    real_only = live_output_checks("crm-followup", exam,
+                                   {"answer": "Janssens 6500 proposal sent; Devos: no record."},
+                                   trace, q2)
+    assert real_only == [], real_only
+
+
 def test_9_label_and_field_modes_are_structural_only_and_say_so():
     """Declared gap: vocabulary is not checked (it lives in the prompt). A missing key
     IS caught."""

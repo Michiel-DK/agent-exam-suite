@@ -429,7 +429,7 @@ class Verdict(NamedTuple):
     champion_note: str = ""         # where the incumbent sits in the measured cohort
     # A3: interval + paired lines, printed under ACCURACY. Annotation only — the
     # noise band above stays the decision rule; these say how wide it really is.
-    stats_evidence: tuple = ()
+    stats_evidence: tuple = ()   # first line = the selection denominator (fmt_comparisons)
 
 
 def _pct(n: int, total: int) -> str:
@@ -578,6 +578,17 @@ def route_agent(agent: str, runs_with_keys: list, current: tuple | None,
                             f"{r.model} {r.heldout_passed}/{heldout_total} heldout, "
                             f"{r.train_passed}/{train_total} train"
                             for r in contenders))
+
+    # The selection denominator, first — every interval and paired line below is
+    # read against it. The deciding p exists only for a pick (leader vs runner-up)
+    # that HELDOUT separated: a pick cleared on train alone leaves the heldout sign
+    # test at a fixed p=1.0, which must not be called "deciding"; a
+    # cannot-distinguish verdict had no single deciding test. Recomputes the pair
+    # that fmt_paired formatted above — cheap, and keeps fmt_paired's signature.
+    deciding_p = (stats.paired(set(leader.heldout_failed),
+                               set(runner_up.heldout_failed))["p"]
+                  if acc_verdict == "pick" and "heldout" in separating else None)
+    stats_lines.insert(0, stats.fmt_comparisons(len(kept), deciding_p))
 
     priced = [r for r in contenders if r.cost.known]
     unpriced = tuple(r.model for r in contenders if not r.cost.known)
@@ -877,9 +888,26 @@ def champion_model(agent: str, agents_dir: Path | None = None) -> str:
         return ""
 
 
+def corpus_summary(corpus: list) -> dict:
+    """How big the matrix that was searched is, on this box: distinct (exam, model)
+    cells, distinct models, exams, and raw files (a cell can hold several files across
+    exam versions and reruns). Pure function of the loaded corpus."""
+    cells = {(r.agent, r.model) for _, r in corpus}
+    return {"files": len(corpus), "cells": len(cells),
+            "models": len({m for _, m in cells}), "agents": len({a for a, _ in cells})}
+
+
+def corpus_summary_line(summary: dict) -> str:
+    return (f"matrix searched on this box: {summary['cells']} exam x model cells "
+            f"({summary['models']} distinct models across {summary['agents']} exam(s), "
+            f"{summary['files']} results files). Every START ON below is an argmax over "
+            f"its cohort; each verdict prints the candidate count it was chosen from")
+
+
 def route_all(results_dir: Path, agent: str | None = None,
-              noise_cases: int = NOISE_BAND_CASES) -> list[Verdict]:
-    corpus = load_corpus(results_dir)
+              noise_cases: int = NOISE_BAND_CASES,
+              corpus: list | None = None) -> list[Verdict]:
+    corpus = load_corpus(results_dir) if corpus is None else corpus
     cats = failure_categories(results_dir)
     agents = sorted({r.agent for _, r in corpus}) if not agent else [agent]
     return [route_agent(a, corpus, current_exam_key(a), noise_cases, cats,
@@ -890,7 +918,8 @@ def route_all(results_dir: Path, agent: str | None = None,
 # ---------------------------------------------------------------- report
 
 def report_lines(verdicts: list, results_dir: Path,
-                 noise_cases: int = NOISE_BAND_CASES) -> list[str]:
+                 noise_cases: int = NOISE_BAND_CASES,
+                 corpus: list | None = None) -> list[str]:
     """The whole report, as lines. Pure function of the verdicts — no clock, no
     environment, every loop over a sorted sequence, so it is byte-stable."""
     try:
@@ -914,6 +943,8 @@ def report_lines(verdicts: list, results_dir: Path,
         "SINGLE run and includes cold model-load, so latency ratios are indicative, "
         "not measured.",
     ]
+    if corpus is not None:
+        out.append(corpus_summary_line(corpus_summary(corpus)))
     for v in sorted(verdicts, key=lambda v: v.agent):
         out += ["", "=" * 78, f"{v.agent}"]
         if v.status == INSUFFICIENT_DATA:
@@ -1019,8 +1050,13 @@ def _cohort_notes(v) -> list[str]:
 
 def run(args) -> int:
     results_dir = Path(args.results) if getattr(args, "results", None) else RESULTS_DIR
-    verdicts = route_all(results_dir, getattr(args, "agent", None))
-    print("\n".join(report_lines(verdicts, results_dir)))
+    corpus = load_corpus(results_dir)
+    agent = getattr(args, "agent", None)
+    verdicts = route_all(results_dir, agent, corpus=corpus)
+    # The matrix header describes what was SEARCHED for the verdicts printed, so under
+    # --agent it is scoped to that exam's rows (regression refuter, 2026-09-15).
+    shown = [(k, r) for k, r in corpus if r.agent == agent] if agent else corpus
+    print("\n".join(report_lines(verdicts, results_dir, corpus=shown)))
     return 0
 
 

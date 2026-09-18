@@ -509,3 +509,17 @@ that, and its rows name the categories worth aggregating: **fabrication-on-tool-
 tool-chaining · decoy-selection · language-drift · house-style/signoff · invented-dates ·
 urgency-cue over-trigger**. E12 needs the routing floor per task; the "routing read" lines
 above are the current best hand answer, to be replaced by measured policy.
+
+## gemma4 e4b QAT (Q4_0) drops the final-answer protocol on crm-followup at 16k — measured 2026-09-17 (E31)
+
+Same weights, same Modelfile window, 3 loads each, 0 unstable: post-hoc `gemma4:e4b` Q4_K_M passes 6 crm cases
+the `-it-qat` Q4_0 tag fails, 0 the other way. 5 of the 6 QAT failures read `unparseable … no final answer emitted`
+with the correct answer sitting in the prose (`'The status of Vitrine Restaurant is **churned**.'`). A format
+signature, not a knowledge one. Resident size is identical (~3.4 GB), wall +22% for the plain tag. Neither arm
+approaches the 2B champion (heldout 10/18 vs 15/18). Open question: the champion `gemma4-e2b-ctx16k` is also built
+FROM `-it-qat`; a plain-e2b arm is queued. `docs/probes/e31-quantisation-2026-09-09/RESULTS.md`.
+
+## qwen3:8b Q8_0 at the default 4k window: no gain over Q4_K_M, +56% wall — measured 2026-09-17 (E31)
+
+task-intake, 3 loads each, 0 unstable: q8 0 up / 2 down (train), heldout 17/20 both. At a 16k window the same q8
+tag ran ~14× slower with 7 ReadTimeouts (10 Sep) — the wall is q8 weights + the 16k KV cache on 16 GB, not q8 alone.

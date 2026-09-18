@@ -161,6 +161,42 @@ def test_1_default_path_byte_identical_to_master():
         f"case.get('expected') fix must not touch the no-turns record shape: {got['expected']}"
 
 
+def test_scope_coverage_fires_on_the_recap_turn_only_and_names_it():
+    """E33 A1 through the REAL run_exam on the committed heldout case
+    portfolio-recap-multiturn-fb2 (scripted model, real tools_mock registry).
+    Turns 0-2 answer one company each — the current-turn scope means "And Devos
+    Garage?" is NOT asked to mention Janssens. Turn 3 recaps all three amounts but
+    never NAMES Peeters: every needle passes, every number is grounded in the
+    accumulated tool results, and the verdict fails on scope_coverage ALONE, at
+    turn 3 (CLAUDE.md gotcha 3: exactly one failed_checks entry)."""
+    exam = load_exam("crm-followup")
+    case = next(c for c in exam["cases"] if c["id"] == "portfolio-recap-multiturn-fb2")
+    script = [
+        '{"tool": "deals_list", "args": {"company": "Janssens Bakery"}}',
+        '{"answer": "Janssens Bakery: Webshop chatbot, 6500, proposal sent."}',
+        '{"tool": "deals_list", "args": {"company": "Devos Garage"}}',
+        '{"answer": "Devos Garage: Phase 2 quote assistant, 9000, discovery."}',
+        '{"tool": "deals_list", "args": {"company": "Peeters Logistics"}}',
+        '{"answer": "Peeters Logistics: Fleet quoting assistant, 4200, negotiation."}',
+        '{"answer": "Roundup: Janssens webshop chatbot 6500 proposal sent; Devos quote '
+        'assistant 9000 discovery; fleet quoting assistant 4200 negotiation."}',
+    ]
+    agent = runner.load_agent("crm-followup")
+    real_adapter_for = runner.adapter_for
+    try:
+        runner.adapter_for = lambda *a, **k: ScriptedAdapter(script)
+        with contextlib.redirect_stdout(io.StringIO()):
+            result = run_exam(agent, {**exam, "cases": [case]}, "ollama", "scripted")
+    finally:
+        runner.adapter_for = real_adapter_for
+    got = result["cases"][0]
+    assert got["passed"] is False, got
+    assert got["failed_checks"] == [{"bucket": "quality", "check": "scope_coverage", "turn": 3}], \
+        got["failed_checks"]
+    per_turn = {t["turn"]: t["passed"] for t in got["detail"]["turns"]}
+    assert per_turn == {0: True, 1: True, 2: True, 3: False}, per_turn
+
+
 def test_9a_termination_path_single_turn_matches_master_shape():
     """CRITERION 9a. A no-`turns` case driven into the D2 termination path must
     show master's ORIGINAL two-key {"bucket","check"} termination entry — the
