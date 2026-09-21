@@ -164,17 +164,47 @@ with tempfile.TemporaryDirectory() as _tmp:
     (_adapter / "adapters.safetensors").write_bytes(b"lora")
     (_adapter / "adapter_config.json").write_bytes(b"{}")
     os.environ["MLX_MODEL_PATH"], os.environ["MLX_ADAPTER_PATH"] = str(_model), str(_adapter)
+    # mlx-lm is Apple-only and not in requirements.txt. Where it is installed (this Mac) the
+    # stamp must PROCEED; where it is not (the public repo's Linux CI, 21 Sep: collection error,
+    # ModuleNotFoundError from runner.mlx_runtime) the runner must refuse LOUDLY, naming the
+    # package, before any inference — that is the fail-loud contract, so it is a check, not a
+    # skip. Both branches are effect checks; which one runs is decided by the environment.
+    def _mlx_installed() -> bool:
+        try:
+            import importlib.metadata as _md
+            _md.version("mlx-lm"); return True
+        except Exception:
+            try:
+                import mlx_lm  # noqa: F401
+                return True
+            except Exception:
+                return False
     try:
         runner.run_exam, runner.save_result = _fake_run, lambda *a, **k: pathlib.Path("/dev/null")
         _rt = {}
-        with contextlib.redirect_stdout(io.StringIO()):
-            try:
-                _agg, _rt = runner.take_snapshot_loads({"name": "x"}, {"cases": []}, "mlx", "default_model", 3)
-            except SystemExit as e:              # the PR #93 blanket refusal come back = red
-                check(f"--snapshot refused with both env vars set: {e}", False)
-        check("with MLX_MODEL_PATH + MLX_ADAPTER_PATH set, --snapshot proceeds (3 loads ran)", _n["runs"] == 3, str(_n))
-        check("…and the runtime stamp carries version, model_sha, adapter_sha (all non-null)",
-              all(isinstance(_rt.get(k), str) and _rt[k] for k in ("version", "model_sha", "adapter_sha")), str(_rt))
+        if _mlx_installed():
+            with contextlib.redirect_stdout(io.StringIO()):
+                try:
+                    _agg, _rt = runner.take_snapshot_loads({"name": "x"}, {"cases": []}, "mlx", "default_model", 3)
+                except SystemExit as e:              # the PR #93 blanket refusal come back = red
+                    check(f"--snapshot refused with both env vars set: {e}", False)
+            check("with MLX_MODEL_PATH + MLX_ADAPTER_PATH set, --snapshot proceeds (3 loads ran)", _n["runs"] == 3, str(_n))
+            check("…and the runtime stamp carries version, model_sha, adapter_sha (all non-null)",
+                  all(isinstance(_rt.get(k), str) and _rt[k] for k in ("version", "model_sha", "adapter_sha")), str(_rt))
+        else:
+            _err = None
+            with contextlib.redirect_stdout(io.StringIO()):
+                try:
+                    runner.take_snapshot_loads({"name": "x"}, {"cases": []}, "mlx", "default_model", 3)
+                except (SystemExit, ImportError) as e:
+                    _err = e
+            check("mlx-lm NOT installed: --snapshot on mlx refuses loudly BEFORE any inference (no loads ran)",
+                  _err is not None and _n["runs"] == 0, f"err={_err!r} runs={_n['runs']}")
+            # Positive cause identification (refuter on PR #95): the provider is itself called "mlx",
+            # so a bare substring match would also accept the unrelated MLX_MODEL_PATH refusal.
+            check("…and the refusal IS the missing-package ImportError, not the env-var refusal",
+                  isinstance(_err, ImportError) and ("mlx_lm" in str(_err) or "mlx-lm" in str(_err))
+                  and "MLX_MODEL_PATH" not in str(_err), f"{type(_err).__name__}: {str(_err)[:120]}")
     finally:
         runner.run_exam, runner.save_result = _orig
         for k, v in _saved_env.items():
