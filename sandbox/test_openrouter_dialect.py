@@ -572,8 +572,11 @@ def test_9_no_other_provider_entry_moved():
           PROVIDERS["nebius"] == {"base_url": "https://api.studio.nebius.com/v1",
                                   "api_key_env": "NEBIUS_API_KEY"})
     check("stub untouched", PROVIDERS["stub"] == {"base_url": None, "api_key_env": None})
-    check("provider roster is exactly the 5 old ones + openrouter",
-          sorted(PROVIDERS) == ["nebius", "ollama", "openrouter", "ovh", "scaleway", "stub"],
+    # Roster pin: a new provider is a deliberate act and edits this line with a reason.
+    # + "mlx" (sprint I, 2026-09-18): local mlx_lm.server so a LoRA adapter can sit an
+    #   exam through the real runner — see sandbox/test_mlx_provider.py for its own pins.
+    check("provider roster is exactly the 5 old ones + openrouter + mlx",
+          sorted(PROVIDERS) == ["mlx", "nebius", "ollama", "openrouter", "ovh", "scaleway", "stub"],
           f"got {sorted(PROVIDERS)}")
 
 

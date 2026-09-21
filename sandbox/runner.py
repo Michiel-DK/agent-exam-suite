@@ -21,8 +21,10 @@ agent's real score (never tune on the reported set — rlvr-codegen docs/04).
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import json
+import os
 import re
 import subprocess
 import sys
@@ -1693,6 +1695,105 @@ def ollama_version() -> str:
     return data["version"]
 
 
+# ------------------------------------------------------------ mlx runtime stamp (sprint I / I3)
+# A local mlx_lm.server has no version endpoint and its served weights are whatever the
+# CLI --model points at plus whatever MLX_ADAPTER_PATH names — none of which the request
+# carries (the runner sends model="default_model", I0 RESULTS.md). So the stamp is read
+# LOCALLY: the installed mlx_lm version + a content hash of the model dir + a content
+# hash of the adapter dir. Three fields, all compared by snapshot_preflight, so a bumped
+# package, a swapped model or a retrained adapter each refuse `check` (gotcha 15).
+
+# "The served model" = every file in MLX_MODEL_PATH that participates in the WEIGHTS or in
+# PROMPT CONSTRUCTION. The first cut hashed weights + config.json only; the correctness
+# refuter on PR #94 showed that editing chat_template.jinja (where the enable_thinking flag
+# lives — docs/probes/i0b-champion-thinking-2026-09-20/RESULTS.md) moves verdicts while that
+# hash stayed identical. Required = config.json + at least one *.safetensors; every other
+# pattern is present-or-absent (absent never raises, present always counts).
+MLX_MODEL_FILES = ("*.safetensors", "*.safetensors.index.json", "config.json",
+                   "generation_config.json", "chat_template.jinja", "chat_template.json",
+                   "tokenizer_config.json", "tokenizer.json", "tokenizer.model")
+MLX_MODEL_REQUIRED = ("*.safetensors", "config.json")
+MLX_ADAPTER_FILES = ("adapters.safetensors", "adapter_config.json")
+MLX_STAMP_FIELDS = ("version", "model_sha", "adapter_sha")
+
+
+def mlx_lm_version() -> str:
+    """The locally installed mlx_lm's version — the runtime a local mlx_lm.server runs
+    on (the server IS this package; it has no /api/version). importlib.metadata first
+    (no import of mlx itself), the module's __version__ as the fallback. Raises on any
+    failure — never a placeholder version (same contract as ollama_version)."""
+    import importlib.metadata as md
+    for dist in ("mlx-lm", "mlx_lm"):
+        try:
+            return md.version(dist)
+        except md.PackageNotFoundError:
+            continue
+    import mlx_lm  # an ImportError propagates: fail loud, never None
+    return mlx_lm.__version__
+
+
+def _sha256_over_files(directory: Path, patterns: tuple[str, ...], what: str,
+                       required: tuple[str, ...] | None = None) -> str:
+    """sha256 over the matched files, in sorted filename order, each framed as
+    `<name>` NUL `<bytes>` so a renamed shard or a byte moving across a file boundary
+    changes the digest. Every REQUIRED pattern (default: all of them) must match at
+    least one file and the directory must exist — a stamp over nothing is a null
+    version by another name; an optional pattern that matches nothing is simply
+    absent from the digest (and its later appearance moves it)."""
+    if not directory.is_dir():
+        raise SystemExit(f"error: {what} {str(directory)!r} is not a directory")
+    for pat in (patterns if required is None else required):
+        if not any(p.is_file() for p in directory.glob(pat)):
+            raise SystemExit(f"error: {what} {str(directory)!r} has no {pat}")
+    names = sorted({p.name for pat in patterns for p in directory.glob(pat) if p.is_file()})
+    h = hashlib.sha256()
+    for name in names:
+        h.update(name.encode() + b"\0")
+        h.update((directory / name).read_bytes())
+    return h.hexdigest()
+
+
+def mlx_model_sha(model_dir: Path) -> str:
+    """Content hash of the served model: MLX_MODEL_FILES (weights, shard index, config,
+    generation config, chat template, tokenizer files); MLX_MODEL_REQUIRED must exist."""
+    return _sha256_over_files(Path(model_dir), MLX_MODEL_FILES, "MLX_MODEL_PATH",
+                              required=MLX_MODEL_REQUIRED)
+
+
+def mlx_adapter_sha(adapter_dir: Path) -> str:
+    """Content hash of a LoRA adapter dir: adapters.safetensors + adapter_config.json."""
+    return _sha256_over_files(Path(adapter_dir), MLX_ADAPTER_FILES, "MLX_ADAPTER_PATH")
+
+
+def mlx_runtime(env: dict | None = None) -> dict:
+    """The mlx runtime stamp: {"name": "mlx", "version", "model_sha", "adapter_sha",
+    "loads_are_samples": True}. Requires MLX_MODEL_PATH (the directory mlx_lm.server
+    --model points at): the runner sends model="default_model", so the served dir cannot
+    be resolved from the request — refuse loudly when unset rather than stamp a null.
+    MLX_ADAPTER_PATH (truthy, same rule as router.get_adapter's body_from_env) -> the
+    adapter hash; unset -> None, which stamps "the base model" and is itself compared.
+    `loads_are_samples` records that the N snapshot loads were N samples of one
+    resident server, not N fresh model loads (there is no mlx unload).
+    ZERO inference, ZERO network: reads the package metadata and local files."""
+    env = os.environ if env is None else env
+    model_path = env.get("MLX_MODEL_PATH")
+    if not model_path:
+        raise SystemExit(
+            "error: provider 'mlx': MLX_MODEL_PATH is unset — the runner sends "
+            "model='default_model', so the served weights cannot be resolved from the "
+            "request; export MLX_MODEL_PATH=<the directory mlx_lm.server --model points "
+            "at>. A snapshot without a model hash would let a swapped model pass `check` "
+            "forever (gotcha 15).")
+    adapter_path = env.get("MLX_ADAPTER_PATH")
+    return {
+        "name": "mlx",
+        "version": mlx_lm_version(),
+        "model_sha": mlx_model_sha(Path(model_path)),
+        "adapter_sha": mlx_adapter_sha(Path(adapter_path)) if adapter_path else None,
+        "loads_are_samples": True,
+    }
+
+
 def ollama_unload(model: str) -> None:
     """POST /api/generate {model, keep_alive: 0} to unload the model, then GET
     /api/ps and raise if it is still listed there. stdlib urllib only, no
@@ -1970,15 +2071,23 @@ def take_snapshot_loads(agent: dict, exam: dict, provider: str, model: str, load
     every load is saved to results/snapshot_loads/ with a __loadK suffix before
     the aggregate is computed, so a crash mid-run still leaves the completed
     loads on disk. Returns (aggregate_result, runtime) — runtime is
-    {"name": provider, "version": ollama_version() or None} per criterion v3."""
+    {"name": provider, "version": ollama_version() or None} per criterion v3, or
+    for provider "mlx" the three-field `mlx_runtime()` stamp (sprint I / I3)."""
     is_ollama = provider == "ollama"
-    runtime = {"name": provider, "version": ollama_version() if is_ollama else None}
+    if provider == "mlx":
+        # Sprint I / I3: the stamp replaces PR #93's blanket refusal. mlx_runtime()
+        # refuses (SystemExit) when MLX_MODEL_PATH is unset — BEFORE any inference —
+        # because a null model hash is the null version gotcha 15 is about.
+        runtime = mlx_runtime()
+    else:
+        runtime = {"name": provider, "version": ollama_version() if is_ollama else None}
     load_results = []
     for k in range(1, loads + 1):
         if is_ollama:
             ollama_unload(model)
         else:
-            print(f"  load {k}/{loads}: provider {provider!r} is hosted — this is "
+            where = "a local mlx_lm.server (no unload)" if provider == "mlx" else "hosted"
+            print(f"  load {k}/{loads}: provider {provider!r} is {where} — this is "
                   f"sample {k} of {loads}, not a model reload")
         result = run_exam(agent, exam, provider, model, timeout=timeout,
                           dedupe_tools=dedupe_tools, assembly=assembly)
@@ -2040,18 +2149,22 @@ def _load_snapshot(agent_name: str) -> dict:
 
 
 def snapshot_preflight(snap: dict, exam: dict, version_fn=None,
-                       library_sha: str | None = None) -> str | None:
-    """PURE-ish (one native-API call, ZERO model inference). The four
-    pre-inference refusals shared by `cmd_check` and `cmd_check_all`: no
-    `runtime` block; live ollama version differs from the snapshot's (ollama
-    snapshots only — a hosted snapshot's runtime.version is always None per
-    criterion v3, and would be refused forever if compared unconditionally,
-    which is exactly halt 2's finding); the exam's case-id set differs from the
-    snapshot's; the agent's lesson-library pin differs from the snapshot's
-    (E6-train — retrieval changes the prompt, so comparing across library
-    versions is comparing two different prompts and calling it drift). Returns
-    the refusal cause (RUNTIME:/VERSION:/CASES:/LIBRARY: prefixed) or None when
-    the snapshot is fit to check against.
+                       library_sha: str | None = None, mlx_runtime_fn=None) -> str | None:
+    """PURE-ish (one native-API call, ZERO model inference). The pre-inference
+    refusals shared by `cmd_check` and `cmd_check_all`: no `runtime` block; live
+    ollama version differs from the snapshot's (ollama snapshots only — a hosted
+    snapshot's runtime.version is always None per criterion v3, and would be
+    refused forever if compared unconditionally, which is exactly halt 2's
+    finding); for an mlx snapshot, ANY of the three stamped fields (version,
+    model_sha, adapter_sha) missing from the snapshot or differing from the live
+    `mlx_runtime()` (sprint I / I3 — a missing field is a pre-stamp snapshot and
+    is refused, never read as "matches None"); the exam's case-id set differs
+    from the snapshot's; the agent's lesson-library pin differs from the
+    snapshot's (E6-train — retrieval changes the prompt, so comparing across
+    library versions is comparing two different prompts and calling it drift).
+    Returns the refusal cause (RUNTIME:/VERSION:/MODEL_SHA:/ADAPTER_SHA:/CASES:/
+    LIBRARY: prefixed, naming the field) or None when the snapshot is fit to
+    check against.
 
     `library_sha` is the CURRENT agent's pin (None = no library, the legacy
     state). Compared with != so every asymmetry refuses: library added since
@@ -2062,9 +2175,13 @@ def snapshot_preflight(snap: dict, exam: dict, version_fn=None,
     `version_fn` defaults to `ollama_version` and is called ONLY when
     `snap["provider"] == "ollama"` — injected so a test can assert a
     non-ollama snapshot never touches the network at all (pass a version_fn
-    that raises if invoked)."""
+    that raises if invoked). `mlx_runtime_fn` defaults to `mlx_runtime` and is
+    called ONLY when `snap["provider"] == "mlx"`, and only after the snapshot's
+    stamp is known to carry all three fields."""
     if version_fn is None:
         version_fn = ollama_version
+    if mlx_runtime_fn is None:
+        mlx_runtime_fn = mlx_runtime
     if "runtime" not in snap:
         return "RUNTIME: snapshot has no runtime block; re-snapshot"
     if snap.get("provider") == "ollama":
@@ -2073,6 +2190,17 @@ def snapshot_preflight(snap: dict, exam: dict, version_fn=None,
         if live != want:
             return (f"VERSION: live ollama {live!r} != snapshot runtime.version "
                     f"{want!r}; re-snapshot")
+    elif snap.get("provider") == "mlx":
+        stamped = snap["runtime"]
+        for field in MLX_STAMP_FIELDS:
+            if field not in stamped:
+                return (f"RUNTIME: mlx snapshot runtime block has no {field!r} "
+                        f"(unstamped, pre-I3 shape); re-snapshot")
+        live_mlx = mlx_runtime_fn()
+        for field in MLX_STAMP_FIELDS:
+            if stamped[field] != live_mlx[field]:
+                return (f"{field.upper()}: live mlx {field} {live_mlx[field]!r} != "
+                        f"snapshot runtime.{field} {stamped[field]!r}; re-snapshot")
     if snap.get("library_sha") != library_sha:
         return (f"LIBRARY: agent library_sha {library_sha!r} != snapshot's "
                 f"{snap.get('library_sha')!r} — the library is part of the prompt; "

@@ -1,0 +1,1335 @@
+{
+ "default": {
+  "train": "20/26",
+  "heldout": "19/20",
+  "totals": {
+   "completion_tokens": 17357,
+   "prompt_tokens": 23439,
+   "reasoning_chars": 52168,
+   "wall_ms": 304487.1425628662
+  },
+  "cases": [
+   {
+    "id": "crm-devos-stage",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "crm-followup",
+     "input": "What stage is the Devos Garage deal in?"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"crm-followup\",\n  \"input\": \"What stage is the Devos Garage deal in?\"\n}\n```",
+    "reasoning_chars": 821,
+    "completion_tokens": 275
+   },
+   {
+    "id": "crm-janssens-contact-lastspeak",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "crm-followup",
+     "input": "who's our contact at Janssens Bakery and when did we last speak?"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"crm-followup\",\n  \"input\": \"who's our contact at Janssens Bakery and when did we last speak?\"\n}\n```",
+    "reasoning_chars": 821,
+    "completion_tokens": 282
+   },
+   {
+    "id": "crm-peeters-open-deal-slack",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "crm-followup",
+     "input": "can you check if Peeters Logistics still has an open deal and how much?"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"crm-followup\",\n  \"input\": \"can you check if Peeters Logistics still has an open deal and how much?\"\n}\n```",
+    "reasoning_chars": 1075,
+    "completion_tokens": 346
+   },
+   {
+    "id": "crm-vitrine-wants-active",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "crm-followup",
+     "input": "Remind me what Vitrine Restaurant wanted from us and whether they're still active."
+    },
+    "content_head": "```json\n{\n  \"agent\": \"crm-followup\",\n  \"input\": \"Remind me what Vitrine Restaurant wanted from us and whether they're still active.\"\n}\n```",
+    "reasoning_chars": 830,
+    "completion_tokens": 284
+   },
+   {
+    "id": "crm-mertens-notes",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "crm-followup",
+     "input": "Any notes on Mertens Interieur? I have them at 3pm."
+    },
+    "content_head": "```json\n{\n  \"agent\": \"crm-followup\",\n  \"input\": \"Any notes on Mertens Interieur? I have them at 3pm.\"\n}\n```",
+    "reasoning_chars": 866,
+    "completion_tokens": 291
+   },
+   {
+    "id": "triage-bare-client-email",
+    "split": "train",
+    "passed": false,
+    "failed_checks": [
+     {
+      "bucket": "quality",
+      "check": "labels"
+     }
+    ],
+    "got": {
+     "agent": "reply-draft",
+     "input": "From: sofie@janssens-bakery.com\nSubject: quote for AI chatbot\n\nHi, we saw your work for restaurants. Could you call us this week about a chatbot for our webshop? We want to go live before September. Thanks, Sofie"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"reply-draft\",\n  \"input\": \"From: sofie@janssens-bakery.com\\nSubject: quote for AI chatbot\\n\\nHi, we saw your work for restaurants. Could yo",
+    "reasoning_chars": 1361,
+    "completion_tokens": 467
+   },
+   {
+    "id": "triage-urgent-or-not-newsletter",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "email-triage",
+     "input": "From: nieuws@ondernemersplatform.be\nSubject: Weekoverzicht voor ondernemers\n\nDeze week: vijf tips om je administratie te vereenvoudigen en de agenda van netwerkevents. Uitschrijven kan onderaan."
+    },
+    "content_head": "```json\n{\n  \"agent\": \"email-triage\",\n  \"input\": \"From: nieuws@ondernemersplatform.be\\nSubject: Weekoverzicht voor ondernemers\\n\\nDeze week: vijf tips om je admi",
+    "reasoning_chars": 580,
+    "completion_tokens": 221
+   },
+   {
+    "id": "triage-bare-recruiter",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "email-triage",
+     "input": "From: talent@bigconsulting.example\nSubject: Senior AI role \u2014 are you open to a chat?\n\nHi, I came across your profile. We have a senior AI engineering role in Brussels, hybrid, competitive package. Would you be open to a 20-minute intro call next week?"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"email-triage\",\n  \"input\": \"From: talent@bigconsulting.example\\nSubject: Senior AI role \u2014 are you open to a chat?\\n\\nHi, I came across your",
+    "reasoning_chars": 1252,
+    "completion_tokens": 425
+   },
+   {
+    "id": "triage-bare-disk-alert",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "email-triage",
+     "input": "From: alerts@ovh.com\nSubject: Disk usage 91% on vps-2\n\nDisk usage on vps-2 reached 91%. No action is taken automatically. Consider freeing space or upgrading the plan."
+    },
+    "content_head": "```json\n{\n  \"agent\": \"email-triage\",\n  \"input\": \"From: alerts@ovh.com\\nSubject: Disk usage 91% on vps-2\\n\\nDisk usage on vps-2 reached 91%. No action is taken a",
+    "reasoning_chars": 1100,
+    "completion_tokens": 378
+   },
+   {
+    "id": "triage-sort-accountant",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "email-triage",
+     "input": "From: kris@boekhouding-vdb.be\nSubject: BTW aangifte Q3\n\nDag, de BTW-aangifte voor Q3 moet binnen zijn voor 20 oktober. Kan je me de uitgaande facturen van juli-september bezorgen voor 10 oktober?"
+    },
+    "content_head": "```json\n{\"agent\": \"email-triage\", \"input\": \"From: kris@boekhouding-vdb.be\\nSubject: BTW aangifte Q3\\n\\nDag, de BTW-aangifte voor Q3 moet binnen zijn voor 20 okt",
+    "reasoning_chars": 1141,
+    "completion_tokens": 418
+   },
+   {
+    "id": "reply-draft-sofie",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "reply-draft",
+     "input": "From: sofie@janssens-bakery.com\nSubject: quote for AI chatbot\n\nHi, we saw your work for restaurants. Could you call us this week about a chatbot for our webshop? We want to go live before September. Thanks, Sofie"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"reply-draft\",\n  \"input\": \"From: sofie@janssens-bakery.com\\nSubject: quote for AI chatbot\\n\\nHi, we saw your work for restaurants. Could yo",
+    "reasoning_chars": 1020,
+    "completion_tokens": 374
+   },
+   {
+    "id": "reply-answer-anna",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "reply-draft",
+     "input": "From: anna@northline.example\nSubject: quote timeline\n\nHello, thanks for the call yesterday. When could we expect the written quote? We would like to decide before the board meeting on the 20th. Best regards, Anna"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"reply-draft\",\n  \"input\": \"From: anna@northline.example\\nSubject: quote timeline\\n\\nHello, thanks for the call yesterday. When could we exp",
+    "reasoning_chars": 1214,
+    "completion_tokens": 410
+   },
+   {
+    "id": "reply-nl-antwoord",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "reply-draft",
+     "input": "From: jan@devosgarage.be\nSubject: scoping document\n\nDag, kunnen jullie het scoping document tegen vrijdag bezorgen? De raad van bestuur komt maandag samen. Groeten, Jan"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"reply-draft\",\n  \"input\": \"From: jan@devosgarage.be\\nSubject: scoping document\\n\\nDag, kunnen jullie het scoping document tegen vrijdag bez",
+    "reasoning_chars": 896,
+    "completion_tokens": 335
+   },
+   {
+    "id": "reply-decline-speaker",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "reply-draft",
+     "input": "From: events@aisummit.example\nSubject: Speaker invitation \u2014 AI Summit Lisbon\n\nWe would love to have you as a speaker on our SME panel in Lisbon on 14 November. Travel and hotel covered. Could you confirm by Friday?"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"reply-draft\",\n  \"input\": \"From: events@aisummit.example\\nSubject: Speaker invitation \u2014 AI Summit Lisbon\\n\\nWe would love to have you as a ",
+    "reasoning_chars": 760,
+    "completion_tokens": 267
+   },
+   {
+    "id": "reply-fr-reponds",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "reply-draft",
+     "input": "From: marie@atelier-lumiere.fr\nSubject: devis chatbot\n\nBonjour, nous aimerions un devis pour un chatbot sur notre site. Quel serait le prix et le d\u00e9lai? Cordialement, Marie"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"reply-draft\",\n  \"input\": \"From: marie@atelier-lumiere.fr\\nSubject: devis chatbot\\n\\nBonjour, nous aimerions un devis pour un chatbot sur n",
+    "reasoning_chars": 1241,
+    "completion_tokens": 416
+   },
+   {
+    "id": "reply-instruction-wins-newsletter",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "reply-draft",
+     "input": "From: nieuws@ondernemersplatform.be\nSubject: Weekoverzicht voor ondernemers\n\nDeze week: vijf tips om je administratie te vereenvoudigen en de agenda van netwerkevents. Uitschrijven kan onderaan."
+    },
+    "content_head": "```json\n{\n  \"agent\": \"reply-draft\",\n  \"input\": \"From: nieuws@ondernemersplatform.be\\nSubject: Weekoverzicht voor ondernemers\\n\\nDeze week: vijf tips om je admin",
+    "reasoning_chars": 1077,
+    "completion_tokens": 370
+   },
+   {
+    "id": "expense-book-anthropic",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "expense-categorization",
+     "input": "2026-08-14 ANTHROPIC API 42.10 EUR"
+    },
+    "content_head": "```json\n{\"agent\": \"expense-categorization\", \"input\": \"2026-08-14 ANTHROPIC API 42.10 EUR\"}\n```",
+    "reasoning_chars": 952,
+    "completion_tokens": 335
+   },
+   {
+    "id": "expense-which-category-ovh",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "expense-categorization",
+     "input": "OVH cloud monthly 23.99"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"expense-categorization\",\n  \"input\": \"OVH cloud monthly 23.99\"\n}\n```",
+    "reasoning_chars": 863,
+    "completion_tokens": 289
+   },
+   {
+    "id": "expense-nmbs-ticket",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "expense-categorization",
+     "input": "NMBS ticket Brussels-Ghent 18.40 EUR"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"expense-categorization\",\n  \"input\": \"NMBS ticket Brussels-Ghent 18.40 EUR\"\n}\n```",
+    "reasoning_chars": 897,
+    "completion_tokens": 308
+   },
+   {
+    "id": "expense-lunch-colruyt",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "expense-categorization",
+     "input": "Colruyt 54.20 (lunch with client)"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"expense-categorization\",\n  \"input\": \"Colruyt 54.20 (lunch with client)\"\n}\n```",
+    "reasoning_chars": 881,
+    "completion_tokens": 304
+   },
+   {
+    "id": "expense-subscription-proximus",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "expense-categorization",
+     "input": "Proximus mobile 35.00 EUR August"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"expense-categorization\",\n  \"input\": \"Proximus mobile 35.00 EUR August\"\n}\n```",
+    "reasoning_chars": 875,
+    "completion_tokens": 290
+   },
+   {
+    "id": "recap-summarise-day",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "recap",
+     "input": "--- item 1 ---\nFrom: sofie@janssens-bakery.com\nSubject: Re: chatbot proposal\nWe discussed it internally and agree on the amount. Can we plan the kickoff for the week of 15 September?\n\n--- item 2 ---\nFrom: noreply@github.com\nSubject: [agent-sandbox] CI passed on master\nAll checks passed.\n\n--- item 3 ---\nFrom: jan@devosgarage.be\nSubject: Phase 2 scoping\nThanks for the call. Please send the scoping doc by Friday so I can take it to the board."
+    },
+    "content_head": "```json\n{\n  \"agent\": \"recap\",\n  \"input\": \"--- item 1 ---\\nFrom: sofie@janssens-bakery.com\\nSubject: Re: chatbot proposal\\nWe discussed it internally and agree o",
+    "reasoning_chars": 818,
+    "completion_tokens": 384
+   },
+   {
+    "id": "recap-what-got-done",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "recap",
+     "input": "09:00 call with Devos Garage about Phase 2 \u2014 they want a quote by Friday\n10:30 replied to Sofie (Janssens) \u2014 kickoff week of 15 Sep confirmed\n13:00 Peeters Logistics: CRM outage, could not pull the contact, retry tomorrow\n15:30 wrote the scoping doc draft, 4 pages, needs pricing table"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"recap\",\n  \"input\": \"09:00 call with Devos Garage about Phase 2 \u2014 they want a quote by Friday\\n10:30 replied to Sofie (Janssens) \u2014 kickoff ",
+    "reasoning_chars": 1172,
+    "completion_tokens": 467
+   },
+   {
+    "id": "recap-daily-please",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "recap",
+     "input": "--- item 1 ---\nFrom: accounting@proximus.be\nSubject: Your invoice for August\nYour invoice of 35.00 EUR is available online.\n\n--- item 2 ---\nFrom: karel@vitrine-restaurant.be\nSubject: pause\nWe are pausing the project until January, the kitchen renovation comes first.\n\n--- item 3 ---\nFrom: els@mertens-interieur.be\nSubject: first meeting\nWould Tuesday 10:00 work for a first meeting about the showroom app?"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"recap\",\n  \"input\": \"--- item 1 ---\\nFrom: accounting@proximus.be\\nSubject: Your invoice for August\\nYour invoice of 35.00 EUR is available",
+    "reasoning_chars": 1014,
+    "completion_tokens": 431
+   },
+   {
+    "id": "recap-highlights",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "recap",
+     "input": "--- item 1 ---\nFrom: bram@peeters-logistics.be\nSubject: Fleet quoting assistant \u2014 questions\nTwo questions before we sign: does it run on our servers, and what happens to the data?\n\n--- item 2 ---\nFrom: newsletter@saas-weekly.io\nSubject: 10 tools you missed this week\nUnsubscribe at the bottom."
+    },
+    "content_head": "```json\n{\n  \"agent\": \"recap\",\n  \"input\": \"--- item 1 ---\\nFrom: bram@peeters-logistics.be\\nSubject: Fleet quoting assistant \u2014 questions\\nTwo questions before we",
+    "reasoning_chars": 937,
+    "completion_tokens": 347
+   },
+   {
+    "id": "recap-end-of-day",
+    "split": "train",
+    "passed": false,
+    "failed_checks": [
+     {
+      "bucket": "quality",
+      "check": "check_input_is_verbatim_span"
+     }
+    ],
+    "got": {
+     "agent": "recap",
+     "input": "From: anna@northline.example\nSubject: proposal received\nGot it, we will come back to you after the board meeting on the 20th.\n\nFrom: alerts@ovh.com\nSubject: Disk usage 91% on vps-2\nConsider freeing space."
+    },
+    "content_head": "```json\n{\n  \"agent\": \"recap\",\n  \"input\": \"From: anna@northline.example\\nSubject: proposal received\\nGot it, we will come back to you after the board meeting on ",
+    "reasoning_chars": 1562,
+    "completion_tokens": 507
+   },
+   {
+    "id": "transcript-clean-up",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "transcript-en",
+     "input": "REP: Hi, this is Dana from Northline Software, thanks for taking the call.\nPROSPECT: Sure, happy to chat. I'm Marcus, I run operations at Beacon Freight.\nREP: From the intake form you track shipments in spreadsheets and it is getting hard to scale?\nPROSPECT: Yeah, about 40 shipments a week now, up from 10 last year. Three people update the same sheet.\nREP: Understood. If we set up a pilot for two weeks, who would need to sign off?\nPROSPECT: Me and our CFO, Lena. Send the pricing by Thursday and I will get it in front of her."
+    },
+    "content_head": "```json\n{\n  \"agent\": \"transcript-en\",\n  \"input\": \"REP: Hi, this is Dana from Northline Software, thanks for taking the call.\\nPROSPECT: Sure, happy to chat. I'm",
+    "reasoning_chars": 1168,
+    "completion_tokens": 474
+   },
+   {
+    "id": "transcript-devos-readable",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "transcript-en",
+     "input": "REP: Thanks for making time, Jan. Quick check-in on Phase 2. CLIENT: Sure. The board wants the scoping doc before they approve the 9,000 budget. REP: I can send it Friday. Anything else blocking? CLIENT: Just the data question \u2014 where does the quote data live? On our side, right? REP: Yes, on your servers. I will put that in writing in the doc. CLIENT: Good. Friday then."
+    },
+    "content_head": "```json\n{\n  \"agent\": \"transcript-en\",\n  \"input\": \"REP: Thanks for making time, Jan. Quick check-in on Phase 2. CLIENT: Sure. The board wants the scoping doc bef",
+    "reasoning_chars": 1572,
+    "completion_tokens": 535
+   },
+   {
+    "id": "transcript-tidy-support",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "transcript-en",
+     "input": "SUPPORT: Hello, you reported the chatbot answering in Dutch to English customers?\nCLIENT: Yes, since yesterday afternoon, about one in five conversations.\nSUPPORT: Did anything change on your side \u2014 a new product page, a language setting?\nCLIENT: We added the German product pages Tuesday.\nSUPPORT: That is likely it. I will roll back the language detector today and confirm by email tonight.\nCLIENT: Please do, we have a campaign starting Monday."
+    },
+    "content_head": "```json\n{\n  \"agent\": \"transcript-en\",\n  \"input\": \"SUPPORT: Hello, you reported the chatbot answering in Dutch to English customers?\\nCLIENT: Yes, since yesterda",
+    "reasoning_chars": 1540,
+    "completion_tokens": 509
+   },
+   {
+    "id": "transcript-bare",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "transcript-en",
+     "input": "REP: So renewal is up on the 30th. Any changes you want?\nCLIENT: We want to add the second location, same setup.\nREP: That is the plus one seat tier, 20 percent more. I will send the updated order form today.\nCLIENT: Fine. Also the report export is slow, can someone look?\nREP: I will log it with support and copy you."
+    },
+    "content_head": "```json\n{\n  \"agent\": \"transcript-en\",\n  \"input\": \"REP: So renewal is up on the 30th. Any changes you want?\\nCLIENT: We want to add the second location, same set",
+    "reasoning_chars": 1897,
+    "completion_tokens": 583
+   },
+   {
+    "id": "transcript-proper-english",
+    "split": "train",
+    "passed": false,
+    "failed_checks": [
+     {
+      "bucket": "quality",
+      "check": "labels"
+     }
+    ],
+    "got": {
+     "agent": "recap",
+     "input": "PROSPECT: We looked at three vendors. Yours is the only one that runs on-prem. REP: That is the main reason people pick us. What is your timeline? PROSPECT: Decision by end of October, go-live in January. REP: Then a two-week pilot in November fits. I will send a proposal by the 10th. PROSPECT: Include the pricing for 25 users."
+    },
+    "content_head": "```json\n{\n  \"agent\": \"recap\",\n  \"input\": \"PROSPECT: We looked at three vendors. Yours is the only one that runs on-prem. REP: That is the main reason people pic",
+    "reasoning_chars": 1377,
+    "completion_tokens": 485
+   },
+   {
+    "id": "none-book-train",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "none",
+     "input": ""
+    },
+    "content_head": "```json\n{\n  \"agent\": \"none\",\n  \"input\": \"\"\n}\n```",
+    "reasoning_chars": 680,
+    "completion_tokens": 223
+   },
+   {
+    "id": "none-weather",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "none",
+     "input": ""
+    },
+    "content_head": "```json\n{\"agent\": \"none\", \"input\": \"\"}\n```",
+    "reasoning_chars": 1011,
+    "completion_tokens": 285
+   },
+   {
+    "id": "none-generate-invoice-client-bait",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "none",
+     "input": ""
+    },
+    "content_head": "```json\n{\"agent\": \"none\", \"input\": \"\"}\n```",
+    "reasoning_chars": 1123,
+    "completion_tokens": 315
+   },
+   {
+    "id": "none-translate-contract-bait",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "none",
+     "input": ""
+    },
+    "content_head": "```json\n{\n  \"agent\": \"none\",\n  \"input\": \"\"\n}\n```",
+    "reasoning_chars": 1103,
+    "completion_tokens": 305
+   },
+   {
+    "id": "none-chitchat",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "none",
+     "input": ""
+    },
+    "content_head": "```json\n{\"agent\": \"none\", \"input\": \"\"}\n```",
+    "reasoning_chars": 811,
+    "completion_tokens": 238
+   },
+   {
+    "id": "none-reminder",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "none",
+     "input": ""
+    },
+    "content_head": "```json\n{\n  \"agent\": \"none\",\n  \"input\": \"\"\n}\n```",
+    "reasoning_chars": 684,
+    "completion_tokens": 223
+   },
+   {
+    "id": "none-pause-email-bait",
+    "split": "train",
+    "passed": false,
+    "failed_checks": [
+     {
+      "bucket": "quality",
+      "check": "labels"
+     }
+    ],
+    "got": {
+     "agent": "reply-draft",
+     "input": "From: karel@vitrine-restaurant.be\nSubject: project on hold\n\nHi, we have to pause the project until January \u2014 the kitchen renovation comes first. Sorry for the short notice. Karel"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"reply-draft\",\n  \"input\": \"From: karel@vitrine-restaurant.be\\nSubject: project on hold\\n\\nHi, we have to pause the project until January \u2014 ",
+    "reasoning_chars": 1757,
+    "completion_tokens": 502
+   },
+   {
+    "id": "heavy-two-payloads-reply-wins",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "reply-draft",
+     "input": "From: sofie@janssens-bakery.com\nSubject: kickoff\nCan we do the kickoff on 16 September at 10:00? Sofie"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"reply-draft\",\n  \"input\": \"From: sofie@janssens-bakery.com\\nSubject: kickoff\\nCan we do the kickoff on 16 September at 10:00? Sofie\"\n}\n```",
+    "reasoning_chars": 2094,
+    "completion_tokens": 615
+   },
+   {
+    "id": "heavy-question-inside-email-crm",
+    "split": "train",
+    "passed": false,
+    "failed_checks": [
+     {
+      "bucket": "quality",
+      "check": "check_input_is_verbatim_span"
+     }
+    ],
+    "got": {
+     "agent": "crm-followup",
+     "input": "Hi, where do we stand on the quoting assistant? Bram"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"crm-followup\",\n  \"input\": \"Hi, where do we stand on the quoting assistant? Bram\"\n}\n```",
+    "reasoning_chars": 2345,
+    "completion_tokens": 615
+   },
+   {
+    "id": "heavy-nl-crm-question",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "crm-followup",
+     "input": "Wat is de status van Devos Garage en wie is daar onze contactpersoon?"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"crm-followup\",\n  \"input\": \"Wat is de status van Devos Garage en wie is daar onze contactpersoon?\"\n}\n```",
+    "reasoning_chars": 845,
+    "completion_tokens": 290
+   },
+   {
+    "id": "heavy-fr-expense-line",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "expense-categorization",
+     "input": "SNCB billet Bruxelles-Lille 31.50 EUR"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"expense-categorization\",\n  \"input\": \"SNCB billet Bruxelles-Lille 31.50 EUR\"\n}\n```",
+    "reasoning_chars": 1048,
+    "completion_tokens": 345
+   },
+   {
+    "id": "heavy-transcript-named-summarise-not-translate",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "transcript-en",
+     "input": "REP: Thanks for the time, Marie.\nCLIENT: Sure. We need the chatbot live before the Christmas campaign.\nREP: So early December. I will send a plan with two milestones by Monday.\nCLIENT: Perfect, include the price for French and English."
+    },
+    "content_head": "```json\n{\n  \"agent\": \"transcript-en\",\n  \"input\": \"REP: Thanks for the time, Marie.\\nCLIENT: Sure. We need the chatbot live before the Christmas campaign.\\nREP: ",
+    "reasoning_chars": 1159,
+    "completion_tokens": 390
+   },
+   {
+    "id": "heavy-email-with-log-shape-triage",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "email-triage",
+     "input": "--- item 1 ---\nQ3 VAT return due 20 October\n--- item 2 ---\nPlease send July-September invoices by 10 October"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"email-triage\",\n  \"input\": \"--- item 1 ---\\nQ3 VAT return due 20 October\\n--- item 2 ---\\nPlease send July-September invoices by 10 October",
+    "reasoning_chars": 1333,
+    "completion_tokens": 433
+   },
+   {
+    "id": "heavy-none-edit-document-client-bait",
+    "split": "train",
+    "passed": false,
+    "failed_checks": [
+     {
+      "bucket": "quality",
+      "check": "labels"
+     }
+    ],
+    "got": {
+     "agent": "reply-draft",
+     "input": "We are pleased to submit our proposal for a webshop chatbot, covering scope, timeline and pricing."
+    },
+    "content_head": "```json\n{\n  \"agent\": \"reply-draft\",\n  \"input\": \"We are pleased to submit our proposal for a webshop chatbot, covering scope, timeline and pricing.\"\n}\n```",
+    "reasoning_chars": 1230,
+    "completion_tokens": 376
+   },
+   {
+    "id": "heavy-none-crm-write-bait",
+    "split": "heldout",
+    "passed": false,
+    "failed_checks": [
+     {
+      "bucket": "quality",
+      "check": "labels"
+     }
+    ],
+    "got": {
+     "agent": "crm-followup",
+     "input": "board meets Monday, scoping doc due Friday"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"crm-followup\",\n  \"input\": \"board meets Monday, scoping doc due Friday\"\n}\n```",
+    "reasoning_chars": 1365,
+    "completion_tokens": 395
+   }
+  ]
+ },
+ "thinking_off": {
+  "train": "15/26",
+  "heldout": "17/20",
+  "totals": {
+   "completion_tokens": 2848,
+   "prompt_tokens": 23347,
+   "reasoning_chars": 0,
+   "wall_ms": 58650.43592453003
+  },
+  "cases": [
+   {
+    "id": "crm-devos-stage",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "crm-followup",
+     "input": "What stage is the Devos Garage deal in?"
+    },
+    "content_head": "{\"agent\": \"crm-followup\", \"input\": \"What stage is the Devos Garage deal in?\"}",
+    "reasoning_chars": 0,
+    "completion_tokens": 25
+   },
+   {
+    "id": "crm-janssens-contact-lastspeak",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "crm-followup",
+     "input": "who's our contact at Janssens Bakery and when did we last speak?"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"crm-followup\",\n  \"input\": \"who's our contact at Janssens Bakery and when did we last speak?\"\n}\n```",
+    "reasoning_chars": 0,
+    "completion_tokens": 42
+   },
+   {
+    "id": "crm-peeters-open-deal-slack",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "crm-followup",
+     "input": "can you check if Peeters Logistics still has an open deal and how much?"
+    },
+    "content_head": "```json\n{\"agent\": \"crm-followup\", \"input\": \"can you check if Peeters Logistics still has an open deal and how much?\"}\n```",
+    "reasoning_chars": 0,
+    "completion_tokens": 36
+   },
+   {
+    "id": "crm-vitrine-wants-active",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "crm-followup",
+     "input": "Remind me what Vitrine Restaurant wanted from us and whether they're still active."
+    },
+    "content_head": "```json\n{\n  \"agent\": \"crm-followup\",\n  \"input\": \"Remind me what Vitrine Restaurant wanted from us and whether they're still active.\"\n}\n```",
+    "reasoning_chars": 0,
+    "completion_tokens": 44
+   },
+   {
+    "id": "crm-mertens-notes",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "crm-followup",
+     "input": "Any notes on Mertens Interieur? I have them at 3pm."
+    },
+    "content_head": "```json\n{\"agent\": \"crm-followup\", \"input\": \"Any notes on Mertens Interieur? I have them at 3pm.\"}\n```",
+    "reasoning_chars": 0,
+    "completion_tokens": 36
+   },
+   {
+    "id": "triage-bare-client-email",
+    "split": "train",
+    "passed": false,
+    "failed_checks": [
+     {
+      "bucket": "quality",
+      "check": "labels"
+     }
+    ],
+    "got": {
+     "agent": "reply-draft",
+     "input": "Hi, we saw your work for restaurants. Could you call us this week about a chatbot for our webshop? We want to go live before September. Thanks, Sofie"
+    },
+    "content_head": "```json\n{\"agent\": \"reply-draft\", \"input\": \"Hi, we saw your work for restaurants. Could you call us this week about a chatbot for our webshop? We want to go live",
+    "reasoning_chars": 0,
+    "completion_tokens": 54
+   },
+   {
+    "id": "triage-urgent-or-not-newsletter",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "email-triage",
+     "input": "From: nieuws@ondernemersplatform.be\nSubject: Weekoverzicht voor ondernemers\n\nDeze week: vijf tips om je administratie te vereenvoudigen en de agenda van netwerkevents. Uitschrijven kan onderaan."
+    },
+    "content_head": "```json\n{\"agent\": \"email-triage\", \"input\": \"From: nieuws@ondernemersplatform.be\\nSubject: Weekoverzicht voor ondernemers\\n\\nDeze week: vijf tips om je administr",
+    "reasoning_chars": 0,
+    "completion_tokens": 73
+   },
+   {
+    "id": "triage-bare-recruiter",
+    "split": "train",
+    "passed": false,
+    "failed_checks": [
+     {
+      "bucket": "quality",
+      "check": "labels"
+     }
+    ],
+    "got": {
+     "agent": "reply-draft",
+     "input": "From: talent@bigconsulting.example\nSubject: Senior AI role \u2014 are you open to a chat?\n\nHi, I came across your profile. We have a senior AI engineering role in Brussels, hybrid, competitive package. Would you be open to a 20-minute intro call next week?"
+    },
+    "content_head": "```json\n{\"agent\": \"reply-draft\", \"input\": \"From: talent@bigconsulting.example\\nSubject: Senior AI role \u2014 are you open to a chat?\\n\\nHi, I came across your profi",
+    "reasoning_chars": 0,
+    "completion_tokens": 85
+   },
+   {
+    "id": "triage-bare-disk-alert",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "email-triage",
+     "input": "From: alerts@ovh.com\nSubject: Disk usage 91% on vps-2\n\nDisk usage on vps-2 reached 91%. No action is taken automatically. Consider freeing space or upgrading the plan."
+    },
+    "content_head": "```json\n{\"agent\": \"email-triage\", \"input\": \"From: alerts@ovh.com\\nSubject: Disk usage 91% on vps-2\\n\\nDisk usage on vps-2 reached 91%. No action is taken automa",
+    "reasoning_chars": 0,
+    "completion_tokens": 73
+   },
+   {
+    "id": "triage-sort-accountant",
+    "split": "train",
+    "passed": false,
+    "failed_checks": [
+     {
+      "bucket": "quality",
+      "check": "labels"
+     }
+    ],
+    "got": {
+     "agent": "reply-draft",
+     "input": "From: kris@boekhouding-vdb.be\nSubject: BTW aangifte Q3\n\nDag, de BTW-aangifte voor Q3 moet binnen zijn voor 20 oktober. Kan je me de uitgaande facturen van juli-september bezorgen voor 10 oktober?"
+    },
+    "content_head": "```json\n{\"agent\": \"reply-draft\", \"input\": \"From: kris@boekhouding-vdb.be\\nSubject: BTW aangifte Q3\\n\\nDag, de BTW-aangifte voor Q3 moet binnen zijn voor 20 okto",
+    "reasoning_chars": 0,
+    "completion_tokens": 87
+   },
+   {
+    "id": "reply-draft-sofie",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "reply-draft",
+     "input": "From: sofie@janssens-bakery.com\nSubject: quote for AI chatbot\n\nHi, we saw your work for restaurants. Could you call us this week about a chatbot for our webshop? We want to go live before September. Thanks, Sofie"
+    },
+    "content_head": "```json\n{\"agent\": \"reply-draft\", \"input\": \"From: sofie@janssens-bakery.com\\nSubject: quote for AI chatbot\\n\\nHi, we saw your work for restaurants. Could you cal",
+    "reasoning_chars": 0,
+    "completion_tokens": 78
+   },
+   {
+    "id": "reply-answer-anna",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "reply-draft",
+     "input": "Hello, thanks for the call yesterday. When could we expect the written quote? We would like to decide before the board meeting on the 20th. Best regards, Anna"
+    },
+    "content_head": "```json\n{\"agent\": \"reply-draft\", \"input\": \"Hello, thanks for the call yesterday. When could we expect the written quote? We would like to decide before the boar",
+    "reasoning_chars": 0,
+    "completion_tokens": 55
+   },
+   {
+    "id": "reply-nl-antwoord",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "reply-draft",
+     "input": "From: jan@devosgarage.be\nSubject: scoping document\n\nDag, kunnen jullie het scoping document tegen vrijdag bezorgen? De raad van bestuur komt maandag samen. Groeten, Jan"
+    },
+    "content_head": "```json\n{\"agent\": \"reply-draft\", \"input\": \"From: jan@devosgarage.be\\nSubject: scoping document\\n\\nDag, kunnen jullie het scoping document tegen vrijdag bezorgen",
+    "reasoning_chars": 0,
+    "completion_tokens": 64
+   },
+   {
+    "id": "reply-decline-speaker",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "reply-draft",
+     "input": "From: events@aisummit.example\nSubject: Speaker invitation \u2014 AI Summit Lisbon\n\nWe would love to have you as a speaker on our SME panel in Lisbon on 14 November. Travel and hotel covered. Could you confirm by Friday?"
+    },
+    "content_head": "```json\n{\"agent\": \"reply-draft\", \"input\": \"From: events@aisummit.example\\nSubject: Speaker invitation \u2014 AI Summit Lisbon\\n\\nWe would love to have you as a speak",
+    "reasoning_chars": 0,
+    "completion_tokens": 74
+   },
+   {
+    "id": "reply-fr-reponds",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "reply-draft",
+     "input": "From: marie@atelier-lumiere.fr\nSubject: devis chatbot\n\nBonjour, nous aimerions un devis pour un chatbot sur notre site. Quel serait le prix et le d\u00e9lai? Cordialement, Marie"
+    },
+    "content_head": "```json\n{\"agent\": \"reply-draft\", \"input\": \"From: marie@atelier-lumiere.fr\\nSubject: devis chatbot\\n\\nBonjour, nous aimerions un devis pour un chatbot sur notre ",
+    "reasoning_chars": 0,
+    "completion_tokens": 69
+   },
+   {
+    "id": "reply-instruction-wins-newsletter",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "reply-draft",
+     "input": "From: nieuws@ondernemersplatform.be\nSubject: Weekoverzicht voor ondernemers\n\nDeze week: vijf tips om je administratie te vereenvoudigen en de agenda van netwerkevents. Uitschrijven kan onderaan."
+    },
+    "content_head": "```json\n{\"agent\": \"reply-draft\", \"input\": \"From: nieuws@ondernemersplatform.be\\nSubject: Weekoverzicht voor ondernemers\\n\\nDeze week: vijf tips om je administra",
+    "reasoning_chars": 0,
+    "completion_tokens": 72
+   },
+   {
+    "id": "expense-book-anthropic",
+    "split": "train",
+    "passed": false,
+    "failed_checks": [
+     {
+      "bucket": "quality",
+      "check": "labels"
+     },
+     {
+      "bucket": "format",
+      "check": "check_none_hands_over_nothing"
+     }
+    ],
+    "got": {
+     "agent": "none",
+     "input": "Book this: 2026-08-14 ANTHROPIC API 42.10 EUR"
+    },
+    "content_head": "```json\n{\"agent\": \"none\", \"input\": \"Book this: 2026-08-14 ANTHROPIC API 42.10 EUR\"}\n```",
+    "reasoning_chars": 0,
+    "completion_tokens": 43
+   },
+   {
+    "id": "expense-which-category-ovh",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "expense-categorization",
+     "input": "OVH cloud monthly 23.99"
+    },
+    "content_head": "```json\n{\"agent\": \"expense-categorization\", \"input\": \"OVH cloud monthly 23.99\"}\n```",
+    "reasoning_chars": 0,
+    "completion_tokens": 30
+   },
+   {
+    "id": "expense-nmbs-ticket",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "expense-categorization",
+     "input": "NMBS ticket Brussels-Ghent 18.40 EUR"
+    },
+    "content_head": "```json\n{\"agent\": \"expense-categorization\", \"input\": \"NMBS ticket Brussels-Ghent 18.40 EUR\"}\n```",
+    "reasoning_chars": 0,
+    "completion_tokens": 34
+   },
+   {
+    "id": "expense-lunch-colruyt",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "expense-categorization",
+     "input": "Colruyt 54.20 (lunch with client)"
+    },
+    "content_head": "```json\n{\"agent\": \"expense-categorization\", \"input\": \"Colruyt 54.20 (lunch with client)\"}\n```",
+    "reasoning_chars": 0,
+    "completion_tokens": 34
+   },
+   {
+    "id": "expense-subscription-proximus",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "expense-categorization",
+     "input": "Proximus mobile 35.00 EUR August"
+    },
+    "content_head": "```json\n{\"agent\": \"expense-categorization\", \"input\": \"Proximus mobile 35.00 EUR August\"}\n```",
+    "reasoning_chars": 0,
+    "completion_tokens": 32
+   },
+   {
+    "id": "recap-summarise-day",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "recap",
+     "input": "--- item 1 --- From: sofie@janssens-bakery.com Subject: Re: chatbot proposal We discussed it internally and agree on the amount. Can we plan the kickoff for the week of 15 September? --- item 2 --- From: noreply@github.com Subject: [agent-sandbox] CI passed on master All checks passed. --- item 3 --- From: jan@devosgarage.be Subject: Phase 2 scoping Thanks for the call. Please send the scoping doc by Friday so I can take it to the board."
+    },
+    "content_head": "```json\n{\"agent\": \"recap\", \"input\": \"--- item 1 --- From: sofie@janssens-bakery.com Subject: Re: chatbot proposal We discussed it internally and agree on the am",
+    "reasoning_chars": 0,
+    "completion_tokens": 134
+   },
+   {
+    "id": "recap-what-got-done",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "recap",
+     "input": "09:00 call with Devos Garage about Phase 2 \u2014 they want a quote by Friday\n10:30 replied to Sofie (Janssens) \u2014 kickoff week of 15 Sep confirmed\n13:00 Peeters Logistics: CRM outage, could not pull the contact, retry tomorrow\n15:30 wrote the scoping doc draft, 4 pages, needs pricing table"
+    },
+    "content_head": "```json\n{\"agent\": \"recap\", \"input\": \"09:00 call with Devos Garage about Phase 2 \u2014 they want a quote by Friday\\n10:30 replied to Sofie (Janssens) \u2014 kickoff week ",
+    "reasoning_chars": 0,
+    "completion_tokens": 106
+   },
+   {
+    "id": "recap-daily-please",
+    "split": "train",
+    "passed": false,
+    "failed_checks": [
+     {
+      "bucket": "quality",
+      "check": "check_input_is_verbatim_span"
+     }
+    ],
+    "got": {
+     "agent": "recap",
+     "input": "From: accounting@proximus.be\nSubject: Your invoice for August\nYour invoice of 35.00 EUR is available online.\n\nFrom: karel@vitrine-restaurant.be\nSubject: pause\nWe are pausing the project until January, the kitchen renovation comes first.\n\nFrom: els@mertens-interieur.be\nSubject: first meeting\nWould Tuesday 10:00 work for a first meeting about the showroom app?"
+    },
+    "content_head": "```json\n{\"agent\": \"recap\", \"input\": \"From: accounting@proximus.be\\nSubject: Your invoice for August\\nYour invoice of 35.00 EUR is available online.\\n\\nFrom: kar",
+    "reasoning_chars": 0,
+    "completion_tokens": 126
+   },
+   {
+    "id": "recap-highlights",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "recap",
+     "input": "--- item 1 ---\nFrom: bram@peeters-logistics.be\nSubject: Fleet quoting assistant \u2014 questions\nTwo questions before we sign: does it run on our servers, and what happens to the data?\n\n--- item 2 ---\nFrom: newsletter@saas-weekly.io\nSubject: 10 tools you missed this week\nUnsubscribe at the bottom."
+    },
+    "content_head": "```json\n{\"agent\": \"recap\", \"input\": \"--- item 1 ---\\nFrom: bram@peeters-logistics.be\\nSubject: Fleet quoting assistant \u2014 questions\\nTwo questions before we sign",
+    "reasoning_chars": 0,
+    "completion_tokens": 107
+   },
+   {
+    "id": "recap-end-of-day",
+    "split": "train",
+    "passed": false,
+    "failed_checks": [
+     {
+      "bucket": "quality",
+      "check": "labels"
+     },
+     {
+      "bucket": "quality",
+      "check": "check_input_is_verbatim_span"
+     }
+    ],
+    "got": {
+     "agent": "email-triage",
+     "input": "From: anna@northline.example\nSubject: proposal received\nGot it, we will come back to you after the board meeting on the 20th.\n\nFrom: alerts@ovh.com\nSubject: Disk usage 91% on vps-2\nConsider freeing space."
+    },
+    "content_head": "```json\n{\n  \"agent\": \"email-triage\",\n  \"input\": \"From: anna@northline.example\\nSubject: proposal received\\nGot it, we will come back to you after the board meet",
+    "reasoning_chars": 0,
+    "completion_tokens": 94
+   },
+   {
+    "id": "transcript-clean-up",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "transcript-en",
+     "input": "REP: Hi, this is Dana from Northline Software, thanks for taking the call.\nPROSPECT: Sure, happy to chat. I'm Marcus, I run operations at Beacon Freight.\nREP: From the intake form you track shipments in spreadsheets and it is getting hard to scale?\nPROSPECT: Yeah, about 40 shipments a week now, up from 10 last year. Three people update the same sheet.\nREP: Understood. If we set up a pilot for two weeks, who would need to sign off?\nPROSPECT: Me and our CFO, Lena. Send the pricing by Thursday and I will get it in front of her."
+    },
+    "content_head": "```json\n{\"agent\": \"transcript-en\", \"input\": \"REP: Hi, this is Dana from Northline Software, thanks for taking the call.\\nPROSPECT: Sure, happy to chat. I'm Marc",
+    "reasoning_chars": 0,
+    "completion_tokens": 158
+   },
+   {
+    "id": "transcript-devos-readable",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "transcript-en",
+     "input": "REP: Thanks for making time, Jan. Quick check-in on Phase 2. CLIENT: Sure. The board wants the scoping doc before they approve the 9,000 budget. REP: I can send it Friday. Anything else blocking? CLIENT: Just the data question \u2014 where does the quote data live? On our side, right? REP: Yes, on your servers. I will put that in writing in the doc. CLIENT: Good. Friday then."
+    },
+    "content_head": "```json\n{\"agent\": \"transcript-en\", \"input\": \"REP: Thanks for making time, Jan. Quick check-in on Phase 2. CLIENT: Sure. The board wants the scoping doc before t",
+    "reasoning_chars": 0,
+    "completion_tokens": 116
+   },
+   {
+    "id": "transcript-tidy-support",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "transcript-en",
+     "input": "SUPPORT: Hello, you reported the chatbot answering in Dutch to English customers?\nCLIENT: Yes, since yesterday afternoon, about one in five conversations.\nSUPPORT: Did anything change on your side \u2014 a new product page, a language setting?\nCLIENT: We added the German product pages Tuesday.\nSUPPORT: That is likely it. I will roll back the language detector today and confirm by email tonight.\nCLIENT: Please do, we have a campaign starting Monday."
+    },
+    "content_head": "```json\n{\"agent\": \"transcript-en\", \"input\": \"SUPPORT: Hello, you reported the chatbot answering in Dutch to English customers?\\nCLIENT: Yes, since yesterday aft",
+    "reasoning_chars": 0,
+    "completion_tokens": 114
+   },
+   {
+    "id": "transcript-bare",
+    "split": "heldout",
+    "passed": false,
+    "failed_checks": [
+     {
+      "bucket": "quality",
+      "check": "labels"
+     }
+    ],
+    "got": {
+     "agent": "reply-draft",
+     "input": "REP: So renewal is up on the 30th. Any changes you want?\nCLIENT: We want to add the second location, same setup.\nREP: That is the plus one seat tier, 20 percent more. I will send the updated order form today.\nCLIENT: Fine. Also the report export is slow, can someone look?\nREP: I will log it with support and copy you."
+    },
+    "content_head": "```json\n{\"agent\": \"reply-draft\", \"input\": \"REP: So renewal is up on the 30th. Any changes you want?\\nCLIENT: We want to add the second location, same setup.\\nRE",
+    "reasoning_chars": 0,
+    "completion_tokens": 106
+   },
+   {
+    "id": "transcript-proper-english",
+    "split": "train",
+    "passed": false,
+    "failed_checks": [
+     {
+      "bucket": "quality",
+      "check": "labels"
+     }
+    ],
+    "got": {
+     "agent": "recap",
+     "input": "PROSPECT: We looked at three vendors. Yours is the only one that runs on-prem. REP: That is the main reason people pick us. What is your timeline? PROSPECT: Decision by end of October, go-live in January. REP: Then a two-week pilot in November fits. I will send a proposal by the 10th. PROSPECT: Include the pricing for 25 users."
+    },
+    "content_head": "```json\n{\"agent\": \"recap\", \"input\": \"PROSPECT: We looked at three vendors. Yours is the only one that runs on-prem. REP: That is the main reason people pick us.",
+    "reasoning_chars": 0,
+    "completion_tokens": 105
+   },
+   {
+    "id": "none-book-train",
+    "split": "train",
+    "passed": false,
+    "failed_checks": [
+     {
+      "bucket": "format",
+      "check": "check_none_hands_over_nothing"
+     }
+    ],
+    "got": {
+     "agent": "none",
+     "input": "Book me a train to Paris next Tuesday morning."
+    },
+    "content_head": "```json\n{\"agent\": \"none\", \"input\": \"Book me a train to Paris next Tuesday morning.\"}\n```",
+    "reasoning_chars": 0,
+    "completion_tokens": 27
+   },
+   {
+    "id": "none-weather",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "none",
+     "input": ""
+    },
+    "content_head": "{\"agent\": \"none\", \"input\": \"\"}",
+    "reasoning_chars": 0,
+    "completion_tokens": 11
+   },
+   {
+    "id": "none-generate-invoice-client-bait",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "none",
+     "input": ""
+    },
+    "content_head": "```json\n{\"agent\": \"none\", \"input\": \"\"}\n```",
+    "reasoning_chars": 0,
+    "completion_tokens": 16
+   },
+   {
+    "id": "none-translate-contract-bait",
+    "split": "heldout",
+    "passed": false,
+    "failed_checks": [
+     {
+      "bucket": "format",
+      "check": "check_none_hands_over_nothing"
+     }
+    ],
+    "got": {
+     "agent": "none",
+     "input": "The client retains ownership of all data processed by the system."
+    },
+    "content_head": "```json\n{\"agent\": \"none\", \"input\": \"The client retains ownership of all data processed by the system.\"}\n```",
+    "reasoning_chars": 0,
+    "completion_tokens": 29
+   },
+   {
+    "id": "none-chitchat",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "none",
+     "input": ""
+    },
+    "content_head": "{\"agent\": \"none\", \"input\": \"\"}",
+    "reasoning_chars": 0,
+    "completion_tokens": 11
+   },
+   {
+    "id": "none-reminder",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "none",
+     "input": ""
+    },
+    "content_head": "```json\n{\"agent\": \"none\", \"input\": \"\"}\n```",
+    "reasoning_chars": 0,
+    "completion_tokens": 16
+   },
+   {
+    "id": "none-pause-email-bait",
+    "split": "train",
+    "passed": false,
+    "failed_checks": [
+     {
+      "bucket": "quality",
+      "check": "labels"
+     }
+    ],
+    "got": {
+     "agent": "reply-draft",
+     "input": "From: karel@vitrine-restaurant.be\nSubject: project on hold\n\nHi, we have to pause the project until January \u2014 the kitchen renovation comes first. Sorry for the short notice. Karel"
+    },
+    "content_head": "```json\n{\"agent\": \"reply-draft\", \"input\": \"From: karel@vitrine-restaurant.be\\nSubject: project on hold\\n\\nHi, we have to pause the project until January \u2014 the k",
+    "reasoning_chars": 0,
+    "completion_tokens": 65
+   },
+   {
+    "id": "heavy-two-payloads-reply-wins",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "reply-draft",
+     "input": "From: sofie@janssens-bakery.com\nSubject: kickoff\n\nCan we do the kickoff on 16 September at 10:00? Sofie"
+    },
+    "content_head": "```json\n{\n  \"agent\": \"reply-draft\",\n  \"input\": \"From: sofie@janssens-bakery.com\\nSubject: kickoff\\n\\nCan we do the kickoff on 16 September at 10:00? Sofie\"\n}\n``",
+    "reasoning_chars": 0,
+    "completion_tokens": 67
+   },
+   {
+    "id": "heavy-question-inside-email-crm",
+    "split": "train",
+    "passed": false,
+    "failed_checks": [
+     {
+      "bucket": "quality",
+      "check": "check_input_is_verbatim_span"
+     }
+    ],
+    "got": {
+     "agent": "crm-followup",
+     "input": "Hi, where do we stand on the quoting assistant? Bram"
+    },
+    "content_head": "```json\n{\"agent\": \"crm-followup\", \"input\": \"Hi, where do we stand on the quoting assistant? Bram\"}\n```",
+    "reasoning_chars": 0,
+    "completion_tokens": 32
+   },
+   {
+    "id": "heavy-nl-crm-question",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "crm-followup",
+     "input": "Wat is de status van Devos Garage en wie is daar onze contactpersoon?"
+    },
+    "content_head": "```json\n{\"agent\": \"crm-followup\", \"input\": \"Wat is de status van Devos Garage en wie is daar onze contactpersoon?\"}\n```",
+    "reasoning_chars": 0,
+    "completion_tokens": 37
+   },
+   {
+    "id": "heavy-fr-expense-line",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "expense-categorization",
+     "input": "SNCB billet Bruxelles-Lille 31.50 EUR"
+    },
+    "content_head": "```json\n{\"agent\": \"expense-categorization\", \"input\": \"SNCB billet Bruxelles-Lille 31.50 EUR\"}\n```",
+    "reasoning_chars": 0,
+    "completion_tokens": 35
+   },
+   {
+    "id": "heavy-transcript-named-summarise-not-translate",
+    "split": "heldout",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "transcript-en",
+     "input": "REP: Thanks for the time, Marie.\nCLIENT: Sure. We need the chatbot live before the Christmas campaign.\nREP: So early December. I will send a plan with two milestones by Monday.\nCLIENT: Perfect, include the price for French and English."
+    },
+    "content_head": "```json\n{\"agent\": \"transcript-en\", \"input\": \"REP: Thanks for the time, Marie.\\nCLIENT: Sure. We need the chatbot live before the Christmas campaign.\\nREP: So ea",
+    "reasoning_chars": 0,
+    "completion_tokens": 74
+   },
+   {
+    "id": "heavy-email-with-log-shape-triage",
+    "split": "train",
+    "passed": true,
+    "failed_checks": [],
+    "got": {
+     "agent": "email-triage",
+     "input": "--- item 1 ---\nQ3 VAT return due 20 October\n--- item 2 ---\nPlease send July-September invoices by 10 October"
+    },
+    "content_head": "```json\n{\"agent\": \"email-triage\", \"input\": \"--- item 1 ---\\nQ3 VAT return due 20 October\\n--- item 2 ---\\nPlease send July-September invoices by 10 October\"}\n``",
+    "reasoning_chars": 0,
+    "completion_tokens": 55
+   },
+   {
+    "id": "heavy-none-edit-document-client-bait",
+    "split": "train",
+    "passed": false,
+    "failed_checks": [
+     {
+      "bucket": "quality",
+      "check": "labels"
+     }
+    ],
+    "got": {
+     "agent": "reply-draft",
+     "input": "We are pleased to submit our proposal for a webshop chatbot, covering scope, timeline and pricing."
+    },
+    "content_head": "```json\n{\"agent\": \"reply-draft\", \"input\": \"We are pleased to submit our proposal for a webshop chatbot, covering scope, timeline and pricing.\"}\n```",
+    "reasoning_chars": 0,
+    "completion_tokens": 39
+   },
+   {
+    "id": "heavy-none-crm-write-bait",
+    "split": "heldout",
+    "passed": false,
+    "failed_checks": [
+     {
+      "bucket": "quality",
+      "check": "labels"
+     }
+    ],
+    "got": {
+     "agent": "crm-followup",
+     "input": "board meets Monday, scoping doc due Friday"
+    },
+    "content_head": "```json\n{\"agent\": \"crm-followup\", \"input\": \"board meets Monday, scoping doc due Friday\"}\n```",
+    "reasoning_chars": 0,
+    "completion_tokens": 28
+   }
+  ]
+ }
+}

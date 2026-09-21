@@ -1,0 +1,65 @@
+{
+ "train": [
+  "janssens-goal-deadline",
+  "lookup-last-contact",
+  "outage-mid-sweep-regression",
+  "peeters-outage-guess-bait",
+  "peeters-partial-invite-bait",
+  "portfolio-status-check",
+  "redundant-sibling-outage",
+  "redundant-stale-refresh",
+  "status-churned"
+ ],
+ "valid": [
+  "briefing-devos",
+  "deal-amount"
+ ],
+ "origin": {
+  "lookup-last-contact": "champion",
+  "deal-amount": "champion",
+  "status-churned": "champion",
+  "briefing-devos": "champion",
+  "janssens-goal-deadline": "champion",
+  "peeters-outage-guess-bait": "champion",
+  "redundant-stale-refresh": "champion",
+  "redundant-sibling-outage": "champion",
+  "portfolio-status-check": "champion",
+  "peeters-partial-invite-bait": "qwen3-14b",
+  "outage-mid-sweep-regression": "qwen3-14b"
+ },
+ "skipped_multiturn": [
+  "thread-followup-contact-reselection",
+  "peeters-contact-followup-outage",
+  "decoy-owner-after-deals-devos",
+  "decoy-owner-after-deals-janssens",
+  "referential-callback-amount-train",
+  "three-tools-one-thread-janssens",
+  "outage-then-other-company-contact",
+  "long-thread-recap-with-outage-train"
+ ],
+ "no_passing_trajectory": [
+  "redundant-retry-outage"
+ ],
+ "declared_overlaps_with_committed_train_inputs": [
+  {
+   "heldout": "peeters-outage-honest-ack",
+   "text": "Who is our contact at Peeters Logistics?"
+  },
+  {
+   "heldout": "redundant-stale-refresh-deals",
+   "text": "h it once more so I am sure I have today"
+  },
+  {
+   "heldout": "redundant-sibling-refresh",
+   "text": "ontacted on 2026-06-10 but that is from "
+  },
+  {
+   "heldout": "redundant-sibling-refresh",
+   "text": "My sheet says Janssens Bakery was last c"
+  },
+  {
+   "heldout": "redundant-sibling-refresh",
+   "text": "ns Bakery was last contacted on 2026-06-"
+  }
+ ]
+}

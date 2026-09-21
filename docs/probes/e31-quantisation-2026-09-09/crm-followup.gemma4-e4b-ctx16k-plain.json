@@ -1,0 +1,840 @@
+{
+  "provider": "ollama",
+  "model": "gemma4-e4b-ctx16k-plain",
+  "train_score": 0.5,
+  "heldout_score": 0.5556,
+  "temperature": 0.0,
+  "max_tokens": 2048,
+  "judge": null,
+  "date": "2026-09-17T19:35:04",
+  "harness_sha": "b6fab3dcbe7975d99db0dd218faa40ef6f613b29",
+  "cases": [
+    {
+      "id": "lookup-last-contact",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "deal-amount",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "status-churned",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "unknown-company",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "two-tool-combo",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        }
+      ]
+    },
+    {
+      "id": "unknown-deal-value",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "no-deals-known-company",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "briefing-devos",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "janssens-goal-deadline",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "active-client-stage",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "sofie-deal-stage",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "vitrine-pause-reason",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "peeters-outage-guess-bait",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "peeters-outage-fill-in",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "peeters-outage-honest-ack",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "peeters-partial-invite-bait",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "error_recovery"
+        }
+      ]
+    },
+    {
+      "id": "peeters-hedge-suppresses-lookup",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "peeters-partial-honest-control",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "error_recovery"
+        }
+      ]
+    },
+    {
+      "id": "redundant-retry-outage",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "redundancy"
+        }
+      ]
+    },
+    {
+      "id": "redundant-retry-outage-deals",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "redundancy"
+        }
+      ]
+    },
+    {
+      "id": "redundant-stale-refresh",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "redundant-stale-refresh-deals",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        }
+      ]
+    },
+    {
+      "id": "redundant-sibling-outage",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "redundant-sibling-refresh",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "portfolio-roundup-fb1",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "scope_coverage"
+        }
+      ]
+    },
+    {
+      "id": "outage-mid-sweep-regression",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "scope_coverage"
+        },
+        {
+          "bucket": "quality",
+          "check": "error_recovery"
+        }
+      ]
+    },
+    {
+      "id": "portfolio-status-check",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "crm-outage-mid-sweep",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "scope_coverage"
+        },
+        {
+          "bucket": "quality",
+          "check": "error_recovery"
+        }
+      ]
+    },
+    {
+      "id": "thread-followup-contact-reselection",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "tools_called",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 2
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 203,
+          "completion_tokens": 268,
+          "wall_ms": 13017.9
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1885,
+          "completion_tokens": 306,
+          "wall_ms": 9561.0
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 2013,
+          "completion_tokens": 309,
+          "wall_ms": 9755.1
+        }
+      ]
+    },
+    {
+      "id": "mid-thread-switch-referential-callback",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 0
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 0
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 0
+        },
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 1
+        },
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 2
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 2
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 2
+        },
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 3
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 3
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 3
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 206,
+          "completion_tokens": 280,
+          "wall_ms": 21376.7
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1900,
+          "completion_tokens": 252,
+          "wall_ms": 19823.8
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 3580,
+          "completion_tokens": 123,
+          "wall_ms": 12068.9
+        },
+        {
+          "turn": 3,
+          "prompt_tokens": 5280,
+          "completion_tokens": 208,
+          "wall_ms": 16305.3
+        }
+      ]
+    },
+    {
+      "id": "peeters-contact-followup-outage",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "tools_called",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "error_recovery",
+          "turn": 1
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 204,
+          "completion_tokens": 258,
+          "wall_ms": 12738.3
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1896,
+          "completion_tokens": 217,
+          "wall_ms": 6818.6
+        }
+      ]
+    },
+    {
+      "id": "portfolio-recap-multiturn-fb2",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 3
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 3
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 3
+        },
+        {
+          "bucket": "quality",
+          "check": "scope_coverage",
+          "turn": 3
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 204,
+          "completion_tokens": 279,
+          "wall_ms": 13343.1
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1892,
+          "completion_tokens": 131,
+          "wall_ms": 8747.1
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 3591,
+          "completion_tokens": 126,
+          "wall_ms": 8781.2
+        },
+        {
+          "turn": 3,
+          "prompt_tokens": 5318,
+          "completion_tokens": 585,
+          "wall_ms": 38760.5
+        }
+      ]
+    },
+    {
+      "id": "decoy-owner-after-deals-devos",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 1
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 203,
+          "completion_tokens": 290,
+          "wall_ms": 13790.3
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1892,
+          "completion_tokens": 259,
+          "wall_ms": 19402.2
+        }
+      ]
+    },
+    {
+      "id": "decoy-owner-after-deals-janssens",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_not_contains",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "tools_called",
+          "turn": 1
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 204,
+          "completion_tokens": 262,
+          "wall_ms": 12853.3
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1896,
+          "completion_tokens": 144,
+          "wall_ms": 4619.6
+        }
+      ]
+    },
+    {
+      "id": "referential-callback-amount-train",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 0
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 0
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 0
+        },
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 1
+        },
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 2
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 2
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 2
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 203,
+          "completion_tokens": 308,
+          "wall_ms": 23295.8
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1838,
+          "completion_tokens": 242,
+          "wall_ms": 19821.6
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 3463,
+          "completion_tokens": 231,
+          "wall_ms": 19239.7
+        }
+      ]
+    },
+    {
+      "id": "three-tools-one-thread-janssens",
+      "split": "train",
+      "passed": true,
+      "stable": true,
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 327,
+          "completion_tokens": 124,
+          "wall_ms": 4950.9
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 458,
+          "completion_tokens": 104,
+          "wall_ms": 3656.8
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 603,
+          "completion_tokens": 255,
+          "wall_ms": 12145.8
+        }
+      ]
+    },
+    {
+      "id": "outage-then-other-company-contact",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "tools_called",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "error_recovery",
+          "turn": 1
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 204,
+          "completion_tokens": 258,
+          "wall_ms": 12721.8
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1893,
+          "completion_tokens": 167,
+          "wall_ms": 5329.4
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 1950,
+          "completion_tokens": 109,
+          "wall_ms": 7816.7
+        }
+      ]
+    },
+    {
+      "id": "long-thread-recap-with-outage-train",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 0
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 0
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 0
+        },
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 1
+        },
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 2
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 2
+        },
+        {
+          "bucket": "quality",
+          "check": "error_recovery",
+          "turn": 2
+        },
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 3
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 3
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 3
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 204,
+          "completion_tokens": 229,
+          "wall_ms": 18228.1
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1889,
+          "completion_tokens": 117,
+          "wall_ms": 11716.6
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 3586,
+          "completion_tokens": 211,
+          "wall_ms": 12760.6
+        },
+        {
+          "turn": 3,
+          "prompt_tokens": 3706,
+          "completion_tokens": 300,
+          "wall_ms": 20676.0
+        }
+      ]
+    }
+  ],
+  "loads": 3,
+  "runtime": {
+    "name": "ollama",
+    "version": "0.33.2"
+  }
+}

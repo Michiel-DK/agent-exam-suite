@@ -1,0 +1,4684 @@
+{
+ "stamp": "2026-09-18T17:57:40",
+ "backend": "gliner2",
+ "arch": "SpanExtractor",
+ "model": "fastino/gliner2-base-v1",
+ "tag": "g2base",
+ "python": "3.10.6",
+ "load_s": 9.7,
+ "total_wall_s": 40.6,
+ "rows": [
+  {
+   "exam": "email-triage",
+   "schema": "bare",
+   "id": "client-quote-request",
+   "split": "train",
+   "expected": {
+    "label": "reply_now"
+   },
+   "parsed": {
+    "label": "reply_now"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_now",
+     "confidence": 0.9999955892562866
+    }
+   },
+   "wall_ms": 274,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "bare",
+   "id": "overdue-invoice",
+   "split": "train",
+   "expected": {
+    "label": "reply_now"
+   },
+   "parsed": {
+    "label": "reply_now"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_now",
+     "confidence": 0.999991774559021
+    }
+   },
+   "wall_ms": 158,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "bare",
+   "id": "newsletter-substack",
+   "split": "train",
+   "expected": {
+    "label": "ignore"
+   },
+   "parsed": {
+    "label": "reply_now"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_now",
+     "confidence": 0.9999985694885254
+    }
+   },
+   "wall_ms": 140,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "bare",
+   "id": "recruiter-linkedin",
+   "split": "train",
+   "expected": {
+    "label": "reply_later"
+   },
+   "parsed": {
+    "label": "reply_now"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_now",
+     "confidence": 0.9999510049819946
+    }
+   },
+   "wall_ms": 150,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "bare",
+   "id": "seo-cold-spam",
+   "split": "train",
+   "expected": {
+    "label": "ignore"
+   },
+   "parsed": {
+    "label": "reply_now"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_now",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 147,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "bare",
+   "id": "friend-dinner",
+   "split": "train",
+   "expected": {
+    "label": "reply_later"
+   },
+   "parsed": {
+    "label": "reply_now"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_now",
+     "confidence": 0.9999996423721313
+    }
+   },
+   "wall_ms": 143,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "bare",
+   "id": "production-down",
+   "split": "heldout",
+   "expected": {
+    "label": "reply_now"
+   },
+   "parsed": {
+    "label": "reply_now"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_now",
+     "confidence": 0.9999994039535522
+    }
+   },
+   "wall_ms": 140,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "bare",
+   "id": "gdpr-data-request",
+   "split": "heldout",
+   "expected": {
+    "label": "reply_now"
+   },
+   "parsed": {
+    "label": "reply_now"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_now",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 140,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "bare",
+   "id": "conference-invite",
+   "split": "heldout",
+   "expected": {
+    "label": "reply_later"
+   },
+   "parsed": {
+    "label": "reply_later"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_later",
+     "confidence": 0.5814401507377625
+    }
+   },
+   "wall_ms": 192,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "bare",
+   "id": "promo-code",
+   "split": "heldout",
+   "expected": {
+    "label": "ignore"
+   },
+   "parsed": {
+    "label": "reply_now"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_now",
+     "confidence": 0.9999983310699463
+    }
+   },
+   "wall_ms": 146,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "bare",
+   "id": "client-question-no-rush",
+   "split": "train",
+   "expected": {
+    "label": "reply_now"
+   },
+   "parsed": {
+    "label": "reply_now"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_now",
+     "confidence": 0.9999949932098389
+    }
+   },
+   "wall_ms": 159,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "bare",
+   "id": "agency-whitelabel-offer",
+   "split": "train",
+   "expected": {
+    "label": "reply_later"
+   },
+   "parsed": {
+    "label": "reply_now"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_now",
+     "confidence": 0.9909662008285522
+    }
+   },
+   "wall_ms": 187,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "bare",
+   "id": "invoice-error-client",
+   "split": "heldout",
+   "expected": {
+    "label": "reply_now"
+   },
+   "parsed": {
+    "label": "reply_now"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_now",
+     "confidence": 0.9875714778900146
+    }
+   },
+   "wall_ms": 179,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "bare",
+   "id": "dpa-signature-compliance",
+   "split": "heldout",
+   "expected": {
+    "label": "reply_now"
+   },
+   "parsed": {
+    "label": "reply_now"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_now",
+     "confidence": 0.9999963045120239
+    }
+   },
+   "wall_ms": 118,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "bare",
+   "id": "recruiter-fake-urgency",
+   "split": "heldout",
+   "expected": {
+    "label": "reply_later"
+   },
+   "parsed": {
+    "label": "reply_now"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_now",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 88,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "bare",
+   "id": "paid-workshop-invite",
+   "split": "heldout",
+   "expected": {
+    "label": "reply_later"
+   },
+   "parsed": {
+    "label": "reply_now"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_now",
+     "confidence": 0.9998509883880615
+    }
+   },
+   "wall_ms": 85,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "bare",
+   "id": "intro-no-ask",
+   "split": "heldout",
+   "expected": {
+    "label": "reply_later"
+   },
+   "parsed": {
+    "label": "reply_now"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_now",
+     "confidence": 0.9999949932098389
+    }
+   },
+   "wall_ms": 86,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "bare",
+   "id": "disk-warning-no-action",
+   "split": "heldout",
+   "expected": {
+    "label": "ignore"
+   },
+   "parsed": {
+    "label": "ignore"
+   },
+   "raw": {
+    "label": {
+     "label": "ignore",
+     "confidence": 0.9939502477645874
+    }
+   },
+   "wall_ms": 85,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "bare",
+   "id": "long-ramble-buried-incident",
+   "split": "heldout",
+   "expected": {
+    "label": "reply_now"
+   },
+   "parsed": {
+    "label": "reply_now"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_now",
+     "confidence": 0.9550180435180664
+    }
+   },
+   "wall_ms": 203,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "desc",
+   "id": "client-quote-request",
+   "split": "train",
+   "expected": {
+    "label": "reply_now"
+   },
+   "parsed": {
+    "label": "reply_now"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_now",
+     "confidence": 0.9937536120414734
+    }
+   },
+   "wall_ms": 111,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "desc",
+   "id": "overdue-invoice",
+   "split": "train",
+   "expected": {
+    "label": "reply_now"
+   },
+   "parsed": {
+    "label": "reply_now"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_now",
+     "confidence": 0.962662935256958
+    }
+   },
+   "wall_ms": 117,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "desc",
+   "id": "newsletter-substack",
+   "split": "train",
+   "expected": {
+    "label": "ignore"
+   },
+   "parsed": {
+    "label": "ignore"
+   },
+   "raw": {
+    "label": {
+     "label": "ignore",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 127,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "desc",
+   "id": "recruiter-linkedin",
+   "split": "train",
+   "expected": {
+    "label": "reply_later"
+   },
+   "parsed": {
+    "label": "reply_later"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_later",
+     "confidence": 0.9996147155761719
+    }
+   },
+   "wall_ms": 117,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "desc",
+   "id": "seo-cold-spam",
+   "split": "train",
+   "expected": {
+    "label": "ignore"
+   },
+   "parsed": {
+    "label": "reply_now"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_now",
+     "confidence": 0.9999959468841553
+    }
+   },
+   "wall_ms": 111,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "desc",
+   "id": "friend-dinner",
+   "split": "train",
+   "expected": {
+    "label": "reply_later"
+   },
+   "parsed": {
+    "label": "reply_later"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_later",
+     "confidence": 0.9968453049659729
+    }
+   },
+   "wall_ms": 116,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "desc",
+   "id": "production-down",
+   "split": "heldout",
+   "expected": {
+    "label": "reply_now"
+   },
+   "parsed": {
+    "label": "reply_now"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_now",
+     "confidence": 0.9999074935913086
+    }
+   },
+   "wall_ms": 114,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "desc",
+   "id": "gdpr-data-request",
+   "split": "heldout",
+   "expected": {
+    "label": "reply_now"
+   },
+   "parsed": {
+    "label": "reply_now"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_now",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 111,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "desc",
+   "id": "conference-invite",
+   "split": "heldout",
+   "expected": {
+    "label": "reply_later"
+   },
+   "parsed": {
+    "label": "reply_later"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_later",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 125,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "desc",
+   "id": "promo-code",
+   "split": "heldout",
+   "expected": {
+    "label": "ignore"
+   },
+   "parsed": {
+    "label": "ignore"
+   },
+   "raw": {
+    "label": {
+     "label": "ignore",
+     "confidence": 0.5184804201126099
+    }
+   },
+   "wall_ms": 114,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "desc",
+   "id": "client-question-no-rush",
+   "split": "train",
+   "expected": {
+    "label": "reply_now"
+   },
+   "parsed": {
+    "label": "reply_later"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_later",
+     "confidence": 0.9009724855422974
+    }
+   },
+   "wall_ms": 123,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "desc",
+   "id": "agency-whitelabel-offer",
+   "split": "train",
+   "expected": {
+    "label": "reply_later"
+   },
+   "parsed": {
+    "label": "reply_later"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_later",
+     "confidence": 0.7000157237052917
+    }
+   },
+   "wall_ms": 126,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "desc",
+   "id": "invoice-error-client",
+   "split": "heldout",
+   "expected": {
+    "label": "reply_now"
+   },
+   "parsed": {
+    "label": "reply_later"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_later",
+     "confidence": 0.999923825263977
+    }
+   },
+   "wall_ms": 119,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "desc",
+   "id": "dpa-signature-compliance",
+   "split": "heldout",
+   "expected": {
+    "label": "reply_now"
+   },
+   "parsed": {
+    "label": "reply_now"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_now",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 116,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "desc",
+   "id": "recruiter-fake-urgency",
+   "split": "heldout",
+   "expected": {
+    "label": "reply_later"
+   },
+   "parsed": {
+    "label": "reply_now"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_now",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 120,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "desc",
+   "id": "paid-workshop-invite",
+   "split": "heldout",
+   "expected": {
+    "label": "reply_later"
+   },
+   "parsed": {
+    "label": "reply_later"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_later",
+     "confidence": 0.8129270672798157
+    }
+   },
+   "wall_ms": 218,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "desc",
+   "id": "intro-no-ask",
+   "split": "heldout",
+   "expected": {
+    "label": "reply_later"
+   },
+   "parsed": {
+    "label": "reply_later"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_later",
+     "confidence": 0.9999990463256836
+    }
+   },
+   "wall_ms": 199,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "desc",
+   "id": "disk-warning-no-action",
+   "split": "heldout",
+   "expected": {
+    "label": "ignore"
+   },
+   "parsed": {
+    "label": "ignore"
+   },
+   "raw": {
+    "label": {
+     "label": "ignore",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 206,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "email-triage",
+   "schema": "desc",
+   "id": "long-ramble-buried-incident",
+   "split": "heldout",
+   "expected": {
+    "label": "reply_now"
+   },
+   "parsed": {
+    "label": "reply_later"
+   },
+   "raw": {
+    "label": {
+     "label": "reply_later",
+     "confidence": 0.992813766002655
+    }
+   },
+   "wall_ms": 426,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "bare",
+   "id": "railway-subscription",
+   "split": "train",
+   "expected": {
+    "category": "software",
+    "recurring": true
+   },
+   "parsed": {
+    "category": "software",
+    "recurring": true
+   },
+   "raw": {
+    "category": {
+     "label": "software",
+     "confidence": 0.9999021291732788
+    },
+    "recurring": {
+     "label": "true",
+     "confidence": 0.9999990463256836
+    }
+   },
+   "wall_ms": 159,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {
+    "fields_matched": 2,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "bare",
+   "id": "client-lunch",
+   "split": "train",
+   "expected": {
+    "category": "meals",
+    "recurring": false
+   },
+   "parsed": {
+    "category": "meals",
+    "recurring": true
+   },
+   "raw": {
+    "category": {
+     "label": "meals",
+     "confidence": 0.9975512623786926
+    },
+    "recurring": {
+     "label": "true",
+     "confidence": 0.6293119788169861
+    }
+   },
+   "wall_ms": 136,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "fields"
+    }
+   ],
+   "failures": [],
+   "detail": {
+    "fields_matched": 1,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "bare",
+   "id": "nmbs-ticket",
+   "split": "train",
+   "expected": {
+    "category": "travel",
+    "recurring": false
+   },
+   "parsed": {
+    "category": "travel",
+    "recurring": false
+   },
+   "raw": {
+    "category": {
+     "label": "travel",
+     "confidence": 0.9985587000846863
+    },
+    "recurring": {
+     "label": "false",
+     "confidence": 0.847683310508728
+    }
+   },
+   "wall_ms": 128,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {
+    "fields_matched": 2,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "bare",
+   "id": "proximus-monthly",
+   "split": "train",
+   "expected": {
+    "category": "telecom",
+    "recurring": true
+   },
+   "parsed": {
+    "category": "telecom",
+    "recurring": true
+   },
+   "raw": {
+    "category": {
+     "label": "telecom",
+     "confidence": 1.0
+    },
+    "recurring": {
+     "label": "true",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 152,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {
+    "fields_matched": 2,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "bare",
+   "id": "coolblue-monitor",
+   "split": "train",
+   "expected": {
+    "category": "hardware",
+    "recurring": false
+   },
+   "parsed": {
+    "category": "hardware",
+    "recurring": false
+   },
+   "raw": {
+    "category": {
+     "label": "hardware",
+     "confidence": 0.9564639925956726
+    },
+    "recurring": {
+     "label": "false",
+     "confidence": 0.9262261390686035
+    }
+   },
+   "wall_ms": 131,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {
+    "fields_matched": 2,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "bare",
+   "id": "anthropic-api",
+   "split": "heldout",
+   "expected": {
+    "category": "software",
+    "recurring": false
+   },
+   "parsed": {
+    "category": "other",
+    "recurring": true
+   },
+   "raw": {
+    "category": {
+     "label": "other",
+     "confidence": 0.9999819993972778
+    },
+    "recurring": {
+     "label": "true",
+     "confidence": 0.9998310804367065
+    }
+   },
+   "wall_ms": 129,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "fields"
+    }
+   ],
+   "failures": [],
+   "detail": {
+    "fields_matched": 0,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "bare",
+   "id": "hotel-lisbon",
+   "split": "heldout",
+   "expected": {
+    "category": "travel",
+    "recurring": false
+   },
+   "parsed": {
+    "category": "travel",
+    "recurring": false
+   },
+   "raw": {
+    "category": {
+     "label": "travel",
+     "confidence": 0.9998277425765991
+    },
+    "recurring": {
+     "label": "false",
+     "confidence": 0.9969992637634277
+    }
+   },
+   "wall_ms": 133,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {
+    "fields_matched": 2,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "bare",
+   "id": "google-ads",
+   "split": "heldout",
+   "expected": {
+    "category": "marketing",
+    "recurring": true
+   },
+   "parsed": {
+    "category": "marketing",
+    "recurring": true
+   },
+   "raw": {
+    "category": {
+     "label": "marketing",
+     "confidence": 0.9999828338623047
+    },
+    "recurring": {
+     "label": "true",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 164,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {
+    "fields_matched": 2,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "bare",
+   "id": "paypal-cryptic",
+   "split": "heldout",
+   "expected": {
+    "category": "other",
+    "recurring": false
+   },
+   "parsed": {
+    "category": "other",
+    "recurring": false
+   },
+   "raw": {
+    "category": {
+     "label": "other",
+     "confidence": 0.9999998807907104
+    },
+    "recurring": {
+     "label": "false",
+     "confidence": 0.9950016140937805
+    }
+   },
+   "wall_ms": 133,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {
+    "fields_matched": 2,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "bare",
+   "id": "bank-transfer-savings",
+   "split": "heldout",
+   "expected": {
+    "category": "other",
+    "recurring": false
+   },
+   "parsed": {
+    "category": "other",
+    "recurring": true
+   },
+   "raw": {
+    "category": {
+     "label": "other",
+     "confidence": 0.9999629259109497
+    },
+    "recurring": {
+     "label": "true",
+     "confidence": 0.8986326456069946
+    }
+   },
+   "wall_ms": 120,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "fields"
+    }
+   ],
+   "failures": [],
+   "detail": {
+    "fields_matched": 1,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "bare",
+   "id": "godaddy-domain-renewal",
+   "split": "train",
+   "expected": {
+    "category": "marketing",
+    "recurring": true
+   },
+   "parsed": {
+    "category": "hardware",
+    "recurring": true
+   },
+   "raw": {
+    "category": {
+     "label": "hardware",
+     "confidence": 0.8578598499298096
+    },
+    "recurring": {
+     "label": "true",
+     "confidence": 0.9952126741409302
+    }
+   },
+   "wall_ms": 102,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "fields"
+    }
+   ],
+   "failures": [],
+   "detail": {
+    "fields_matched": 1,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "bare",
+   "id": "paypal-adobe-subscription",
+   "split": "heldout",
+   "expected": {
+    "category": "software",
+    "recurring": true
+   },
+   "parsed": {
+    "category": "software",
+    "recurring": true
+   },
+   "raw": {
+    "category": {
+     "label": "software",
+     "confidence": 0.9973004460334778
+    },
+    "recurring": {
+     "label": "true",
+     "confidence": 0.9106101393699646
+    }
+   },
+   "wall_ms": 71,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {
+    "fields_matched": 2,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "bare",
+   "id": "square-cafe-cryptic",
+   "split": "heldout",
+   "expected": {
+    "category": "meals",
+    "recurring": false
+   },
+   "parsed": {
+    "category": "other",
+    "recurring": false
+   },
+   "raw": {
+    "category": {
+     "label": "other",
+     "confidence": 0.5018933415412903
+    },
+    "recurring": {
+     "label": "false",
+     "confidence": 0.8138786554336548
+    }
+   },
+   "wall_ms": 110,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "fields"
+    }
+   ],
+   "failures": [],
+   "detail": {
+    "fields_matched": 1,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "bare",
+   "id": "uber-trip-cryptic",
+   "split": "heldout",
+   "expected": {
+    "category": "travel",
+    "recurring": false
+   },
+   "parsed": {
+    "category": "travel",
+    "recurring": false
+   },
+   "raw": {
+    "category": {
+     "label": "travel",
+     "confidence": 0.999990701675415
+    },
+    "recurring": {
+     "label": "false",
+     "confidence": 0.7928785085678101
+    }
+   },
+   "wall_ms": 138,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {
+    "fields_matched": 2,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "bare",
+   "id": "telenet-daypass",
+   "split": "heldout",
+   "expected": {
+    "category": "telecom",
+    "recurring": false
+   },
+   "parsed": {
+    "category": "telecom",
+    "recurring": true
+   },
+   "raw": {
+    "category": {
+     "label": "telecom",
+     "confidence": 0.9997084736824036
+    },
+    "recurring": {
+     "label": "true",
+     "confidence": 0.999997615814209
+    }
+   },
+   "wall_ms": 135,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "fields"
+    }
+   ],
+   "failures": [],
+   "detail": {
+    "fields_matched": 1,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "desc",
+   "id": "railway-subscription",
+   "split": "train",
+   "expected": {
+    "category": "software",
+    "recurring": true
+   },
+   "parsed": {
+    "category": "software",
+    "recurring": true
+   },
+   "raw": {
+    "category": {
+     "label": "software",
+     "confidence": 0.9999774694442749
+    },
+    "recurring": {
+     "label": "true",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 181,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {
+    "fields_matched": 2,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "desc",
+   "id": "client-lunch",
+   "split": "train",
+   "expected": {
+    "category": "meals",
+    "recurring": false
+   },
+   "parsed": {
+    "category": "meals",
+    "recurring": true
+   },
+   "raw": {
+    "category": {
+     "label": "meals",
+     "confidence": 0.9999997615814209
+    },
+    "recurring": {
+     "label": "true",
+     "confidence": 0.7913830876350403
+    }
+   },
+   "wall_ms": 195,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "fields"
+    }
+   ],
+   "failures": [],
+   "detail": {
+    "fields_matched": 1,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "desc",
+   "id": "nmbs-ticket",
+   "split": "train",
+   "expected": {
+    "category": "travel",
+    "recurring": false
+   },
+   "parsed": {
+    "category": "travel",
+    "recurring": true
+   },
+   "raw": {
+    "category": {
+     "label": "travel",
+     "confidence": 0.999823272228241
+    },
+    "recurring": {
+     "label": "true",
+     "confidence": 0.8489909768104553
+    }
+   },
+   "wall_ms": 198,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "fields"
+    }
+   ],
+   "failures": [],
+   "detail": {
+    "fields_matched": 1,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "desc",
+   "id": "proximus-monthly",
+   "split": "train",
+   "expected": {
+    "category": "telecom",
+    "recurring": true
+   },
+   "parsed": {
+    "category": "telecom",
+    "recurring": true
+   },
+   "raw": {
+    "category": {
+     "label": "telecom",
+     "confidence": 1.0
+    },
+    "recurring": {
+     "label": "true",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 196,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {
+    "fields_matched": 2,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "desc",
+   "id": "coolblue-monitor",
+   "split": "train",
+   "expected": {
+    "category": "hardware",
+    "recurring": false
+   },
+   "parsed": {
+    "category": "hardware",
+    "recurring": true
+   },
+   "raw": {
+    "category": {
+     "label": "hardware",
+     "confidence": 0.9794377088546753
+    },
+    "recurring": {
+     "label": "true",
+     "confidence": 0.7223289012908936
+    }
+   },
+   "wall_ms": 239,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "fields"
+    }
+   ],
+   "failures": [],
+   "detail": {
+    "fields_matched": 1,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "desc",
+   "id": "anthropic-api",
+   "split": "heldout",
+   "expected": {
+    "category": "software",
+    "recurring": false
+   },
+   "parsed": {
+    "category": "other",
+    "recurring": true
+   },
+   "raw": {
+    "category": {
+     "label": "other",
+     "confidence": 0.9540423154830933
+    },
+    "recurring": {
+     "label": "true",
+     "confidence": 0.9821246862411499
+    }
+   },
+   "wall_ms": 228,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "fields"
+    }
+   ],
+   "failures": [],
+   "detail": {
+    "fields_matched": 0,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "desc",
+   "id": "hotel-lisbon",
+   "split": "heldout",
+   "expected": {
+    "category": "travel",
+    "recurring": false
+   },
+   "parsed": {
+    "category": "travel",
+    "recurring": false
+   },
+   "raw": {
+    "category": {
+     "label": "travel",
+     "confidence": 1.0
+    },
+    "recurring": {
+     "label": "false",
+     "confidence": 0.5602266192436218
+    }
+   },
+   "wall_ms": 213,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {
+    "fields_matched": 2,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "desc",
+   "id": "google-ads",
+   "split": "heldout",
+   "expected": {
+    "category": "marketing",
+    "recurring": true
+   },
+   "parsed": {
+    "category": "marketing",
+    "recurring": true
+   },
+   "raw": {
+    "category": {
+     "label": "marketing",
+     "confidence": 1.0
+    },
+    "recurring": {
+     "label": "true",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 205,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {
+    "fields_matched": 2,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "desc",
+   "id": "paypal-cryptic",
+   "split": "heldout",
+   "expected": {
+    "category": "other",
+    "recurring": false
+   },
+   "parsed": {
+    "category": "other",
+    "recurring": false
+   },
+   "raw": {
+    "category": {
+     "label": "other",
+     "confidence": 0.9999990463256836
+    },
+    "recurring": {
+     "label": "false",
+     "confidence": 0.8957256078720093
+    }
+   },
+   "wall_ms": 197,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {
+    "fields_matched": 2,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "desc",
+   "id": "bank-transfer-savings",
+   "split": "heldout",
+   "expected": {
+    "category": "other",
+    "recurring": false
+   },
+   "parsed": {
+    "category": "other",
+    "recurring": true
+   },
+   "raw": {
+    "category": {
+     "label": "other",
+     "confidence": 0.9999833106994629
+    },
+    "recurring": {
+     "label": "true",
+     "confidence": 0.9054479002952576
+    }
+   },
+   "wall_ms": 191,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "fields"
+    }
+   ],
+   "failures": [],
+   "detail": {
+    "fields_matched": 1,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "desc",
+   "id": "godaddy-domain-renewal",
+   "split": "train",
+   "expected": {
+    "category": "marketing",
+    "recurring": true
+   },
+   "parsed": {
+    "category": "marketing",
+    "recurring": true
+   },
+   "raw": {
+    "category": {
+     "label": "marketing",
+     "confidence": 0.9985816478729248
+    },
+    "recurring": {
+     "label": "true",
+     "confidence": 0.9548508524894714
+    }
+   },
+   "wall_ms": 194,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {
+    "fields_matched": 2,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "desc",
+   "id": "paypal-adobe-subscription",
+   "split": "heldout",
+   "expected": {
+    "category": "software",
+    "recurring": true
+   },
+   "parsed": {
+    "category": "software",
+    "recurring": true
+   },
+   "raw": {
+    "category": {
+     "label": "software",
+     "confidence": 0.9999985694885254
+    },
+    "recurring": {
+     "label": "true",
+     "confidence": 0.9999890327453613
+    }
+   },
+   "wall_ms": 226,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {
+    "fields_matched": 2,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "desc",
+   "id": "square-cafe-cryptic",
+   "split": "heldout",
+   "expected": {
+    "category": "meals",
+    "recurring": false
+   },
+   "parsed": {
+    "category": "meals",
+    "recurring": true
+   },
+   "raw": {
+    "category": {
+     "label": "meals",
+     "confidence": 0.9999281167984009
+    },
+    "recurring": {
+     "label": "true",
+     "confidence": 0.9067623615264893
+    }
+   },
+   "wall_ms": 199,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "fields"
+    }
+   ],
+   "failures": [],
+   "detail": {
+    "fields_matched": 1,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "desc",
+   "id": "uber-trip-cryptic",
+   "split": "heldout",
+   "expected": {
+    "category": "travel",
+    "recurring": false
+   },
+   "parsed": {
+    "category": "travel",
+    "recurring": true
+   },
+   "raw": {
+    "category": {
+     "label": "travel",
+     "confidence": 0.9999998807907104
+    },
+    "recurring": {
+     "label": "true",
+     "confidence": 0.9987591505050659
+    }
+   },
+   "wall_ms": 191,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "fields"
+    }
+   ],
+   "failures": [],
+   "detail": {
+    "fields_matched": 1,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "expense-categorization",
+   "schema": "desc",
+   "id": "telenet-daypass",
+   "split": "heldout",
+   "expected": {
+    "category": "telecom",
+    "recurring": false
+   },
+   "parsed": {
+    "category": "telecom",
+    "recurring": true
+   },
+   "raw": {
+    "category": {
+     "label": "telecom",
+     "confidence": 1.0
+    },
+    "recurring": {
+     "label": "true",
+     "confidence": 0.9999998807907104
+    }
+   },
+   "wall_ms": 200,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "fields"
+    }
+   ],
+   "failures": [],
+   "detail": {
+    "fields_matched": 1,
+    "fields_total": 2
+   }
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "crm-devos-stage",
+   "split": "train",
+   "expected": {
+    "agent": "crm-followup"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.9999188184738159
+    }
+   },
+   "wall_ms": 144,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "crm-janssens-contact-lastspeak",
+   "split": "heldout",
+   "expected": {
+    "agent": "crm-followup"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.9889849424362183
+    }
+   },
+   "wall_ms": 146,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "crm-peeters-open-deal-slack",
+   "split": "train",
+   "expected": {
+    "agent": "crm-followup"
+   },
+   "parsed": {
+    "agent": "expense-categorization",
+    "input_len": 91
+   },
+   "raw": {
+    "agent": {
+     "label": "expense-categorization",
+     "confidence": 0.686481773853302
+    }
+   },
+   "wall_ms": 160,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "crm-vitrine-wants-active",
+   "split": "heldout",
+   "expected": {
+    "agent": "crm-followup"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.9640117883682251
+    }
+   },
+   "wall_ms": 128,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "crm-mertens-notes",
+   "split": "train",
+   "expected": {
+    "agent": "crm-followup"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.6523185968399048
+    }
+   },
+   "wall_ms": 141,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "triage-bare-client-email",
+   "split": "train",
+   "expected": {
+    "agent": "email-triage"
+   },
+   "parsed": {
+    "agent": "email-triage",
+    "input_len": 212
+   },
+   "raw": {
+    "agent": {
+     "label": "email-triage",
+     "confidence": 0.7924031019210815
+    }
+   },
+   "wall_ms": 191,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "triage-urgent-or-not-newsletter",
+   "split": "heldout",
+   "expected": {
+    "agent": "email-triage"
+   },
+   "parsed": {
+    "agent": "email-triage",
+    "input_len": 232
+   },
+   "raw": {
+    "agent": {
+     "label": "email-triage",
+     "confidence": 0.9999992847442627
+    }
+   },
+   "wall_ms": 176,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "triage-bare-recruiter",
+   "split": "train",
+   "expected": {
+    "agent": "email-triage"
+   },
+   "parsed": {
+    "agent": "email-triage",
+    "input_len": 251
+   },
+   "raw": {
+    "agent": {
+     "label": "email-triage",
+     "confidence": 0.9828599095344543
+    }
+   },
+   "wall_ms": 196,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "triage-bare-disk-alert",
+   "split": "heldout",
+   "expected": {
+    "agent": "email-triage"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.99857497215271
+    }
+   },
+   "wall_ms": 155,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "triage-sort-accountant",
+   "split": "train",
+   "expected": {
+    "agent": "email-triage"
+   },
+   "parsed": {
+    "agent": "email-triage",
+    "input_len": 214
+   },
+   "raw": {
+    "agent": {
+     "label": "email-triage",
+     "confidence": 0.9999996423721313
+    }
+   },
+   "wall_ms": 178,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "reply-draft-sofie",
+   "split": "train",
+   "expected": {
+    "agent": "reply-draft"
+   },
+   "parsed": {
+    "agent": "reply-draft",
+    "input_len": 236
+   },
+   "raw": {
+    "agent": {
+     "label": "reply-draft",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 338,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "reply-answer-anna",
+   "split": "heldout",
+   "expected": {
+    "agent": "reply-draft"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.4239465296268463
+    }
+   },
+   "wall_ms": 167,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "reply-nl-antwoord",
+   "split": "train",
+   "expected": {
+    "agent": "reply-draft"
+   },
+   "parsed": {
+    "agent": "reply-draft",
+    "input_len": 195
+   },
+   "raw": {
+    "agent": {
+     "label": "reply-draft",
+     "confidence": 0.7003427743911743
+    }
+   },
+   "wall_ms": 166,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "reply-decline-speaker",
+   "split": "heldout",
+   "expected": {
+    "agent": "reply-draft"
+   },
+   "parsed": {
+    "agent": "reply-draft",
+    "input_len": 257
+   },
+   "raw": {
+    "agent": {
+     "label": "reply-draft",
+     "confidence": 0.9314767718315125
+    }
+   },
+   "wall_ms": 152,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "reply-fr-reponds",
+   "split": "train",
+   "expected": {
+    "agent": "reply-draft"
+   },
+   "parsed": {
+    "agent": "reply-draft",
+    "input_len": 196
+   },
+   "raw": {
+    "agent": {
+     "label": "reply-draft",
+     "confidence": 0.8218015432357788
+    }
+   },
+   "wall_ms": 161,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "reply-instruction-wins-newsletter",
+   "split": "heldout",
+   "expected": {
+    "agent": "reply-draft"
+   },
+   "parsed": {
+    "agent": "reply-draft",
+    "input_len": 249
+   },
+   "raw": {
+    "agent": {
+     "label": "reply-draft",
+     "confidence": 0.9999991655349731
+    }
+   },
+   "wall_ms": 195,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "expense-book-anthropic",
+   "split": "train",
+   "expected": {
+    "agent": "expense-categorization"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.9999741315841675
+    }
+   },
+   "wall_ms": 144,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "expense-which-category-ovh",
+   "split": "heldout",
+   "expected": {
+    "agent": "expense-categorization"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.9999961853027344
+    }
+   },
+   "wall_ms": 156,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "expense-nmbs-ticket",
+   "split": "train",
+   "expected": {
+    "agent": "expense-categorization"
+   },
+   "parsed": {
+    "agent": "expense-categorization",
+    "input_len": 64
+   },
+   "raw": {
+    "agent": {
+     "label": "expense-categorization",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 137,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "expense-lunch-colruyt",
+   "split": "heldout",
+   "expected": {
+    "agent": "expense-categorization"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.9886709451675415
+    }
+   },
+   "wall_ms": 135,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "expense-subscription-proximus",
+   "split": "train",
+   "expected": {
+    "agent": "expense-categorization"
+   },
+   "parsed": {
+    "agent": "expense-categorization",
+    "input_len": 56
+   },
+   "raw": {
+    "agent": {
+     "label": "expense-categorization",
+     "confidence": 0.9943317174911499
+    }
+   },
+   "wall_ms": 112,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "recap-summarise-day",
+   "split": "train",
+   "expected": {
+    "agent": "recap"
+   },
+   "parsed": {
+    "agent": "recap",
+    "input_len": 462
+   },
+   "raw": {
+    "agent": {
+     "label": "recap",
+     "confidence": 0.99985671043396
+    }
+   },
+   "wall_ms": 224,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "recap-what-got-done",
+   "split": "heldout",
+   "expected": {
+    "agent": "recap"
+   },
+   "parsed": {
+    "agent": "reply-draft",
+    "input_len": 338
+   },
+   "raw": {
+    "agent": {
+     "label": "reply-draft",
+     "confidence": 0.5366621613502502
+    }
+   },
+   "wall_ms": 173,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "recap-daily-please",
+   "split": "train",
+   "expected": {
+    "agent": "recap"
+   },
+   "parsed": {
+    "agent": "recap",
+    "input_len": 425
+   },
+   "raw": {
+    "agent": {
+     "label": "recap",
+     "confidence": 0.9999998807907104
+    }
+   },
+   "wall_ms": 202,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "recap-highlights",
+   "split": "heldout",
+   "expected": {
+    "agent": "recap"
+   },
+   "parsed": {
+    "agent": "email-triage",
+    "input_len": 340
+   },
+   "raw": {
+    "agent": {
+     "label": "email-triage",
+     "confidence": 0.7985393404960632
+    }
+   },
+   "wall_ms": 193,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "recap-end-of-day",
+   "split": "train",
+   "expected": {
+    "agent": "recap"
+   },
+   "parsed": {
+    "agent": "email-triage",
+    "input_len": 247
+   },
+   "raw": {
+    "agent": {
+     "label": "email-triage",
+     "confidence": 0.9907429814338684
+    }
+   },
+   "wall_ms": 165,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "transcript-clean-up",
+   "split": "train",
+   "expected": {
+    "agent": "transcript-en"
+   },
+   "parsed": {
+    "agent": "transcript-en",
+    "input_len": 562
+   },
+   "raw": {
+    "agent": {
+     "label": "transcript-en",
+     "confidence": 0.9999909400939941
+    }
+   },
+   "wall_ms": 257,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "transcript-devos-readable",
+   "split": "heldout",
+   "expected": {
+    "agent": "transcript-en"
+   },
+   "parsed": {
+    "agent": "transcript-en",
+    "input_len": 439
+   },
+   "raw": {
+    "agent": {
+     "label": "transcript-en",
+     "confidence": 0.9998252987861633
+    }
+   },
+   "wall_ms": 238,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "transcript-tidy-support",
+   "split": "train",
+   "expected": {
+    "agent": "transcript-en"
+   },
+   "parsed": {
+    "agent": "transcript-en",
+    "input_len": 487
+   },
+   "raw": {
+    "agent": {
+     "label": "transcript-en",
+     "confidence": 0.999985933303833
+    }
+   },
+   "wall_ms": 203,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "transcript-bare",
+   "split": "heldout",
+   "expected": {
+    "agent": "transcript-en"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.9712037444114685
+    }
+   },
+   "wall_ms": 174,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "transcript-proper-english",
+   "split": "train",
+   "expected": {
+    "agent": "transcript-en"
+   },
+   "parsed": {
+    "agent": "recap",
+    "input_len": 389
+   },
+   "raw": {
+    "agent": {
+     "label": "recap",
+     "confidence": 0.9999984502792358
+    }
+   },
+   "wall_ms": 207,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "none-book-train",
+   "split": "train",
+   "expected": {
+    "agent": "none"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 145,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "none-weather",
+   "split": "heldout",
+   "expected": {
+    "agent": "none"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 129,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "none-generate-invoice-client-bait",
+   "split": "train",
+   "expected": {
+    "agent": "none"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.9902053475379944
+    }
+   },
+   "wall_ms": 137,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "none-translate-contract-bait",
+   "split": "heldout",
+   "expected": {
+    "agent": "none"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.9999895095825195
+    }
+   },
+   "wall_ms": 160,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "none-chitchat",
+   "split": "train",
+   "expected": {
+    "agent": "none"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.9999997615814209
+    }
+   },
+   "wall_ms": 113,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "none-reminder",
+   "split": "heldout",
+   "expected": {
+    "agent": "none"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.9999995231628418
+    }
+   },
+   "wall_ms": 128,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "none-pause-email-bait",
+   "split": "train",
+   "expected": {
+    "agent": "none"
+   },
+   "parsed": {
+    "agent": "email-triage",
+    "input_len": 213
+   },
+   "raw": {
+    "agent": {
+     "label": "email-triage",
+     "confidence": 0.937114953994751
+    }
+   },
+   "wall_ms": 149,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "heavy-two-payloads-reply-wins",
+   "split": "heldout",
+   "expected": {
+    "agent": "reply-draft"
+   },
+   "parsed": {
+    "agent": "reply-draft",
+    "input_len": 191
+   },
+   "raw": {
+    "agent": {
+     "label": "reply-draft",
+     "confidence": 0.9999991655349731
+    }
+   },
+   "wall_ms": 126,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "heavy-question-inside-email-crm",
+   "split": "train",
+   "expected": {
+    "agent": "crm-followup"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.9719563126564026
+    }
+   },
+   "wall_ms": 105,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "heavy-nl-crm-question",
+   "split": "heldout",
+   "expected": {
+    "agent": "crm-followup"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.9999884366989136
+    }
+   },
+   "wall_ms": 71,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "heavy-fr-expense-line",
+   "split": "train",
+   "expected": {
+    "agent": "expense-categorization"
+   },
+   "parsed": {
+    "agent": "expense-categorization",
+    "input_len": 68
+   },
+   "raw": {
+    "agent": {
+     "label": "expense-categorization",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 114,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "heavy-transcript-named-summarise-not-translate",
+   "split": "heldout",
+   "expected": {
+    "agent": "transcript-en"
+   },
+   "parsed": {
+    "agent": "recap",
+    "input_len": 296
+   },
+   "raw": {
+    "agent": {
+     "label": "recap",
+     "confidence": 0.9999948740005493
+    }
+   },
+   "wall_ms": 195,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "heavy-email-with-log-shape-triage",
+   "split": "train",
+   "expected": {
+    "agent": "email-triage"
+   },
+   "parsed": {
+    "agent": "email-triage",
+    "input_len": 175
+   },
+   "raw": {
+    "agent": {
+     "label": "email-triage",
+     "confidence": 0.990448534488678
+    }
+   },
+   "wall_ms": 206,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "heavy-none-edit-document-client-bait",
+   "split": "train",
+   "expected": {
+    "agent": "none"
+   },
+   "parsed": {
+    "agent": "reply-draft",
+    "input_len": 175
+   },
+   "raw": {
+    "agent": {
+     "label": "reply-draft",
+     "confidence": 0.9990824460983276
+    }
+   },
+   "wall_ms": 169,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "bare",
+   "id": "heavy-none-crm-write-bait",
+   "split": "heldout",
+   "expected": {
+    "agent": "none"
+   },
+   "parsed": {
+    "agent": "crm-followup",
+    "input_len": 82
+   },
+   "raw": {
+    "agent": {
+     "label": "crm-followup",
+     "confidence": 0.984076201915741
+    }
+   },
+   "wall_ms": 131,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "crm-devos-stage",
+   "split": "train",
+   "expected": {
+    "agent": "crm-followup"
+   },
+   "parsed": {
+    "agent": "crm-followup",
+    "input_len": 39
+   },
+   "raw": {
+    "agent": {
+     "label": "crm-followup",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 310,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "crm-janssens-contact-lastspeak",
+   "split": "heldout",
+   "expected": {
+    "agent": "crm-followup"
+   },
+   "parsed": {
+    "agent": "crm-followup",
+    "input_len": 91
+   },
+   "raw": {
+    "agent": {
+     "label": "crm-followup",
+     "confidence": 0.9999438524246216
+    }
+   },
+   "wall_ms": 270,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "crm-peeters-open-deal-slack",
+   "split": "train",
+   "expected": {
+    "agent": "crm-followup"
+   },
+   "parsed": {
+    "agent": "crm-followup",
+    "input_len": 91
+   },
+   "raw": {
+    "agent": {
+     "label": "crm-followup",
+     "confidence": 0.9998341798782349
+    }
+   },
+   "wall_ms": 236,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "crm-vitrine-wants-active",
+   "split": "heldout",
+   "expected": {
+    "agent": "crm-followup"
+   },
+   "parsed": {
+    "agent": "crm-followup",
+    "input_len": 82
+   },
+   "raw": {
+    "agent": {
+     "label": "crm-followup",
+     "confidence": 0.9999979734420776
+    }
+   },
+   "wall_ms": 305,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "crm-mertens-notes",
+   "split": "train",
+   "expected": {
+    "agent": "crm-followup"
+   },
+   "parsed": {
+    "agent": "crm-followup",
+    "input_len": 51
+   },
+   "raw": {
+    "agent": {
+     "label": "crm-followup",
+     "confidence": 0.9999998807907104
+    }
+   },
+   "wall_ms": 367,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "triage-bare-client-email",
+   "split": "train",
+   "expected": {
+    "agent": "email-triage"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.9981972575187683
+    }
+   },
+   "wall_ms": 317,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "triage-urgent-or-not-newsletter",
+   "split": "heldout",
+   "expected": {
+    "agent": "email-triage"
+   },
+   "parsed": {
+    "agent": "email-triage",
+    "input_len": 232
+   },
+   "raw": {
+    "agent": {
+     "label": "email-triage",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 312,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "triage-bare-recruiter",
+   "split": "train",
+   "expected": {
+    "agent": "email-triage"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.9626792669296265
+    }
+   },
+   "wall_ms": 304,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "triage-bare-disk-alert",
+   "split": "heldout",
+   "expected": {
+    "agent": "email-triage"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.9818599820137024
+    }
+   },
+   "wall_ms": 318,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "triage-sort-accountant",
+   "split": "train",
+   "expected": {
+    "agent": "email-triage"
+   },
+   "parsed": {
+    "agent": "email-triage",
+    "input_len": 214
+   },
+   "raw": {
+    "agent": {
+     "label": "email-triage",
+     "confidence": 0.999735414981842
+    }
+   },
+   "wall_ms": 239,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "reply-draft-sofie",
+   "split": "train",
+   "expected": {
+    "agent": "reply-draft"
+   },
+   "parsed": {
+    "agent": "reply-draft",
+    "input_len": 236
+   },
+   "raw": {
+    "agent": {
+     "label": "reply-draft",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 279,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "reply-answer-anna",
+   "split": "heldout",
+   "expected": {
+    "agent": "reply-draft"
+   },
+   "parsed": {
+    "agent": "reply-draft",
+    "input_len": 249
+   },
+   "raw": {
+    "agent": {
+     "label": "reply-draft",
+     "confidence": 0.9958829879760742
+    }
+   },
+   "wall_ms": 225,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "reply-nl-antwoord",
+   "split": "train",
+   "expected": {
+    "agent": "reply-draft"
+   },
+   "parsed": {
+    "agent": "reply-draft",
+    "input_len": 195
+   },
+   "raw": {
+    "agent": {
+     "label": "reply-draft",
+     "confidence": 0.9999308586120605
+    }
+   },
+   "wall_ms": 226,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "reply-decline-speaker",
+   "split": "heldout",
+   "expected": {
+    "agent": "reply-draft"
+   },
+   "parsed": {
+    "agent": "reply-draft",
+    "input_len": 257
+   },
+   "raw": {
+    "agent": {
+     "label": "reply-draft",
+     "confidence": 0.9999998807907104
+    }
+   },
+   "wall_ms": 203,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "reply-fr-reponds",
+   "split": "train",
+   "expected": {
+    "agent": "reply-draft"
+   },
+   "parsed": {
+    "agent": "reply-draft",
+    "input_len": 196
+   },
+   "raw": {
+    "agent": {
+     "label": "reply-draft",
+     "confidence": 0.5270848870277405
+    }
+   },
+   "wall_ms": 172,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "reply-instruction-wins-newsletter",
+   "split": "heldout",
+   "expected": {
+    "agent": "reply-draft"
+   },
+   "parsed": {
+    "agent": "reply-draft",
+    "input_len": 249
+   },
+   "raw": {
+    "agent": {
+     "label": "reply-draft",
+     "confidence": 0.9999997615814209
+    }
+   },
+   "wall_ms": 193,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "expense-book-anthropic",
+   "split": "train",
+   "expected": {
+    "agent": "expense-categorization"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 168,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "expense-which-category-ovh",
+   "split": "heldout",
+   "expected": {
+    "agent": "expense-categorization"
+   },
+   "parsed": {
+    "agent": "expense-categorization",
+    "input_len": 43
+   },
+   "raw": {
+    "agent": {
+     "label": "expense-categorization",
+     "confidence": 0.9999067783355713
+    }
+   },
+   "wall_ms": 165,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "expense-nmbs-ticket",
+   "split": "train",
+   "expected": {
+    "agent": "expense-categorization"
+   },
+   "parsed": {
+    "agent": "expense-categorization",
+    "input_len": 64
+   },
+   "raw": {
+    "agent": {
+     "label": "expense-categorization",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 265,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "expense-lunch-colruyt",
+   "split": "heldout",
+   "expected": {
+    "agent": "expense-categorization"
+   },
+   "parsed": {
+    "agent": "expense-categorization",
+    "input_len": 45
+   },
+   "raw": {
+    "agent": {
+     "label": "expense-categorization",
+     "confidence": 0.9980713725090027
+    }
+   },
+   "wall_ms": 243,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "expense-subscription-proximus",
+   "split": "train",
+   "expected": {
+    "agent": "expense-categorization"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.9999816417694092
+    }
+   },
+   "wall_ms": 257,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "recap-summarise-day",
+   "split": "train",
+   "expected": {
+    "agent": "recap"
+   },
+   "parsed": {
+    "agent": "recap",
+    "input_len": 462
+   },
+   "raw": {
+    "agent": {
+     "label": "recap",
+     "confidence": 0.9999330043792725
+    }
+   },
+   "wall_ms": 351,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "recap-what-got-done",
+   "split": "heldout",
+   "expected": {
+    "agent": "recap"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.5689643025398254
+    }
+   },
+   "wall_ms": 309,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "recap-daily-please",
+   "split": "train",
+   "expected": {
+    "agent": "recap"
+   },
+   "parsed": {
+    "agent": "recap",
+    "input_len": 425
+   },
+   "raw": {
+    "agent": {
+     "label": "recap",
+     "confidence": 0.9999985694885254
+    }
+   },
+   "wall_ms": 341,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "recap-highlights",
+   "split": "heldout",
+   "expected": {
+    "agent": "recap"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.9917245507240295
+    }
+   },
+   "wall_ms": 307,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "recap-end-of-day",
+   "split": "train",
+   "expected": {
+    "agent": "recap"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.6392881274223328
+    }
+   },
+   "wall_ms": 298,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "transcript-clean-up",
+   "split": "train",
+   "expected": {
+    "agent": "transcript-en"
+   },
+   "parsed": {
+    "agent": "transcript-en",
+    "input_len": 562
+   },
+   "raw": {
+    "agent": {
+     "label": "transcript-en",
+     "confidence": 0.9999990463256836
+    }
+   },
+   "wall_ms": 406,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "transcript-devos-readable",
+   "split": "heldout",
+   "expected": {
+    "agent": "transcript-en"
+   },
+   "parsed": {
+    "agent": "transcript-en",
+    "input_len": 439
+   },
+   "raw": {
+    "agent": {
+     "label": "transcript-en",
+     "confidence": 0.9996662139892578
+    }
+   },
+   "wall_ms": 324,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "transcript-tidy-support",
+   "split": "train",
+   "expected": {
+    "agent": "transcript-en"
+   },
+   "parsed": {
+    "agent": "transcript-en",
+    "input_len": 487
+   },
+   "raw": {
+    "agent": {
+     "label": "transcript-en",
+     "confidence": 0.9999849796295166
+    }
+   },
+   "wall_ms": 300,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "transcript-bare",
+   "split": "heldout",
+   "expected": {
+    "agent": "transcript-en"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.9123718738555908
+    }
+   },
+   "wall_ms": 294,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "transcript-proper-english",
+   "split": "train",
+   "expected": {
+    "agent": "transcript-en"
+   },
+   "parsed": {
+    "agent": "crm-followup",
+    "input_len": 389
+   },
+   "raw": {
+    "agent": {
+     "label": "crm-followup",
+     "confidence": 0.9439637064933777
+    }
+   },
+   "wall_ms": 309,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "none-book-train",
+   "split": "train",
+   "expected": {
+    "agent": "none"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 246,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "none-weather",
+   "split": "heldout",
+   "expected": {
+    "agent": "none"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 281,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "none-generate-invoice-client-bait",
+   "split": "train",
+   "expected": {
+    "agent": "none"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 254,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "none-translate-contract-bait",
+   "split": "heldout",
+   "expected": {
+    "agent": "none"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 1.0
+    }
+   },
+   "wall_ms": 246,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "none-chitchat",
+   "split": "train",
+   "expected": {
+    "agent": "none"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.9999998807907104
+    }
+   },
+   "wall_ms": 240,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "none-reminder",
+   "split": "heldout",
+   "expected": {
+    "agent": "none"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.9999974966049194
+    }
+   },
+   "wall_ms": 305,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "none-pause-email-bait",
+   "split": "train",
+   "expected": {
+    "agent": "none"
+   },
+   "parsed": {
+    "agent": "email-triage",
+    "input_len": 213
+   },
+   "raw": {
+    "agent": {
+     "label": "email-triage",
+     "confidence": 0.9675292372703552
+    }
+   },
+   "wall_ms": 275,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "heavy-two-payloads-reply-wins",
+   "split": "heldout",
+   "expected": {
+    "agent": "reply-draft"
+   },
+   "parsed": {
+    "agent": "reply-draft",
+    "input_len": 191
+   },
+   "raw": {
+    "agent": {
+     "label": "reply-draft",
+     "confidence": 0.9999312162399292
+    }
+   },
+   "wall_ms": 274,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "heavy-question-inside-email-crm",
+   "split": "train",
+   "expected": {
+    "agent": "crm-followup"
+   },
+   "parsed": {
+    "agent": "crm-followup",
+    "input_len": 174
+   },
+   "raw": {
+    "agent": {
+     "label": "crm-followup",
+     "confidence": 0.9999704360961914
+    }
+   },
+   "wall_ms": 299,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "heavy-nl-crm-question",
+   "split": "heldout",
+   "expected": {
+    "agent": "crm-followup"
+   },
+   "parsed": {
+    "agent": "crm-followup",
+    "input_len": 69
+   },
+   "raw": {
+    "agent": {
+     "label": "crm-followup",
+     "confidence": 0.993958592414856
+    }
+   },
+   "wall_ms": 238,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "heavy-fr-expense-line",
+   "split": "train",
+   "expected": {
+    "agent": "expense-categorization"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.561856746673584
+    }
+   },
+   "wall_ms": 257,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "heavy-transcript-named-summarise-not-translate",
+   "split": "heldout",
+   "expected": {
+    "agent": "transcript-en"
+   },
+   "parsed": {
+    "agent": "transcript-en",
+    "input_len": 296
+   },
+   "raw": {
+    "agent": {
+     "label": "transcript-en",
+     "confidence": 0.450772225856781
+    }
+   },
+   "wall_ms": 288,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "heavy-email-with-log-shape-triage",
+   "split": "train",
+   "expected": {
+    "agent": "email-triage"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.9933191537857056
+    }
+   },
+   "wall_ms": 320,
+   "passed": false,
+   "labels_ok": false,
+   "props_ok": true,
+   "failed_checks": [
+    {
+     "bucket": "quality",
+     "check": "labels"
+    }
+   ],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "heavy-none-edit-document-client-bait",
+   "split": "train",
+   "expected": {
+    "agent": "none"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.9999986886978149
+    }
+   },
+   "wall_ms": 276,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  },
+  {
+   "exam": "task-intake",
+   "schema": "desc",
+   "id": "heavy-none-crm-write-bait",
+   "split": "heldout",
+   "expected": {
+    "agent": "none"
+   },
+   "parsed": {
+    "agent": "none",
+    "input_len": 0
+   },
+   "raw": {
+    "agent": {
+     "label": "none",
+     "confidence": 0.8413459658622742
+    }
+   },
+   "wall_ms": 261,
+   "passed": true,
+   "labels_ok": true,
+   "props_ok": true,
+   "failed_checks": [],
+   "failures": [],
+   "detail": {}
+  }
+ ]
+}

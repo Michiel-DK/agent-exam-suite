@@ -35,6 +35,14 @@ PROVIDERS: dict[str, dict] = {
     # see the smoke block in the PR that added this entry.
     "openrouter": {"base_url": "https://openrouter.ai/api/v1",
                    "api_key_env": "OPENROUTER_API_KEY"},
+    # mlx: a LOCAL mlx-lm server (`python3 -m mlx_lm.server --model <mlx dir> [--adapter-path <lora>]`,
+    # OpenAI-compatible on 127.0.0.1:8080). Same trust class as ollama (local, deterministic at temp 0);
+    # this is how a fine-tuned adapter sits an exam before it can be a champion (sprint I, 2026-09-18).
+    # `--snapshot` stamps runtime = {version: installed mlx_lm, model_sha: hash of MLX_MODEL_PATH,
+    # adapter_sha: hash of MLX_ADAPTER_PATH or None} (runner.mlx_runtime, sprint I / I3) and refuses
+    # without MLX_MODEL_PATH; `check` refuses when any of the three moved.
+    "mlx": {"base_url": "http://127.0.0.1:8080/v1", "api_key_env": None,
+            "body_from_env": {"adapters": "MLX_ADAPTER_PATH"}},
     "stub": {"base_url": None, "api_key_env": None},
 }
 
@@ -105,8 +113,16 @@ class ChatCompletionsAdapter(Adapter):
     def __init__(self, base_url: str, api_key: str | None = None,
                  timeout: int = DEFAULT_TIMEOUT_S, json_mode: bool = False,
                  reasoning_effort: str | None = None,
-                 provider_routing: dict | None = None):
+                 provider_routing: dict | None = None,
+                 extra_body: dict | None = None):
         self.base_url = base_url.rstrip("/")
+        # Sprint I (2026-09-18): provider-level opaque request-body keys, resolved from env
+        # by get_adapter (PROVIDERS[...]["body_from_env"]). Empty for every committed
+        # provider, so the default body stays byte-identical. First user: mlx_lm.server
+        # applies a LoRA ONLY when the request carries "adapters": <path> — its CLI
+        # --adapter-path is inert for the default model (measured 18 Sep: 46/46 outputs
+        # identical with the flag, adapter applied with the body key).
+        self.extra_body = dict(extra_body or {})
         self.api_key = api_key
         self.timeout = timeout
         self.json_mode = json_mode
@@ -168,6 +184,9 @@ class ChatCompletionsAdapter(Adapter):
         # "send nothing extra". Pinned by a test in sandbox/test_router_knobs.py.
         if self.provider_routing:
             body["provider"] = self.provider_routing
+        if self.extra_body:
+            for k, v in self.extra_body.items():   # never clobber a core key
+                body.setdefault(k, v)
         resp = requests.post(
             f"{self.base_url}/chat/completions",
             headers=headers,
@@ -432,9 +451,12 @@ def get_adapter(provider: str, timeout: int | None = None,
         if not api_key:
             raise ValueError(
                 f"Provider {provider!r} needs env var {cfg['api_key_env']} (not set)")
+    extra_body = {k: os.environ[v] for k, v in cfg.get("body_from_env", {}).items()
+                  if os.environ.get(v)}
     return ChatCompletionsAdapter(
         cfg["base_url"], api_key,
         timeout=DEFAULT_TIMEOUT_S if timeout is None else timeout,
         json_mode=json_mode,
         reasoning_effort=reasoning_effort,
-        provider_routing=provider_routing)
+        provider_routing=provider_routing,
+        extra_body=extra_body)

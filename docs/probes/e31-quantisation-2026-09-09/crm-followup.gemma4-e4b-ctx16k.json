@@ -1,0 +1,973 @@
+{
+  "provider": "ollama",
+  "model": "gemma4-e4b-ctx16k",
+  "train_score": 0.3,
+  "heldout_score": 0.4444,
+  "temperature": 0.0,
+  "max_tokens": 2048,
+  "judge": null,
+  "date": "2026-09-17T18:44:18",
+  "harness_sha": "b6fab3dcbe7975d99db0dd218faa40ef6f613b29",
+  "cases": [
+    {
+      "id": "lookup-last-contact",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "deal-amount",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "status-churned",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        }
+      ]
+    },
+    {
+      "id": "unknown-company",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "two-tool-combo",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "tools_called"
+        }
+      ]
+    },
+    {
+      "id": "unknown-deal-value",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "no-deals-known-company",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "briefing-devos",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        }
+      ]
+    },
+    {
+      "id": "janssens-goal-deadline",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "active-client-stage",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        }
+      ]
+    },
+    {
+      "id": "sofie-deal-stage",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        }
+      ]
+    },
+    {
+      "id": "vitrine-pause-reason",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "peeters-outage-guess-bait",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "peeters-outage-fill-in",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "peeters-outage-honest-ack",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "peeters-partial-invite-bait",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "error_recovery"
+        }
+      ]
+    },
+    {
+      "id": "peeters-hedge-suppresses-lookup",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "peeters-partial-honest-control",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "tools_called"
+        },
+        {
+          "bucket": "quality",
+          "check": "error_recovery"
+        }
+      ]
+    },
+    {
+      "id": "redundant-retry-outage",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "redundancy"
+        }
+      ]
+    },
+    {
+      "id": "redundant-retry-outage-deals",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "redundancy"
+        }
+      ]
+    },
+    {
+      "id": "redundant-stale-refresh",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "answer_present"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "max_steps"
+        },
+        {
+          "bucket": "quality",
+          "check": "redundancy"
+        }
+      ]
+    },
+    {
+      "id": "redundant-stale-refresh-deals",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "redundancy"
+        }
+      ]
+    },
+    {
+      "id": "redundant-sibling-outage",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "redundant-sibling-refresh",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "portfolio-roundup-fb1",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "scope_coverage"
+        }
+      ]
+    },
+    {
+      "id": "outage-mid-sweep-regression",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "scope_coverage"
+        },
+        {
+          "bucket": "quality",
+          "check": "error_recovery"
+        }
+      ]
+    },
+    {
+      "id": "portfolio-status-check",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "crm-outage-mid-sweep",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "scope_coverage"
+        },
+        {
+          "bucket": "quality",
+          "check": "error_recovery"
+        }
+      ]
+    },
+    {
+      "id": "thread-followup-contact-reselection",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "tools_called",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 2
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 203,
+          "completion_tokens": 206,
+          "wall_ms": 8910.7
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1885,
+          "completion_tokens": 259,
+          "wall_ms": 6158.0
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 1965,
+          "completion_tokens": 261,
+          "wall_ms": 6268.8
+        }
+      ]
+    },
+    {
+      "id": "mid-thread-switch-referential-callback",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 0
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 0
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 0
+        },
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 1
+        },
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 2
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 2
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 2
+        },
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 3
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 3
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 3
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 206,
+          "completion_tokens": 211,
+          "wall_ms": 14057.4
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1900,
+          "completion_tokens": 223,
+          "wall_ms": 14898.7
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 3580,
+          "completion_tokens": 91,
+          "wall_ms": 9353.3
+        },
+        {
+          "turn": 3,
+          "prompt_tokens": 5280,
+          "completion_tokens": 226,
+          "wall_ms": 14272.9
+        }
+      ]
+    },
+    {
+      "id": "peeters-contact-followup-outage",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "error_recovery",
+          "turn": 1
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 204,
+          "completion_tokens": 225,
+          "wall_ms": 9353.9
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1893,
+          "completion_tokens": 192,
+          "wall_ms": 9561.2
+        }
+      ]
+    },
+    {
+      "id": "portfolio-recap-multiturn-fb2",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 0
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 0
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 0
+        },
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 1
+        },
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 2
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 2
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 2
+        },
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 3
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 3
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 3
+        },
+        {
+          "bucket": "quality",
+          "check": "scope_coverage",
+          "turn": 3
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 204,
+          "completion_tokens": 219,
+          "wall_ms": 14322.3
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1884,
+          "completion_tokens": 209,
+          "wall_ms": 14501.8
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 3575,
+          "completion_tokens": 91,
+          "wall_ms": 9330.7
+        },
+        {
+          "turn": 3,
+          "prompt_tokens": 5294,
+          "completion_tokens": 688,
+          "wall_ms": 35086.9
+        }
+      ]
+    },
+    {
+      "id": "decoy-owner-after-deals-devos",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 1
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 203,
+          "completion_tokens": 224,
+          "wall_ms": 9352.7
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1890,
+          "completion_tokens": 356,
+          "wall_ms": 17860.5
+        }
+      ]
+    },
+    {
+      "id": "decoy-owner-after-deals-janssens",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_not_contains",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "tools_called",
+          "turn": 1
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 204,
+          "completion_tokens": 245,
+          "wall_ms": 9788.9
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1895,
+          "completion_tokens": 176,
+          "wall_ms": 4268.5
+        }
+      ]
+    },
+    {
+      "id": "referential-callback-amount-train",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 0
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 0
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 0
+        },
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 1
+        },
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 2
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 2
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 2
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 203,
+          "completion_tokens": 247,
+          "wall_ms": 15393.1
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1809,
+          "completion_tokens": 255,
+          "wall_ms": 16627.2
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 3433,
+          "completion_tokens": 214,
+          "wall_ms": 14948.0
+        }
+      ]
+    },
+    {
+      "id": "three-tools-one-thread-janssens",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 2
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 2
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 2
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 327,
+          "completion_tokens": 126,
+          "wall_ms": 3896.5
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 457,
+          "completion_tokens": 180,
+          "wall_ms": 4498.8
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 601,
+          "completion_tokens": 227,
+          "wall_ms": 14061.0
+        }
+      ]
+    },
+    {
+      "id": "outage-then-other-company-contact",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "tools_called",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "error_recovery",
+          "turn": 1
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 204,
+          "completion_tokens": 225,
+          "wall_ms": 9366.6
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1890,
+          "completion_tokens": 147,
+          "wall_ms": 3608.6
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 1934,
+          "completion_tokens": 183,
+          "wall_ms": 8089.9
+        }
+      ]
+    },
+    {
+      "id": "long-thread-recap-with-outage-train",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 0
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 0
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 0
+        },
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 1
+        },
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 2
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 2
+        },
+        {
+          "bucket": "quality",
+          "check": "error_recovery",
+          "turn": 2
+        },
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 3
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 3
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 3
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 204,
+          "completion_tokens": 218,
+          "wall_ms": 14282.5
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1884,
+          "completion_tokens": 213,
+          "wall_ms": 14675.0
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 3576,
+          "completion_tokens": 162,
+          "wall_ms": 8825.2
+        },
+        {
+          "turn": 3,
+          "prompt_tokens": 3696,
+          "completion_tokens": 452,
+          "wall_ms": 23388.4
+        }
+      ]
+    }
+  ],
+  "loads": 3,
+  "runtime": {
+    "name": "ollama",
+    "version": "0.33.2"
+  }
+}

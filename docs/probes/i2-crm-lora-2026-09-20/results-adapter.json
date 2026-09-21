@@ -1,0 +1,5080 @@
+{
+  "agent": "crm-followup",
+  "provider": "mlx",
+  "model": "default_model",
+  "mode": "trajectory",
+  "train": {
+    "passed": 13,
+    "total": 20,
+    "score": 0.65
+  },
+  "heldout": {
+    "passed": 12,
+    "total": 18,
+    "score": 0.6667
+  },
+  "cases": [
+    {
+      "id": "lookup-last-contact",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "answer_contains": [
+          "2026-07-02",
+          "chatbot"
+        ],
+        "max_steps": 3
+      },
+      "got": {
+        "answer": "We last talked to Janssens Bakery on 2026-07-02. They want a chatbot for their webshop and aim to go live before September."
+      },
+      "detail": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "tool_calls": [
+          {
+            "tool": "crm_lookup",
+            "args": {
+              "company": "Janssens Bakery"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "id": "cmp_9802577",
+            "object": "company",
+            "created_at": "2026-03-21T08:12:44Z",
+            "updated_at": "2026-03-25T16:03:21Z",
+            "owner": {
+              "id": "u_4417",
+              "name": "Marieke Claes",
+              "email": "marieke.claes@example.com",
+              "team": "Commercial NL/BE"
+            },
+            "address": {
+              "street": "Nijverheidslaan 22",
+              "postal_code": "2018",
+              "city": "Gent",
+              "country": "BE",
+              "region": "Oost-Vlaanderen"
+            },
+            "phone": "+32 9 233 41 07",
+            "website": "https://janssensbakery.example.com",
+            "employee_count": 24,
+            "annual_revenue_eur": 1240000,
+            "industry": "SMB services",
+            "tags": [
+              "nl-be",
+              "smb",
+              "inbound",
+              "newsletter-subscriber"
+            ],
+            "lifecycle_stage": "customer",
+            "custom_fields": {
+              "preferred_language": "nl",
+              "vat_number": "BE 0681.204.337",
+              "payment_terms_days": 30,
+              "nps_last_score": 8,
+              "onboarding_completed": true,
+              "source_campaign": "inbound/organic-search"
+            },
+            "integration_metadata": {
+              "synced_from": "folk",
+              "sync_version": 42,
+              "last_sync_at": "2026-03-29T02:00:00Z",
+              "record_hash": "h_9179189"
+            },
+            "activity_history": [
+              {
+                "id": "act_0158312",
+                "type": "email",
+                "occurred_at": "2026-02-19T09:05:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 0,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_3893488",
+                "type": "call",
+                "occurred_at": "2026-02-22T09:12:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 5,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_5692980",
+                "type": "meeting",
+                "occurred_at": "2026-02-25T09:19:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Meeting regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 10,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_8276725",
+                "type": "note",
+                "occurred_at": "2026-02-28T09:26:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 15,
+                "direction": "outbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_9055704",
+                "type": "task",
+                "occurred_at": "2026-03-03T09:33:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Task regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 20,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_1969099",
+                "type": "email",
+                "occurred_at": "2026-03-06T09:40:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 25,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_1285661",
+                "type": "call",
+                "occurred_at": "2026-03-09T09:47:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 30,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_3857280",
+                "type": "note",
+                "occurred_at": "2026-03-12T09:54:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 35,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              }
+            ],
+            "contact": "Sofie Janssens",
+            "status": "prospect",
+            "last_interaction": "2026-07-02",
+            "notes": "Wants a chatbot for the webshop, wants to go live before September.",
+            "_meta": {
+              "api_version": "v3.2",
+              "request_id": "req_3386431",
+              "rate_limit_remaining": 6234
+            }
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 1952,
+          "completion_tokens": 63,
+          "total_tokens": 2015,
+          "wall_ms": 7670.6,
+          "retries": 0,
+          "content_chars": 199,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "deal-amount",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "tools_called": [
+          "deals_list"
+        ],
+        "answer_contains": [
+          "9000",
+          "discovery"
+        ],
+        "max_steps": 3
+      },
+      "got": {
+        "answer": "The open deal with Devos Garage is worth €9,000 and is in the 'discovery' stage."
+      },
+      "detail": {
+        "tools_called": [
+          "deals_list"
+        ],
+        "tool_calls": [
+          {
+            "tool": "deals_list",
+            "args": {
+              "company": "Devos Garage"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "id": "cmp_7292143",
+            "object": "company",
+            "created_at": "2026-02-04T08:12:44Z",
+            "updated_at": "2026-02-08T16:03:21Z",
+            "owner": {
+              "id": "u_2290",
+              "name": "Tom Verhaeghe",
+              "email": "tom.verhaeghe@example.com",
+              "team": "Commercial NL/BE"
+            },
+            "address": {
+              "street": "Nijverheidslaan 22",
+              "postal_code": "8500",
+              "city": "Gent",
+              "country": "BE",
+              "region": "Oost-Vlaanderen"
+            },
+            "phone": "+32 3 771 26 58",
+            "website": "https://devosgarage.example.com",
+            "employee_count": 24,
+            "annual_revenue_eur": 2610000,
+            "industry": "SMB services",
+            "tags": [
+              "nl-be",
+              "smb",
+              "inbound",
+              "newsletter-subscriber"
+            ],
+            "lifecycle_stage": "customer",
+            "custom_fields": {
+              "preferred_language": "nl",
+              "vat_number": "BE 0452.817.966",
+              "payment_terms_days": 30,
+              "nps_last_score": 8,
+              "onboarding_completed": true,
+              "source_campaign": "inbound/organic-search"
+            },
+            "integration_metadata": {
+              "synced_from": "folk",
+              "sync_version": 42,
+              "last_sync_at": "2026-02-12T02:00:00Z",
+              "record_hash": "h_8154249"
+            },
+            "activity_history": [
+              {
+                "id": "act_2843161",
+                "type": "email",
+                "occurred_at": "2026-01-05T09:41:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 0,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_6407527",
+                "type": "call",
+                "occurred_at": "2026-01-08T09:48:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 5,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_3835302",
+                "type": "meeting",
+                "occurred_at": "2026-01-11T09:55:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Meeting regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 10,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_5755885",
+                "type": "note",
+                "occurred_at": "2026-01-14T09:02:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 15,
+                "direction": "outbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_6871918",
+                "type": "task",
+                "occurred_at": "2026-01-17T09:09:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Task regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 20,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_7201472",
+                "type": "email",
+                "occurred_at": "2026-01-20T09:16:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 25,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_1802050",
+                "type": "call",
+                "occurred_at": "2026-01-23T09:23:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 30,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_8537424",
+                "type": "note",
+                "occurred_at": "2026-01-26T09:30:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 35,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              }
+            ],
+            "deals": [
+              {
+                "deal": "Phase 2: quote assistant",
+                "amount_eur": 9000,
+                "stage": "discovery"
+              }
+            ],
+            "pipeline": {
+              "id": "pl_0710961",
+              "name": "Standard sales pipeline",
+              "stage_codes": [
+                "ST-10",
+                "ST-20",
+                "ST-30",
+                "ST-40",
+                "ST-50"
+              ],
+              "probability_pct_by_code": {
+                "ST-10": 20,
+                "ST-20": 45,
+                "ST-30": 70,
+                "ST-40": 95,
+                "ST-50": 0
+              }
+            },
+            "_meta": {
+              "api_version": "v3.2",
+              "request_id": "req_8641643",
+              "rate_limit_remaining": 3187
+            }
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 2061,
+          "completion_tokens": 50,
+          "total_tokens": 2111,
+          "wall_ms": 2403.2,
+          "retries": 0,
+          "content_chars": 153,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "status-churned",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "answer_contains": [
+          "churned"
+        ],
+        "max_steps": 3
+      },
+      "got": {
+        "answer": "The current status of Vitrine Restaurant is 'churned'. The last interaction was on 2026-03-11, and the notes indicate that the menu-QA pilot was paused for budget reasons, with plans to revisit in Q4. Given this, it might be best to hold off on chasing them this month, as they are currently in a paused/churned state."
+      },
+      "detail": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "tool_calls": [
+          {
+            "tool": "crm_lookup",
+            "args": {
+              "company": "Vitrine Restaurant"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "id": "cmp_0589485",
+            "object": "company",
+            "created_at": "2026-08-03T08:12:44Z",
+            "updated_at": "2026-08-07T16:03:21Z",
+            "owner": {
+              "id": "u_6538",
+              "name": "Nadia El Amrani",
+              "email": "nadia.elamrani@example.com",
+              "team": "Commercial NL/BE"
+            },
+            "address": {
+              "street": "Nijverheidslaan 22",
+              "postal_code": "3500",
+              "city": "Gent",
+              "country": "BE",
+              "region": "Oost-Vlaanderen"
+            },
+            "phone": "+32 2 415 93 82",
+            "website": "https://vitrinerestaurant.example.com",
+            "employee_count": 24,
+            "annual_revenue_eur": 780000,
+            "industry": "SMB services",
+            "tags": [
+              "nl-be",
+              "smb",
+              "inbound",
+              "newsletter-subscriber"
+            ],
+            "lifecycle_stage": "customer",
+            "custom_fields": {
+              "preferred_language": "nl",
+              "vat_number": "BE 0739.562.108",
+              "payment_terms_days": 30,
+              "nps_last_score": 8,
+              "onboarding_completed": true,
+              "source_campaign": "inbound/organic-search"
+            },
+            "integration_metadata": {
+              "synced_from": "folk",
+              "sync_version": 42,
+              "last_sync_at": "2026-08-11T02:00:00Z",
+              "record_hash": "h_2955495"
+            },
+            "activity_history": [
+              {
+                "id": "act_1359102",
+                "type": "email",
+                "occurred_at": "2026-07-04T09:20:00Z",
+                "created_by": "Nadia El Amrani",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 0,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_7027214",
+                "type": "call",
+                "occurred_at": "2026-07-07T09:27:00Z",
+                "created_by": "Nadia El Amrani",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 5,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_5394364",
+                "type": "meeting",
+                "occurred_at": "2026-07-10T09:34:00Z",
+                "created_by": "Nadia El Amrani",
+                "subject": "Meeting regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 10,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_0407887",
+                "type": "note",
+                "occurred_at": "2026-07-13T09:41:00Z",
+                "created_by": "Nadia El Amrani",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 15,
+                "direction": "outbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_8298527",
+                "type": "task",
+                "occurred_at": "2026-07-16T09:48:00Z",
+                "created_by": "Nadia El Amrani",
+                "subject": "Task regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 20,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_9715215",
+                "type": "email",
+                "occurred_at": "2026-07-19T09:55:00Z",
+                "created_by": "Nadia El Amrani",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 25,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_4013050",
+                "type": "call",
+                "occurred_at": "2026-07-22T09:02:00Z",
+                "created_by": "Nadia El Amrani",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 30,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_7087358",
+                "type": "note",
+                "occurred_at": "2026-07-25T09:09:00Z",
+                "created_by": "Nadia El Amrani",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 35,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              }
+            ],
+            "contact": "Karel Mestdagh",
+            "status": "churned",
+            "last_interaction": "2026-03-11",
+            "notes": "Paused the menu-QA pilot for budget reasons; revisit Q4.",
+            "_meta": {
+              "api_version": "v3.2",
+              "request_id": "req_0409897",
+              "rate_limit_remaining": 8421
+            }
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 1964,
+          "completion_tokens": 107,
+          "total_tokens": 2071,
+          "wall_ms": 3601.7,
+          "retries": 0,
+          "content_chars": 397,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "unknown-company",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "answer_contains_any": [
+          "no record",
+          "no crm record",
+          "not found",
+          "no results",
+          "nothing on file",
+          "no entry",
+          "no open deal",
+          "no deal",
+          "no information",
+          "no data",
+          "don't have",
+          "do not have",
+          "unable to find",
+          "couldn't find",
+          "could not find",
+          "can't find",
+          "cannot find"
+        ],
+        "max_steps": 3
+      },
+      "got": {
+        "answer": "I was unable to find a CRM record for 'Maes Bikes'."
+      },
+      "detail": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "tool_calls": [
+          {
+            "tool": "crm_lookup",
+            "args": {
+              "company": "Maes Bikes"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "error": "no CRM record for 'Maes Bikes'"
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 452,
+          "completion_tokens": 40,
+          "total_tokens": 492,
+          "wall_ms": 1342.5,
+          "retries": 0,
+          "content_chars": 122,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "two-tool-combo",
+      "split": "heldout",
+      "passed": false,
+      "expected": {
+        "tools_called": [
+          "crm_lookup",
+          "deals_list"
+        ],
+        "answer_contains": [
+          "Sofie",
+          "6500"
+        ],
+        "max_steps": 4
+      },
+      "got": {
+        "answer": "Your contact is Sofie Janssens, and the open deal is to go live with a chatbot for the webshop before September."
+      },
+      "failures": [
+        "answer missing '6500'",
+        "never called tool 'deals_list'"
+      ],
+      "failed_checks": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "tools_called"
+        }
+      ],
+      "detail": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "tool_calls": [
+          {
+            "tool": "crm_lookup",
+            "args": {
+              "company": "Janssens Bakery"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "id": "cmp_9802577",
+            "object": "company",
+            "created_at": "2026-03-21T08:12:44Z",
+            "updated_at": "2026-03-25T16:03:21Z",
+            "owner": {
+              "id": "u_4417",
+              "name": "Marieke Claes",
+              "email": "marieke.claes@example.com",
+              "team": "Commercial NL/BE"
+            },
+            "address": {
+              "street": "Nijverheidslaan 22",
+              "postal_code": "2018",
+              "city": "Gent",
+              "country": "BE",
+              "region": "Oost-Vlaanderen"
+            },
+            "phone": "+32 9 233 41 07",
+            "website": "https://janssensbakery.example.com",
+            "employee_count": 24,
+            "annual_revenue_eur": 1240000,
+            "industry": "SMB services",
+            "tags": [
+              "nl-be",
+              "smb",
+              "inbound",
+              "newsletter-subscriber"
+            ],
+            "lifecycle_stage": "customer",
+            "custom_fields": {
+              "preferred_language": "nl",
+              "vat_number": "BE 0681.204.337",
+              "payment_terms_days": 30,
+              "nps_last_score": 8,
+              "onboarding_completed": true,
+              "source_campaign": "inbound/organic-search"
+            },
+            "integration_metadata": {
+              "synced_from": "folk",
+              "sync_version": 42,
+              "last_sync_at": "2026-03-29T02:00:00Z",
+              "record_hash": "h_9179189"
+            },
+            "activity_history": [
+              {
+                "id": "act_0158312",
+                "type": "email",
+                "occurred_at": "2026-02-19T09:05:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 0,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_3893488",
+                "type": "call",
+                "occurred_at": "2026-02-22T09:12:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 5,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_5692980",
+                "type": "meeting",
+                "occurred_at": "2026-02-25T09:19:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Meeting regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 10,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_8276725",
+                "type": "note",
+                "occurred_at": "2026-02-28T09:26:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 15,
+                "direction": "outbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_9055704",
+                "type": "task",
+                "occurred_at": "2026-03-03T09:33:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Task regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 20,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_1969099",
+                "type": "email",
+                "occurred_at": "2026-03-06T09:40:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 25,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_1285661",
+                "type": "call",
+                "occurred_at": "2026-03-09T09:47:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 30,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_3857280",
+                "type": "note",
+                "occurred_at": "2026-03-12T09:54:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 35,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              }
+            ],
+            "contact": "Sofie Janssens",
+            "status": "prospect",
+            "last_interaction": "2026-07-02",
+            "notes": "Wants a chatbot for the webshop, wants to go live before September.",
+            "_meta": {
+              "api_version": "v3.2",
+              "request_id": "req_3386431",
+              "rate_limit_remaining": 6234
+            }
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 1976,
+          "completion_tokens": 53,
+          "total_tokens": 2029,
+          "wall_ms": 2388.3,
+          "retries": 0,
+          "content_chars": 188,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "unknown-deal-value",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "tools_called": [
+          "deals_list"
+        ],
+        "answer_contains_any": [
+          "no record",
+          "no crm record",
+          "not found",
+          "no results",
+          "nothing on file",
+          "no entry",
+          "no open deal",
+          "no deal",
+          "no information",
+          "no data",
+          "don't have",
+          "do not have",
+          "unable to find",
+          "couldn't find",
+          "could not find",
+          "can't find",
+          "cannot find"
+        ],
+        "max_steps": 3
+      },
+      "got": {
+        "answer": "There are currently no open deals with Aerts Consulting."
+      },
+      "detail": {
+        "tools_called": [
+          "deals_list"
+        ],
+        "tool_calls": [
+          {
+            "tool": "deals_list",
+            "args": {
+              "company": "Aerts Consulting"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "error": "no open deals for 'Aerts Consulting'"
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 476,
+          "completion_tokens": 37,
+          "total_tokens": 513,
+          "wall_ms": 1380.9,
+          "retries": 0,
+          "content_chars": 133,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "no-deals-known-company",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "tools_called": [
+          "deals_list"
+        ],
+        "answer_contains_any": [
+          "no record",
+          "no crm record",
+          "not found",
+          "no results",
+          "nothing on file",
+          "no entry",
+          "no open deal",
+          "no deal",
+          "no information",
+          "no data",
+          "don't have",
+          "do not have",
+          "unable to find",
+          "couldn't find",
+          "could not find",
+          "can't find",
+          "cannot find"
+        ],
+        "max_steps": 3
+      },
+      "got": {
+        "answer": "There are currently no open deals with Vitrine Restaurant."
+      },
+      "detail": {
+        "tools_called": [
+          "deals_list"
+        ],
+        "tool_calls": [
+          {
+            "tool": "deals_list",
+            "args": {
+              "company": "Vitrine Restaurant"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "error": "no open deals for 'Vitrine Restaurant'"
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 472,
+          "completion_tokens": 37,
+          "total_tokens": 509,
+          "wall_ms": 1268.9,
+          "retries": 0,
+          "content_chars": 137,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "briefing-devos",
+      "split": "train",
+      "passed": false,
+      "expected": {
+        "tools_called": [
+          "crm_lookup",
+          "deals_list"
+        ],
+        "answer_contains": [
+          "Jan",
+          "9000"
+        ],
+        "max_steps": 4
+      },
+      "got": {
+        "answer": "Your contact at Devos Garage is Jan De Vos. The open deals with them exist in the deals list, but I need to call deals_list to check the open deals."
+      },
+      "failures": [
+        "answer missing '9000'",
+        "never called tool 'deals_list'"
+      ],
+      "failed_checks": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "tools_called"
+        }
+      ],
+      "detail": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "tool_calls": [
+          {
+            "tool": "crm_lookup",
+            "args": {
+              "company": "Devos Garage"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "id": "cmp_7292143",
+            "object": "company",
+            "created_at": "2026-02-04T08:12:44Z",
+            "updated_at": "2026-02-08T16:03:21Z",
+            "owner": {
+              "id": "u_2290",
+              "name": "Tom Verhaeghe",
+              "email": "tom.verhaeghe@example.com",
+              "team": "Commercial NL/BE"
+            },
+            "address": {
+              "street": "Nijverheidslaan 22",
+              "postal_code": "8500",
+              "city": "Gent",
+              "country": "BE",
+              "region": "Oost-Vlaanderen"
+            },
+            "phone": "+32 3 771 26 58",
+            "website": "https://devosgarage.example.com",
+            "employee_count": 24,
+            "annual_revenue_eur": 2610000,
+            "industry": "SMB services",
+            "tags": [
+              "nl-be",
+              "smb",
+              "inbound",
+              "newsletter-subscriber"
+            ],
+            "lifecycle_stage": "customer",
+            "custom_fields": {
+              "preferred_language": "nl",
+              "vat_number": "BE 0452.817.966",
+              "payment_terms_days": 30,
+              "nps_last_score": 8,
+              "onboarding_completed": true,
+              "source_campaign": "inbound/organic-search"
+            },
+            "integration_metadata": {
+              "synced_from": "folk",
+              "sync_version": 42,
+              "last_sync_at": "2026-02-12T02:00:00Z",
+              "record_hash": "h_8154249"
+            },
+            "activity_history": [
+              {
+                "id": "act_2843161",
+                "type": "email",
+                "occurred_at": "2026-01-05T09:41:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 0,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_6407527",
+                "type": "call",
+                "occurred_at": "2026-01-08T09:48:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 5,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_3835302",
+                "type": "meeting",
+                "occurred_at": "2026-01-11T09:55:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Meeting regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 10,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_5755885",
+                "type": "note",
+                "occurred_at": "2026-01-14T09:02:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 15,
+                "direction": "outbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_6871918",
+                "type": "task",
+                "occurred_at": "2026-01-17T09:09:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Task regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 20,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_7201472",
+                "type": "email",
+                "occurred_at": "2026-01-20T09:16:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 25,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_1802050",
+                "type": "call",
+                "occurred_at": "2026-01-23T09:23:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 30,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_8537424",
+                "type": "note",
+                "occurred_at": "2026-01-26T09:30:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 35,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              }
+            ],
+            "contact": "Jan De Vos",
+            "status": "active client",
+            "last_interaction": "2026-06-19",
+            "notes": "Appointment-scheduling assistant delivered in June; happy, considering phase 2.",
+            "_meta": {
+              "api_version": "v3.2",
+              "request_id": "req_8641643",
+              "rate_limit_remaining": 3187
+            }
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 1982,
+          "completion_tokens": 62,
+          "total_tokens": 2044,
+          "wall_ms": 2604.1,
+          "retries": 0,
+          "content_chars": 221,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "janssens-goal-deadline",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "answer_contains": [
+          "chatbot",
+          "september"
+        ],
+        "max_steps": 3
+      },
+      "got": {
+        "answer": "Janssens Bakery wants a chatbot for their webshop and wants to go live before September."
+      },
+      "detail": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "tool_calls": [
+          {
+            "tool": "crm_lookup",
+            "args": {
+              "company": "Janssens Bakery"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "id": "cmp_9802577",
+            "object": "company",
+            "created_at": "2026-03-21T08:12:44Z",
+            "updated_at": "2026-03-25T16:03:21Z",
+            "owner": {
+              "id": "u_4417",
+              "name": "Marieke Claes",
+              "email": "marieke.claes@example.com",
+              "team": "Commercial NL/BE"
+            },
+            "address": {
+              "street": "Nijverheidslaan 22",
+              "postal_code": "2018",
+              "city": "Gent",
+              "country": "BE",
+              "region": "Oost-Vlaanderen"
+            },
+            "phone": "+32 9 233 41 07",
+            "website": "https://janssensbakery.example.com",
+            "employee_count": 24,
+            "annual_revenue_eur": 1240000,
+            "industry": "SMB services",
+            "tags": [
+              "nl-be",
+              "smb",
+              "inbound",
+              "newsletter-subscriber"
+            ],
+            "lifecycle_stage": "customer",
+            "custom_fields": {
+              "preferred_language": "nl",
+              "vat_number": "BE 0681.204.337",
+              "payment_terms_days": 30,
+              "nps_last_score": 8,
+              "onboarding_completed": true,
+              "source_campaign": "inbound/organic-search"
+            },
+            "integration_metadata": {
+              "synced_from": "folk",
+              "sync_version": 42,
+              "last_sync_at": "2026-03-29T02:00:00Z",
+              "record_hash": "h_9179189"
+            },
+            "activity_history": [
+              {
+                "id": "act_0158312",
+                "type": "email",
+                "occurred_at": "2026-02-19T09:05:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 0,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_3893488",
+                "type": "call",
+                "occurred_at": "2026-02-22T09:12:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 5,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_5692980",
+                "type": "meeting",
+                "occurred_at": "2026-02-25T09:19:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Meeting regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 10,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_8276725",
+                "type": "note",
+                "occurred_at": "2026-02-28T09:26:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 15,
+                "direction": "outbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_9055704",
+                "type": "task",
+                "occurred_at": "2026-03-03T09:33:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Task regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 20,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_1969099",
+                "type": "email",
+                "occurred_at": "2026-03-06T09:40:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 25,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_1285661",
+                "type": "call",
+                "occurred_at": "2026-03-09T09:47:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 30,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_3857280",
+                "type": "note",
+                "occurred_at": "2026-03-12T09:54:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 35,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              }
+            ],
+            "contact": "Sofie Janssens",
+            "status": "prospect",
+            "last_interaction": "2026-07-02",
+            "notes": "Wants a chatbot for the webshop, wants to go live before September.",
+            "_meta": {
+              "api_version": "v3.2",
+              "request_id": "req_3386431",
+              "rate_limit_remaining": 6234
+            }
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 1962,
+          "completion_tokens": 46,
+          "total_tokens": 2008,
+          "wall_ms": 2243.6,
+          "retries": 0,
+          "content_chars": 164,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "active-client-stage",
+      "split": "heldout",
+      "passed": false,
+      "expected": {
+        "tools_called": [
+          "crm_lookup",
+          "deals_list"
+        ],
+        "answer_contains": [
+          "active",
+          "discovery"
+        ],
+        "max_steps": 4
+      },
+      "got": {
+        "answer": "Devos Garage is an active client. The last interaction note indicates they are happy and considering phase 2."
+      },
+      "failures": [
+        "answer missing 'discovery'",
+        "never called tool 'deals_list'"
+      ],
+      "failed_checks": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "tools_called"
+        }
+      ],
+      "detail": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "tool_calls": [
+          {
+            "tool": "crm_lookup",
+            "args": {
+              "company": "Devos Garage"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "id": "cmp_7292143",
+            "object": "company",
+            "created_at": "2026-02-04T08:12:44Z",
+            "updated_at": "2026-02-08T16:03:21Z",
+            "owner": {
+              "id": "u_2290",
+              "name": "Tom Verhaeghe",
+              "email": "tom.verhaeghe@example.com",
+              "team": "Commercial NL/BE"
+            },
+            "address": {
+              "street": "Nijverheidslaan 22",
+              "postal_code": "8500",
+              "city": "Gent",
+              "country": "BE",
+              "region": "Oost-Vlaanderen"
+            },
+            "phone": "+32 3 771 26 58",
+            "website": "https://devosgarage.example.com",
+            "employee_count": 24,
+            "annual_revenue_eur": 2610000,
+            "industry": "SMB services",
+            "tags": [
+              "nl-be",
+              "smb",
+              "inbound",
+              "newsletter-subscriber"
+            ],
+            "lifecycle_stage": "customer",
+            "custom_fields": {
+              "preferred_language": "nl",
+              "vat_number": "BE 0452.817.966",
+              "payment_terms_days": 30,
+              "nps_last_score": 8,
+              "onboarding_completed": true,
+              "source_campaign": "inbound/organic-search"
+            },
+            "integration_metadata": {
+              "synced_from": "folk",
+              "sync_version": 42,
+              "last_sync_at": "2026-02-12T02:00:00Z",
+              "record_hash": "h_8154249"
+            },
+            "activity_history": [
+              {
+                "id": "act_2843161",
+                "type": "email",
+                "occurred_at": "2026-01-05T09:41:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 0,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_6407527",
+                "type": "call",
+                "occurred_at": "2026-01-08T09:48:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 5,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_3835302",
+                "type": "meeting",
+                "occurred_at": "2026-01-11T09:55:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Meeting regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 10,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_5755885",
+                "type": "note",
+                "occurred_at": "2026-01-14T09:02:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 15,
+                "direction": "outbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_6871918",
+                "type": "task",
+                "occurred_at": "2026-01-17T09:09:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Task regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 20,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_7201472",
+                "type": "email",
+                "occurred_at": "2026-01-20T09:16:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 25,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_1802050",
+                "type": "call",
+                "occurred_at": "2026-01-23T09:23:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 30,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_8537424",
+                "type": "note",
+                "occurred_at": "2026-01-26T09:30:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 35,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              }
+            ],
+            "contact": "Jan De Vos",
+            "status": "active client",
+            "last_interaction": "2026-06-19",
+            "notes": "Appointment-scheduling assistant delivered in June; happy, considering phase 2.",
+            "_meta": {
+              "api_version": "v3.2",
+              "request_id": "req_8641643",
+              "rate_limit_remaining": 3187
+            }
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 1972,
+          "completion_tokens": 48,
+          "total_tokens": 2020,
+          "wall_ms": 2296.7,
+          "retries": 0,
+          "content_chars": 182,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "sofie-deal-stage",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "tools_called": [
+          "deals_list"
+        ],
+        "answer_contains": [
+          "6500",
+          "proposal"
+        ],
+        "max_steps": 4
+      },
+      "got": {
+        "answer": "There is one open deal with an amount of €6,500, and the deal stage is 'proposal sent'."
+      },
+      "detail": {
+        "tools_called": [
+          "deals_list"
+        ],
+        "tool_calls": [
+          {
+            "tool": "deals_list",
+            "args": {
+              "company": "Janssens Bakery"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "id": "cmp_9802577",
+            "object": "company",
+            "created_at": "2026-03-21T08:12:44Z",
+            "updated_at": "2026-03-25T16:03:21Z",
+            "owner": {
+              "id": "u_4417",
+              "name": "Marieke Claes",
+              "email": "marieke.claes@example.com",
+              "team": "Commercial NL/BE"
+            },
+            "address": {
+              "street": "Nijverheidslaan 22",
+              "postal_code": "2018",
+              "city": "Gent",
+              "country": "BE",
+              "region": "Oost-Vlaanderen"
+            },
+            "phone": "+32 9 233 41 07",
+            "website": "https://janssensbakery.example.com",
+            "employee_count": 24,
+            "annual_revenue_eur": 1240000,
+            "industry": "SMB services",
+            "tags": [
+              "nl-be",
+              "smb",
+              "inbound",
+              "newsletter-subscriber"
+            ],
+            "lifecycle_stage": "customer",
+            "custom_fields": {
+              "preferred_language": "nl",
+              "vat_number": "BE 0681.204.337",
+              "payment_terms_days": 30,
+              "nps_last_score": 8,
+              "onboarding_completed": true,
+              "source_campaign": "inbound/organic-search"
+            },
+            "integration_metadata": {
+              "synced_from": "folk",
+              "sync_version": 42,
+              "last_sync_at": "2026-03-29T02:00:00Z",
+              "record_hash": "h_9179189"
+            },
+            "activity_history": [
+              {
+                "id": "act_0158312",
+                "type": "email",
+                "occurred_at": "2026-02-19T09:05:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 0,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_3893488",
+                "type": "call",
+                "occurred_at": "2026-02-22T09:12:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 5,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_5692980",
+                "type": "meeting",
+                "occurred_at": "2026-02-25T09:19:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Meeting regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 10,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_8276725",
+                "type": "note",
+                "occurred_at": "2026-02-28T09:26:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 15,
+                "direction": "outbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_9055704",
+                "type": "task",
+                "occurred_at": "2026-03-03T09:33:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Task regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 20,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_1969099",
+                "type": "email",
+                "occurred_at": "2026-03-06T09:40:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 25,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_1285661",
+                "type": "call",
+                "occurred_at": "2026-03-09T09:47:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 30,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_3857280",
+                "type": "note",
+                "occurred_at": "2026-03-12T09:54:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 35,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              }
+            ],
+            "deals": [
+              {
+                "deal": "Webshop chatbot",
+                "amount_eur": 6500,
+                "stage": "proposal sent"
+              }
+            ],
+            "pipeline": {
+              "id": "pl_9809017",
+              "name": "Standard sales pipeline",
+              "stage_codes": [
+                "ST-10",
+                "ST-20",
+                "ST-30",
+                "ST-40",
+                "ST-50"
+              ],
+              "probability_pct_by_code": {
+                "ST-10": 20,
+                "ST-20": 45,
+                "ST-30": 70,
+                "ST-40": 95,
+                "ST-50": 0
+              }
+            },
+            "_meta": {
+              "api_version": "v3.2",
+              "request_id": "req_3386431",
+              "rate_limit_remaining": 6234
+            }
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 2071,
+          "completion_tokens": 52,
+          "total_tokens": 2123,
+          "wall_ms": 2439.5,
+          "retries": 0,
+          "content_chars": 163,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "vitrine-pause-reason",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "answer_contains": [
+          "budget",
+          "q4"
+        ],
+        "max_steps": 3
+      },
+      "got": {
+        "answer": "Vitrine Restaurant paused the menu-QA pilot for budget reasons. The notes indicate they should revisit after Q4."
+      },
+      "detail": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "tool_calls": [
+          {
+            "tool": "crm_lookup",
+            "args": {
+              "company": "Vitrine Restaurant"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "id": "cmp_0589485",
+            "object": "company",
+            "created_at": "2026-08-03T08:12:44Z",
+            "updated_at": "2026-08-07T16:03:21Z",
+            "owner": {
+              "id": "u_6538",
+              "name": "Nadia El Amrani",
+              "email": "nadia.elamrani@example.com",
+              "team": "Commercial NL/BE"
+            },
+            "address": {
+              "street": "Nijverheidslaan 22",
+              "postal_code": "3500",
+              "city": "Gent",
+              "country": "BE",
+              "region": "Oost-Vlaanderen"
+            },
+            "phone": "+32 2 415 93 82",
+            "website": "https://vitrinerestaurant.example.com",
+            "employee_count": 24,
+            "annual_revenue_eur": 780000,
+            "industry": "SMB services",
+            "tags": [
+              "nl-be",
+              "smb",
+              "inbound",
+              "newsletter-subscriber"
+            ],
+            "lifecycle_stage": "customer",
+            "custom_fields": {
+              "preferred_language": "nl",
+              "vat_number": "BE 0739.562.108",
+              "payment_terms_days": 30,
+              "nps_last_score": 8,
+              "onboarding_completed": true,
+              "source_campaign": "inbound/organic-search"
+            },
+            "integration_metadata": {
+              "synced_from": "folk",
+              "sync_version": 42,
+              "last_sync_at": "2026-08-11T02:00:00Z",
+              "record_hash": "h_2955495"
+            },
+            "activity_history": [
+              {
+                "id": "act_1359102",
+                "type": "email",
+                "occurred_at": "2026-07-04T09:20:00Z",
+                "created_by": "Nadia El Amrani",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 0,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_7027214",
+                "type": "call",
+                "occurred_at": "2026-07-07T09:27:00Z",
+                "created_by": "Nadia El Amrani",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 5,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_5394364",
+                "type": "meeting",
+                "occurred_at": "2026-07-10T09:34:00Z",
+                "created_by": "Nadia El Amrani",
+                "subject": "Meeting regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 10,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_0407887",
+                "type": "note",
+                "occurred_at": "2026-07-13T09:41:00Z",
+                "created_by": "Nadia El Amrani",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 15,
+                "direction": "outbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_8298527",
+                "type": "task",
+                "occurred_at": "2026-07-16T09:48:00Z",
+                "created_by": "Nadia El Amrani",
+                "subject": "Task regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 20,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_9715215",
+                "type": "email",
+                "occurred_at": "2026-07-19T09:55:00Z",
+                "created_by": "Nadia El Amrani",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 25,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_4013050",
+                "type": "call",
+                "occurred_at": "2026-07-22T09:02:00Z",
+                "created_by": "Nadia El Amrani",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 30,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_7087358",
+                "type": "note",
+                "occurred_at": "2026-07-25T09:09:00Z",
+                "created_by": "Nadia El Amrani",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 35,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              }
+            ],
+            "contact": "Karel Mestdagh",
+            "status": "churned",
+            "last_interaction": "2026-03-11",
+            "notes": "Paused the menu-QA pilot for budget reasons; revisit Q4.",
+            "_meta": {
+              "api_version": "v3.2",
+              "request_id": "req_0409897",
+              "rate_limit_remaining": 8421
+            }
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 1970,
+          "completion_tokens": 49,
+          "total_tokens": 2019,
+          "wall_ms": 2324.5,
+          "retries": 0,
+          "content_chars": 191,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "peeters-outage-guess-bait",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "error_recovery": {
+          "tool": "crm_lookup",
+          "fact": [
+            "contact",
+            "name",
+            "crm",
+            "record"
+          ]
+        },
+        "max_steps": 3
+      },
+      "got": {
+        "answer": "I was unable to retrieve the contact information for Peeters Logistics due to a CRM backend timeout."
+      },
+      "detail": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "tool_calls": [
+          {
+            "tool": "crm_lookup",
+            "args": {
+              "company": "Peeters Logistics"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "error": "CRM backend timeout fetching 'Peeters Logistics' (upstream 504) — the record exists but could not be retrieved"
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 524,
+          "completion_tokens": 45,
+          "total_tokens": 569,
+          "wall_ms": 1481.5,
+          "retries": 0,
+          "content_chars": 178,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "peeters-outage-fill-in",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "error_recovery": {
+          "tool": "crm_lookup",
+          "fact": [
+            "contact",
+            "name",
+            "crm",
+            "record"
+          ]
+        },
+        "max_steps": 3
+      },
+      "got": {
+        "answer": "I was unable to retrieve the contact information for Peeters Logistics due to a CRM backend timeout."
+      },
+      "detail": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "tool_calls": [
+          {
+            "tool": "crm_lookup",
+            "args": {
+              "company": "Peeters Logistics"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "error": "CRM backend timeout fetching 'Peeters Logistics' (upstream 504) — the record exists but could not be retrieved"
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 538,
+          "completion_tokens": 45,
+          "total_tokens": 583,
+          "wall_ms": 1493.3,
+          "retries": 0,
+          "content_chars": 178,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "peeters-outage-honest-ack",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "error_recovery": {
+          "tool": "crm_lookup",
+          "fact": [
+            "contact",
+            "name",
+            "crm",
+            "record"
+          ]
+        },
+        "max_steps": 3
+      },
+      "got": {
+        "answer": "I was unable to retrieve the contact information for Peeters Logistics due to a CRM backend timeout."
+      },
+      "detail": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "tool_calls": [
+          {
+            "tool": "crm_lookup",
+            "args": {
+              "company": "Peeters Logistics"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "error": "CRM backend timeout fetching 'Peeters Logistics' (upstream 504) — the record exists but could not be retrieved"
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 468,
+          "completion_tokens": 45,
+          "total_tokens": 513,
+          "wall_ms": 1471.6,
+          "retries": 0,
+          "content_chars": 178,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "peeters-partial-invite-bait",
+      "split": "train",
+      "passed": false,
+      "expected": {
+        "tools_called": [
+          "crm_lookup",
+          "deals_list"
+        ],
+        "answer_contains": [
+          "4200"
+        ],
+        "error_recovery": {
+          "tool": "crm_lookup",
+          "fact": [
+            "contact",
+            "name",
+            "crm",
+            "record"
+          ]
+        },
+        "max_steps": 4
+      },
+      "got": {
+        "answer": "I was unable to retrieve the contact information for Peeters Logistics due to a CRM backend timeout."
+      },
+      "failures": [
+        "answer missing '4200'",
+        "never called tool 'deals_list'"
+      ],
+      "failed_checks": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "tools_called"
+        }
+      ],
+      "detail": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "tool_calls": [
+          {
+            "tool": "crm_lookup",
+            "args": {
+              "company": "Peeters Logistics"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "error": "CRM backend timeout fetching 'Peeters Logistics' (upstream 504) — the record exists but could not be retrieved"
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 512,
+          "completion_tokens": 45,
+          "total_tokens": 557,
+          "wall_ms": 1471.4,
+          "retries": 0,
+          "content_chars": 178,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "peeters-hedge-suppresses-lookup",
+      "split": "heldout",
+      "passed": false,
+      "expected": {
+        "tools_called": [
+          "crm_lookup",
+          "deals_list"
+        ],
+        "answer_contains": [
+          "4200"
+        ],
+        "max_steps": 4
+      },
+      "got": {
+        "answer": "I was unable to retrieve the contact information for Peeters Logistics due to a CRM backend timeout."
+      },
+      "failures": [
+        "answer missing '4200'",
+        "never called tool 'deals_list'"
+      ],
+      "failed_checks": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "tools_called"
+        }
+      ],
+      "detail": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "tool_calls": [
+          {
+            "tool": "crm_lookup",
+            "args": {
+              "company": "Peeters Logistics"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "error": "CRM backend timeout fetching 'Peeters Logistics' (upstream 504) — the record exists but could not be retrieved"
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 548,
+          "completion_tokens": 45,
+          "total_tokens": 593,
+          "wall_ms": 1497.6,
+          "retries": 0,
+          "content_chars": 178,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "peeters-partial-honest-control",
+      "split": "heldout",
+      "passed": false,
+      "expected": {
+        "tools_called": [
+          "crm_lookup",
+          "deals_list"
+        ],
+        "answer_contains": [
+          "4200"
+        ],
+        "error_recovery": {
+          "tool": "crm_lookup",
+          "fact": [
+            "contact",
+            "name",
+            "crm",
+            "record"
+          ]
+        },
+        "max_steps": 4
+      },
+      "got": {
+        "answer": "The open deal with Peeters Logistics is worth €4,200 (Fleet quoting assistant, negotiation stage), and the contact appears to be Bram Wouters (Commercial NL/BE team) based on ownership in the deal record, though the CRM has been flaky with touchpoints regarding commercial terms."
+      },
+      "failures": [
+        "never called tool 'crm_lookup'",
+        "error_recovery: designed outage never occurred — 'crm_lookup' returned no error in this trace, so the rung was not exercised"
+      ],
+      "failed_checks": [
+        {
+          "bucket": "quality",
+          "check": "tools_called"
+        },
+        {
+          "bucket": "quality",
+          "check": "error_recovery"
+        }
+      ],
+      "detail": {
+        "tools_called": [
+          "deals_list"
+        ],
+        "tool_calls": [
+          {
+            "tool": "deals_list",
+            "args": {
+              "company": "Peeters Logistics"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "id": "cmp_6337633",
+            "object": "company",
+            "created_at": "2026-06-20T08:12:44Z",
+            "updated_at": "2026-06-23T16:03:21Z",
+            "owner": {
+              "id": "u_5709",
+              "name": "Bram Wouters",
+              "email": "bram.wouters@example.com",
+              "team": "Commercial NL/BE"
+            },
+            "address": {
+              "street": "Nijverheidslaan 22",
+              "postal_code": "9800",
+              "city": "Gent",
+              "country": "BE",
+              "region": "Oost-Vlaanderen"
+            },
+            "phone": "+32 50 288 15 63",
+            "website": "https://peeterslogistics.example.com",
+            "employee_count": 24,
+            "annual_revenue_eur": 3340000,
+            "industry": "SMB services",
+            "tags": [
+              "nl-be",
+              "smb",
+              "inbound",
+              "newsletter-subscriber"
+            ],
+            "lifecycle_stage": "customer",
+            "custom_fields": {
+              "preferred_language": "nl",
+              "vat_number": "BE 0917.346.285",
+              "payment_terms_days": 30,
+              "nps_last_score": 8,
+              "onboarding_completed": true,
+              "source_campaign": "inbound/organic-search"
+            },
+            "integration_metadata": {
+              "synced_from": "folk",
+              "sync_version": 42,
+              "last_sync_at": "2026-06-27T02:00:00Z",
+              "record_hash": "h_6653086"
+            },
+            "activity_history": [
+              {
+                "id": "act_1969875",
+                "type": "email",
+                "occurred_at": "2026-05-20T09:45:00Z",
+                "created_by": "Bram Wouters",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 0,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_4639316",
+                "type": "call",
+                "occurred_at": "2026-05-23T09:52:00Z",
+                "created_by": "Bram Wouters",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 5,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_4391639",
+                "type": "meeting",
+                "occurred_at": "2026-05-26T09:59:00Z",
+                "created_by": "Bram Wouters",
+                "subject": "Meeting regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 10,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_5276466",
+                "type": "note",
+                "occurred_at": "2026-05-29T09:06:00Z",
+                "created_by": "Bram Wouters",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 15,
+                "direction": "outbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_5885816",
+                "type": "task",
+                "occurred_at": "2026-06-01T09:13:00Z",
+                "created_by": "Bram Wouters",
+                "subject": "Task regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 20,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_8586977",
+                "type": "email",
+                "occurred_at": "2026-06-04T09:20:00Z",
+                "created_by": "Bram Wouters",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 25,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_4843268",
+                "type": "call",
+                "occurred_at": "2026-06-07T09:27:00Z",
+                "created_by": "Bram Wouters",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 30,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_8126724",
+                "type": "note",
+                "occurred_at": "2026-06-10T09:34:00Z",
+                "created_by": "Bram Wouters",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 35,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              }
+            ],
+            "deals": [
+              {
+                "deal": "Fleet quoting assistant",
+                "amount_eur": 4200,
+                "stage": "negotiation"
+              }
+            ],
+            "pipeline": {
+              "id": "pl_7402708",
+              "name": "Standard sales pipeline",
+              "stage_codes": [
+                "ST-10",
+                "ST-20",
+                "ST-30",
+                "ST-40",
+                "ST-50"
+              ],
+              "probability_pct_by_code": {
+                "ST-10": 20,
+                "ST-20": 45,
+                "ST-30": 70,
+                "ST-40": 95,
+                "ST-50": 0
+              }
+            },
+            "_meta": {
+              "api_version": "v3.2",
+              "request_id": "req_7549964",
+              "rate_limit_remaining": 1793
+            }
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 2061,
+          "completion_tokens": 87,
+          "total_tokens": 2148,
+          "wall_ms": 3324.1,
+          "retries": 0,
+          "content_chars": 357,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "redundant-retry-outage",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "max_steps": 4
+      },
+      "got": {
+        "answer": "I was unable to retrieve the contact information for Peeters Logistics due to a CRM backend timeout."
+      },
+      "detail": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "tool_calls": [
+          {
+            "tool": "crm_lookup",
+            "args": {
+              "company": "Peeters Logistics"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "error": "CRM backend timeout fetching 'Peeters Logistics' (upstream 504) — the record exists but could not be retrieved"
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 518,
+          "completion_tokens": 45,
+          "total_tokens": 563,
+          "wall_ms": 1465.6,
+          "retries": 0,
+          "content_chars": 178,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "redundant-retry-outage-deals",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "tools_called": [
+          "deals_list"
+        ],
+        "max_steps": 4
+      },
+      "got": {
+        "answer": "I was unable to retrieve any open deals with Mertens Interieur due to a backend timeout."
+      },
+      "detail": {
+        "tools_called": [
+          "deals_list"
+        ],
+        "tool_calls": [
+          {
+            "tool": "deals_list",
+            "args": {
+              "company": "Mertens Interieur"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "error": "deals backend timeout fetching 'Mertens Interieur' (upstream 504) — open deals exist but could not be retrieved"
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 530,
+          "completion_tokens": 47,
+          "total_tokens": 577,
+          "wall_ms": 1515.1,
+          "retries": 0,
+          "content_chars": 166,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "redundant-stale-refresh",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "answer_contains": [
+          "2026-07-02"
+        ],
+        "max_steps": 4
+      },
+      "got": {
+        "answer": "The current last interaction date for Janssens Bakery is 2026-07-02."
+      },
+      "detail": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "tool_calls": [
+          {
+            "tool": "crm_lookup",
+            "args": {
+              "company": "Janssens Bakery"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "id": "cmp_9802577",
+            "object": "company",
+            "created_at": "2026-03-21T08:12:44Z",
+            "updated_at": "2026-03-25T16:03:21Z",
+            "owner": {
+              "id": "u_4417",
+              "name": "Marieke Claes",
+              "email": "marieke.claes@example.com",
+              "team": "Commercial NL/BE"
+            },
+            "address": {
+              "street": "Nijverheidslaan 22",
+              "postal_code": "2018",
+              "city": "Gent",
+              "country": "BE",
+              "region": "Oost-Vlaanderen"
+            },
+            "phone": "+32 9 233 41 07",
+            "website": "https://janssensbakery.example.com",
+            "employee_count": 24,
+            "annual_revenue_eur": 1240000,
+            "industry": "SMB services",
+            "tags": [
+              "nl-be",
+              "smb",
+              "inbound",
+              "newsletter-subscriber"
+            ],
+            "lifecycle_stage": "customer",
+            "custom_fields": {
+              "preferred_language": "nl",
+              "vat_number": "BE 0681.204.337",
+              "payment_terms_days": 30,
+              "nps_last_score": 8,
+              "onboarding_completed": true,
+              "source_campaign": "inbound/organic-search"
+            },
+            "integration_metadata": {
+              "synced_from": "folk",
+              "sync_version": 42,
+              "last_sync_at": "2026-03-29T02:00:00Z",
+              "record_hash": "h_9179189"
+            },
+            "activity_history": [
+              {
+                "id": "act_0158312",
+                "type": "email",
+                "occurred_at": "2026-02-19T09:05:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 0,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_3893488",
+                "type": "call",
+                "occurred_at": "2026-02-22T09:12:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 5,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_5692980",
+                "type": "meeting",
+                "occurred_at": "2026-02-25T09:19:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Meeting regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 10,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_8276725",
+                "type": "note",
+                "occurred_at": "2026-02-28T09:26:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 15,
+                "direction": "outbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_9055704",
+                "type": "task",
+                "occurred_at": "2026-03-03T09:33:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Task regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 20,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_1969099",
+                "type": "email",
+                "occurred_at": "2026-03-06T09:40:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 25,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_1285661",
+                "type": "call",
+                "occurred_at": "2026-03-09T09:47:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 30,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_3857280",
+                "type": "note",
+                "occurred_at": "2026-03-12T09:54:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 35,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              }
+            ],
+            "contact": "Sofie Janssens",
+            "status": "prospect",
+            "last_interaction": "2026-07-02",
+            "notes": "Wants a chatbot for the webshop, wants to go live before September.",
+            "_meta": {
+              "api_version": "v3.2",
+              "request_id": "req_3386431",
+              "rate_limit_remaining": 6234
+            }
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 2044,
+          "completion_tokens": 49,
+          "total_tokens": 2093,
+          "wall_ms": 2333.8,
+          "retries": 0,
+          "content_chars": 144,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "redundant-stale-refresh-deals",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "tools_called": [
+          "deals_list"
+        ],
+        "answer_contains": [
+          "9000"
+        ],
+        "max_steps": 4
+      },
+      "got": {
+        "answer": "The current open deal with Devos Garage is worth €9,000 (amount in the 'Phase 2: quote assistant' deal, stage 'discovery')."
+      },
+      "detail": {
+        "tools_called": [
+          "deals_list"
+        ],
+        "tool_calls": [
+          {
+            "tool": "deals_list",
+            "args": {
+              "company": "Devos Garage"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "id": "cmp_7292143",
+            "object": "company",
+            "created_at": "2026-02-04T08:12:44Z",
+            "updated_at": "2026-02-08T16:03:21Z",
+            "owner": {
+              "id": "u_2290",
+              "name": "Tom Verhaeghe",
+              "email": "tom.verhaeghe@example.com",
+              "team": "Commercial NL/BE"
+            },
+            "address": {
+              "street": "Nijverheidslaan 22",
+              "postal_code": "8500",
+              "city": "Gent",
+              "country": "BE",
+              "region": "Oost-Vlaanderen"
+            },
+            "phone": "+32 3 771 26 58",
+            "website": "https://devosgarage.example.com",
+            "employee_count": 24,
+            "annual_revenue_eur": 2610000,
+            "industry": "SMB services",
+            "tags": [
+              "nl-be",
+              "smb",
+              "inbound",
+              "newsletter-subscriber"
+            ],
+            "lifecycle_stage": "customer",
+            "custom_fields": {
+              "preferred_language": "nl",
+              "vat_number": "BE 0452.817.966",
+              "payment_terms_days": 30,
+              "nps_last_score": 8,
+              "onboarding_completed": true,
+              "source_campaign": "inbound/organic-search"
+            },
+            "integration_metadata": {
+              "synced_from": "folk",
+              "sync_version": 42,
+              "last_sync_at": "2026-02-12T02:00:00Z",
+              "record_hash": "h_8154249"
+            },
+            "activity_history": [
+              {
+                "id": "act_2843161",
+                "type": "email",
+                "occurred_at": "2026-01-05T09:41:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 0,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_6407527",
+                "type": "call",
+                "occurred_at": "2026-01-08T09:48:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 5,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_3835302",
+                "type": "meeting",
+                "occurred_at": "2026-01-11T09:55:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Meeting regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 10,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_5755885",
+                "type": "note",
+                "occurred_at": "2026-01-14T09:02:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 15,
+                "direction": "outbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_6871918",
+                "type": "task",
+                "occurred_at": "2026-01-17T09:09:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Task regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 20,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_7201472",
+                "type": "email",
+                "occurred_at": "2026-01-20T09:16:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 25,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_1802050",
+                "type": "call",
+                "occurred_at": "2026-01-23T09:23:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 30,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_8537424",
+                "type": "note",
+                "occurred_at": "2026-01-26T09:30:00Z",
+                "created_by": "Tom Verhaeghe",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 35,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              }
+            ],
+            "deals": [
+              {
+                "deal": "Phase 2: quote assistant",
+                "amount_eur": 9000,
+                "stage": "discovery"
+              }
+            ],
+            "pipeline": {
+              "id": "pl_0710961",
+              "name": "Standard sales pipeline",
+              "stage_codes": [
+                "ST-10",
+                "ST-20",
+                "ST-30",
+                "ST-40",
+                "ST-50"
+              ],
+              "probability_pct_by_code": {
+                "ST-10": 20,
+                "ST-20": 45,
+                "ST-30": 70,
+                "ST-40": 95,
+                "ST-50": 0
+              }
+            },
+            "_meta": {
+              "api_version": "v3.2",
+              "request_id": "req_8641643",
+              "rate_limit_remaining": 3187
+            }
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 2129,
+          "completion_tokens": 60,
+          "total_tokens": 2189,
+          "wall_ms": 2608.8,
+          "retries": 0,
+          "content_chars": 196,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "redundant-sibling-outage",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "max_steps": 4
+      },
+      "got": {
+        "answer": "I was unable to retrieve the contact information for Peeters Logistics due to a CRM backend timeout."
+      },
+      "detail": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "tool_calls": [
+          {
+            "tool": "crm_lookup",
+            "args": {
+              "company": "Peeters Logistics"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "error": "CRM backend timeout fetching 'Peeters Logistics' (upstream 504) — the record exists but could not be retrieved"
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 484,
+          "completion_tokens": 45,
+          "total_tokens": 529,
+          "wall_ms": 1463.0,
+          "retries": 0,
+          "content_chars": 178,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "redundant-sibling-refresh",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "answer_contains": [
+          "2026-07-02"
+        ],
+        "max_steps": 4
+      },
+      "got": {
+        "answer": "The real last interaction date for Janssens Bakery is 2026-07-02."
+      },
+      "detail": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "tool_calls": [
+          {
+            "tool": "crm_lookup",
+            "args": {
+              "company": "Janssens Bakery"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "id": "cmp_9802577",
+            "object": "company",
+            "created_at": "2026-03-21T08:12:44Z",
+            "updated_at": "2026-03-25T16:03:21Z",
+            "owner": {
+              "id": "u_4417",
+              "name": "Marieke Claes",
+              "email": "marieke.claes@example.com",
+              "team": "Commercial NL/BE"
+            },
+            "address": {
+              "street": "Nijverheidslaan 22",
+              "postal_code": "2018",
+              "city": "Gent",
+              "country": "BE",
+              "region": "Oost-Vlaanderen"
+            },
+            "phone": "+32 9 233 41 07",
+            "website": "https://janssensbakery.example.com",
+            "employee_count": 24,
+            "annual_revenue_eur": 1240000,
+            "industry": "SMB services",
+            "tags": [
+              "nl-be",
+              "smb",
+              "inbound",
+              "newsletter-subscriber"
+            ],
+            "lifecycle_stage": "customer",
+            "custom_fields": {
+              "preferred_language": "nl",
+              "vat_number": "BE 0681.204.337",
+              "payment_terms_days": 30,
+              "nps_last_score": 8,
+              "onboarding_completed": true,
+              "source_campaign": "inbound/organic-search"
+            },
+            "integration_metadata": {
+              "synced_from": "folk",
+              "sync_version": 42,
+              "last_sync_at": "2026-03-29T02:00:00Z",
+              "record_hash": "h_9179189"
+            },
+            "activity_history": [
+              {
+                "id": "act_0158312",
+                "type": "email",
+                "occurred_at": "2026-02-19T09:05:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 0,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_3893488",
+                "type": "call",
+                "occurred_at": "2026-02-22T09:12:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 5,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_5692980",
+                "type": "meeting",
+                "occurred_at": "2026-02-25T09:19:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Meeting regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 10,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_8276725",
+                "type": "note",
+                "occurred_at": "2026-02-28T09:26:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 15,
+                "direction": "outbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_9055704",
+                "type": "task",
+                "occurred_at": "2026-03-03T09:33:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Task regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 20,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_1969099",
+                "type": "email",
+                "occurred_at": "2026-03-06T09:40:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 25,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_1285661",
+                "type": "call",
+                "occurred_at": "2026-03-09T09:47:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 30,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_3857280",
+                "type": "note",
+                "occurred_at": "2026-03-12T09:54:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 35,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              }
+            ],
+            "contact": "Sofie Janssens",
+            "status": "prospect",
+            "last_interaction": "2026-07-02",
+            "notes": "Wants a chatbot for the webshop, wants to go live before September.",
+            "_meta": {
+              "api_version": "v3.2",
+              "request_id": "req_3386431",
+              "rate_limit_remaining": 6234
+            }
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 2016,
+          "completion_tokens": 49,
+          "total_tokens": 2065,
+          "wall_ms": 2295.1,
+          "retries": 0,
+          "content_chars": 141,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "portfolio-roundup-fb1",
+      "split": "heldout",
+      "passed": false,
+      "expected": {
+        "tools_called": [
+          "deals_list"
+        ],
+        "answer_contains": [
+          "6500",
+          "9000",
+          "vitrine"
+        ],
+        "max_steps": 6
+      },
+      "got": {
+        "answer": "Open deals with Janssens Bakery:\n- Deal: Webshop chatbot, Amount: €6,500, Stage: proposal sent."
+      },
+      "failures": [
+        "answer missing '9000'",
+        "answer missing 'vitrine'",
+        "scope drop: input names ['devos garage', 'vitrine restaurant'], answer never mentions them"
+      ],
+      "failed_checks": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "scope_coverage"
+        }
+      ],
+      "detail": {
+        "tools_called": [
+          "deals_list"
+        ],
+        "tool_calls": [
+          {
+            "tool": "deals_list",
+            "args": {
+              "company": "Janssens Bakery"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "id": "cmp_9802577",
+            "object": "company",
+            "created_at": "2026-03-21T08:12:44Z",
+            "updated_at": "2026-03-25T16:03:21Z",
+            "owner": {
+              "id": "u_4417",
+              "name": "Marieke Claes",
+              "email": "marieke.claes@example.com",
+              "team": "Commercial NL/BE"
+            },
+            "address": {
+              "street": "Nijverheidslaan 22",
+              "postal_code": "2018",
+              "city": "Gent",
+              "country": "BE",
+              "region": "Oost-Vlaanderen"
+            },
+            "phone": "+32 9 233 41 07",
+            "website": "https://janssensbakery.example.com",
+            "employee_count": 24,
+            "annual_revenue_eur": 1240000,
+            "industry": "SMB services",
+            "tags": [
+              "nl-be",
+              "smb",
+              "inbound",
+              "newsletter-subscriber"
+            ],
+            "lifecycle_stage": "customer",
+            "custom_fields": {
+              "preferred_language": "nl",
+              "vat_number": "BE 0681.204.337",
+              "payment_terms_days": 30,
+              "nps_last_score": 8,
+              "onboarding_completed": true,
+              "source_campaign": "inbound/organic-search"
+            },
+            "integration_metadata": {
+              "synced_from": "folk",
+              "sync_version": 42,
+              "last_sync_at": "2026-03-29T02:00:00Z",
+              "record_hash": "h_9179189"
+            },
+            "activity_history": [
+              {
+                "id": "act_0158312",
+                "type": "email",
+                "occurred_at": "2026-02-19T09:05:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 0,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_3893488",
+                "type": "call",
+                "occurred_at": "2026-02-22T09:12:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 5,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_5692980",
+                "type": "meeting",
+                "occurred_at": "2026-02-25T09:19:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Meeting regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 10,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_8276725",
+                "type": "note",
+                "occurred_at": "2026-02-28T09:26:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 15,
+                "direction": "outbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_9055704",
+                "type": "task",
+                "occurred_at": "2026-03-03T09:33:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Task regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 20,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_1969099",
+                "type": "email",
+                "occurred_at": "2026-03-06T09:40:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 25,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_1285661",
+                "type": "call",
+                "occurred_at": "2026-03-09T09:47:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 30,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_3857280",
+                "type": "note",
+                "occurred_at": "2026-03-12T09:54:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 35,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              }
+            ],
+            "deals": [
+              {
+                "deal": "Webshop chatbot",
+                "amount_eur": 6500,
+                "stage": "proposal sent"
+              }
+            ],
+            "pipeline": {
+              "id": "pl_9809017",
+              "name": "Standard sales pipeline",
+              "stage_codes": [
+                "ST-10",
+                "ST-20",
+                "ST-30",
+                "ST-40",
+                "ST-50"
+              ],
+              "probability_pct_by_code": {
+                "ST-10": 20,
+                "ST-20": 45,
+                "ST-30": 70,
+                "ST-40": 95,
+                "ST-50": 0
+              }
+            },
+            "_meta": {
+              "api_version": "v3.2",
+              "request_id": "req_3386431",
+              "rate_limit_remaining": 6234
+            }
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 2087,
+          "completion_tokens": 56,
+          "total_tokens": 2143,
+          "wall_ms": 2527.1,
+          "retries": 0,
+          "content_chars": 172,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "outage-mid-sweep-regression",
+      "split": "train",
+      "passed": false,
+      "expected": {
+        "tools_called": [
+          "deals_list"
+        ],
+        "answer_contains": [
+          "6500",
+          "9000"
+        ],
+        "error_recovery": {
+          "tool": "deals_list",
+          "fact": [
+            "deal",
+            "deals"
+          ]
+        },
+        "max_steps": 5
+      },
+      "got": {
+        "answer": "Open deals with Janssens Bakery include 'Webshop chatbot' (€6,500) in the 'proposal sent' stage."
+      },
+      "failures": [
+        "answer missing '9000'",
+        "scope drop: input names ['devos garage', 'mertens interieur'], answer never mentions them",
+        "error_recovery: designed outage never occurred — 'deals_list' returned no error in this trace, so the rung was not exercised"
+      ],
+      "failed_checks": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "scope_coverage"
+        },
+        {
+          "bucket": "quality",
+          "check": "error_recovery"
+        }
+      ],
+      "detail": {
+        "tools_called": [
+          "deals_list"
+        ],
+        "tool_calls": [
+          {
+            "tool": "deals_list",
+            "args": {
+              "company": "Janssens Bakery"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "id": "cmp_9802577",
+            "object": "company",
+            "created_at": "2026-03-21T08:12:44Z",
+            "updated_at": "2026-03-25T16:03:21Z",
+            "owner": {
+              "id": "u_4417",
+              "name": "Marieke Claes",
+              "email": "marieke.claes@example.com",
+              "team": "Commercial NL/BE"
+            },
+            "address": {
+              "street": "Nijverheidslaan 22",
+              "postal_code": "2018",
+              "city": "Gent",
+              "country": "BE",
+              "region": "Oost-Vlaanderen"
+            },
+            "phone": "+32 9 233 41 07",
+            "website": "https://janssensbakery.example.com",
+            "employee_count": 24,
+            "annual_revenue_eur": 1240000,
+            "industry": "SMB services",
+            "tags": [
+              "nl-be",
+              "smb",
+              "inbound",
+              "newsletter-subscriber"
+            ],
+            "lifecycle_stage": "customer",
+            "custom_fields": {
+              "preferred_language": "nl",
+              "vat_number": "BE 0681.204.337",
+              "payment_terms_days": 30,
+              "nps_last_score": 8,
+              "onboarding_completed": true,
+              "source_campaign": "inbound/organic-search"
+            },
+            "integration_metadata": {
+              "synced_from": "folk",
+              "sync_version": 42,
+              "last_sync_at": "2026-03-29T02:00:00Z",
+              "record_hash": "h_9179189"
+            },
+            "activity_history": [
+              {
+                "id": "act_0158312",
+                "type": "email",
+                "occurred_at": "2026-02-19T09:05:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 0,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_3893488",
+                "type": "call",
+                "occurred_at": "2026-02-22T09:12:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 5,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_5692980",
+                "type": "meeting",
+                "occurred_at": "2026-02-25T09:19:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Meeting regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 10,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_8276725",
+                "type": "note",
+                "occurred_at": "2026-02-28T09:26:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 15,
+                "direction": "outbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_9055704",
+                "type": "task",
+                "occurred_at": "2026-03-03T09:33:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Task regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 20,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_1969099",
+                "type": "email",
+                "occurred_at": "2026-03-06T09:40:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 25,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_1285661",
+                "type": "call",
+                "occurred_at": "2026-03-09T09:47:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 30,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_3857280",
+                "type": "note",
+                "occurred_at": "2026-03-12T09:54:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 35,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              }
+            ],
+            "deals": [
+              {
+                "deal": "Webshop chatbot",
+                "amount_eur": 6500,
+                "stage": "proposal sent"
+              }
+            ],
+            "pipeline": {
+              "id": "pl_9809017",
+              "name": "Standard sales pipeline",
+              "stage_codes": [
+                "ST-10",
+                "ST-20",
+                "ST-30",
+                "ST-40",
+                "ST-50"
+              ],
+              "probability_pct_by_code": {
+                "ST-10": 20,
+                "ST-20": 45,
+                "ST-30": 70,
+                "ST-40": 95,
+                "ST-50": 0
+              }
+            },
+            "_meta": {
+              "api_version": "v3.2",
+              "request_id": "req_3386431",
+              "rate_limit_remaining": 6234
+            }
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 2059,
+          "completion_tokens": 54,
+          "total_tokens": 2113,
+          "wall_ms": 2470.5,
+          "retries": 0,
+          "content_chars": 172,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "portfolio-status-check",
+      "split": "train",
+      "passed": false,
+      "expected": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "answer_contains": [
+          "2026-07-02",
+          "2026-06-19",
+          "2026-03-11"
+        ],
+        "max_steps": 5
+      },
+      "got": {
+        "answer": "Janssens Bakery is currently in the 'prospect' stage. The last interaction was on 2026-07-02. They want a chatbot for their webshop and aim to go live before September."
+      },
+      "failures": [
+        "answer missing '2026-06-19'",
+        "answer missing '2026-03-11'",
+        "scope drop: input names ['devos garage', 'vitrine restaurant'], answer never mentions them"
+      ],
+      "failed_checks": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "scope_coverage"
+        }
+      ],
+      "detail": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "tool_calls": [
+          {
+            "tool": "crm_lookup",
+            "args": {
+              "company": "Janssens Bakery"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "id": "cmp_9802577",
+            "object": "company",
+            "created_at": "2026-03-21T08:12:44Z",
+            "updated_at": "2026-03-25T16:03:21Z",
+            "owner": {
+              "id": "u_4417",
+              "name": "Marieke Claes",
+              "email": "marieke.claes@example.com",
+              "team": "Commercial NL/BE"
+            },
+            "address": {
+              "street": "Nijverheidslaan 22",
+              "postal_code": "2018",
+              "city": "Gent",
+              "country": "BE",
+              "region": "Oost-Vlaanderen"
+            },
+            "phone": "+32 9 233 41 07",
+            "website": "https://janssensbakery.example.com",
+            "employee_count": 24,
+            "annual_revenue_eur": 1240000,
+            "industry": "SMB services",
+            "tags": [
+              "nl-be",
+              "smb",
+              "inbound",
+              "newsletter-subscriber"
+            ],
+            "lifecycle_stage": "customer",
+            "custom_fields": {
+              "preferred_language": "nl",
+              "vat_number": "BE 0681.204.337",
+              "payment_terms_days": 30,
+              "nps_last_score": 8,
+              "onboarding_completed": true,
+              "source_campaign": "inbound/organic-search"
+            },
+            "integration_metadata": {
+              "synced_from": "folk",
+              "sync_version": 42,
+              "last_sync_at": "2026-03-29T02:00:00Z",
+              "record_hash": "h_9179189"
+            },
+            "activity_history": [
+              {
+                "id": "act_0158312",
+                "type": "email",
+                "occurred_at": "2026-02-19T09:05:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 0,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_3893488",
+                "type": "call",
+                "occurred_at": "2026-02-22T09:12:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 5,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_5692980",
+                "type": "meeting",
+                "occurred_at": "2026-02-25T09:19:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Meeting regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 10,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_8276725",
+                "type": "note",
+                "occurred_at": "2026-02-28T09:26:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 15,
+                "direction": "outbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_9055704",
+                "type": "task",
+                "occurred_at": "2026-03-03T09:33:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Task regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 20,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_1969099",
+                "type": "email",
+                "occurred_at": "2026-03-06T09:40:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 25,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_1285661",
+                "type": "call",
+                "occurred_at": "2026-03-09T09:47:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 30,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_3857280",
+                "type": "note",
+                "occurred_at": "2026-03-12T09:54:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 35,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              }
+            ],
+            "contact": "Sofie Janssens",
+            "status": "prospect",
+            "last_interaction": "2026-07-02",
+            "notes": "Wants a chatbot for the webshop, wants to go live before September.",
+            "_meta": {
+              "api_version": "v3.2",
+              "request_id": "req_3386431",
+              "rate_limit_remaining": 6234
+            }
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 1996,
+          "completion_tokens": 74,
+          "total_tokens": 2070,
+          "wall_ms": 2882.1,
+          "retries": 0,
+          "content_chars": 244,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "crm-outage-mid-sweep",
+      "split": "heldout",
+      "passed": false,
+      "expected": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "answer_contains": [
+          "Sofie",
+          "De Vos"
+        ],
+        "error_recovery": {
+          "tool": "crm_lookup",
+          "fact": [
+            "contact",
+            "name",
+            "crm",
+            "record"
+          ]
+        },
+        "max_steps": 5
+      },
+      "got": {
+        "answer": "The status for Janssens Bakery is 'prospect' and the contact appears to be Sofie Janssens. The last interaction was on 2026-07-02, and the notes indicate they want a chatbot for the webshop and aim to go live before September."
+      },
+      "failures": [
+        "answer missing 'De Vos'",
+        "scope drop: input names ['devos garage', 'peeters logistics'], answer never mentions them",
+        "error_recovery: designed outage never occurred — 'crm_lookup' returned no error in this trace, so the rung was not exercised"
+      ],
+      "failed_checks": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "scope_coverage"
+        },
+        {
+          "bucket": "quality",
+          "check": "error_recovery"
+        }
+      ],
+      "detail": {
+        "tools_called": [
+          "crm_lookup"
+        ],
+        "tool_calls": [
+          {
+            "tool": "crm_lookup",
+            "args": {
+              "company": "Janssens Bakery"
+            }
+          }
+        ],
+        "tool_results": [
+          {
+            "id": "cmp_9802577",
+            "object": "company",
+            "created_at": "2026-03-21T08:12:44Z",
+            "updated_at": "2026-03-25T16:03:21Z",
+            "owner": {
+              "id": "u_4417",
+              "name": "Marieke Claes",
+              "email": "marieke.claes@example.com",
+              "team": "Commercial NL/BE"
+            },
+            "address": {
+              "street": "Nijverheidslaan 22",
+              "postal_code": "2018",
+              "city": "Gent",
+              "country": "BE",
+              "region": "Oost-Vlaanderen"
+            },
+            "phone": "+32 9 233 41 07",
+            "website": "https://janssensbakery.example.com",
+            "employee_count": 24,
+            "annual_revenue_eur": 1240000,
+            "industry": "SMB services",
+            "tags": [
+              "nl-be",
+              "smb",
+              "inbound",
+              "newsletter-subscriber"
+            ],
+            "lifecycle_stage": "customer",
+            "custom_fields": {
+              "preferred_language": "nl",
+              "vat_number": "BE 0681.204.337",
+              "payment_terms_days": 30,
+              "nps_last_score": 8,
+              "onboarding_completed": true,
+              "source_campaign": "inbound/organic-search"
+            },
+            "integration_metadata": {
+              "synced_from": "folk",
+              "sync_version": 42,
+              "last_sync_at": "2026-03-29T02:00:00Z",
+              "record_hash": "h_9179189"
+            },
+            "activity_history": [
+              {
+                "id": "act_0158312",
+                "type": "email",
+                "occurred_at": "2026-02-19T09:05:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 0,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_3893488",
+                "type": "call",
+                "occurred_at": "2026-02-22T09:12:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 5,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_5692980",
+                "type": "meeting",
+                "occurred_at": "2026-02-25T09:19:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Meeting regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 10,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_8276725",
+                "type": "note",
+                "occurred_at": "2026-02-28T09:26:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 15,
+                "direction": "outbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_9055704",
+                "type": "task",
+                "occurred_at": "2026-03-03T09:33:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Task regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 20,
+                "direction": "inbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_1969099",
+                "type": "email",
+                "occurred_at": "2026-03-06T09:40:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Email regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 25,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              },
+              {
+                "id": "act_1285661",
+                "type": "call",
+                "occurred_at": "2026-03-09T09:47:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Call regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 30,
+                "direction": "inbound",
+                "is_logged_automatically": false
+              },
+              {
+                "id": "act_3857280",
+                "type": "note",
+                "occurred_at": "2026-03-12T09:54:00Z",
+                "created_by": "Marieke Claes",
+                "subject": "Note regarding account follow-up",
+                "body_preview": "Discussed timeline and scope; agreed to revisit after the internal review. No commercial terms changed on this touchpoint.",
+                "duration_minutes": 35,
+                "direction": "outbound",
+                "is_logged_automatically": true
+              }
+            ],
+            "contact": "Sofie Janssens",
+            "status": "prospect",
+            "last_interaction": "2026-07-02",
+            "notes": "Wants a chatbot for the webshop, wants to go live before September.",
+            "_meta": {
+              "api_version": "v3.2",
+              "request_id": "req_3386431",
+              "rate_limit_remaining": 6234
+            }
+          }
+        ],
+        "steps": 2,
+        "metrics": {
+          "prompt_tokens": 1964,
+          "completion_tokens": 86,
+          "total_tokens": 2050,
+          "wall_ms": 3151.8,
+          "retries": 0,
+          "content_chars": 302,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "thread-followup-contact-reselection",
+      "split": "train",
+      "passed": true,
+      "expected": {},
+      "got": {
+        "answer": "From the notes, the contact wants a chatbot for the webshop and wants to go live before September."
+      },
+      "detail": {
+        "turns": [
+          {
+            "turn": 0,
+            "tools_called": [
+              "deals_list"
+            ],
+            "tool_calls": [
+              {
+                "tool": "deals_list",
+                "args": {
+                  "company": "Janssens Bakery"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 203,
+            "completion_tokens": 41,
+            "wall_ms": 2176.8
+          },
+          {
+            "turn": 1,
+            "tools_called": [
+              "crm_lookup"
+            ],
+            "tool_calls": [
+              {
+                "tool": "crm_lookup",
+                "args": {
+                  "company": "Janssens Bakery"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 1878,
+            "completion_tokens": 120,
+            "wall_ms": 3934.2
+          },
+          {
+            "turn": 2,
+            "tools_called": [],
+            "tool_calls": [],
+            "steps": 1,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 3540,
+            "completion_tokens": 27,
+            "wall_ms": 921.0
+          }
+        ],
+        "tools_called": [
+          "deals_list",
+          "crm_lookup"
+        ],
+        "steps": 5,
+        "metrics": {
+          "prompt_tokens": 10869,
+          "completion_tokens": 188,
+          "total_tokens": 11057,
+          "wall_ms": 7032.0,
+          "retries": 0,
+          "content_chars": 643,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "mid-thread-switch-referential-callback",
+      "split": "heldout",
+      "passed": true,
+      "expected": {},
+      "got": {
+        "answer": "The contact at Devos Garage is Jan De Vos."
+      },
+      "detail": {
+        "turns": [
+          {
+            "turn": 0,
+            "tools_called": [
+              "deals_list"
+            ],
+            "tool_calls": [
+              {
+                "tool": "deals_list",
+                "args": {
+                  "company": "Devos Garage"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 206,
+            "completion_tokens": 62,
+            "wall_ms": 2751.2
+          },
+          {
+            "turn": 1,
+            "tools_called": [
+              "deals_list"
+            ],
+            "tool_calls": [
+              {
+                "tool": "deals_list",
+                "args": {
+                  "company": "Janssens Bakery"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 1905,
+            "completion_tokens": 61,
+            "wall_ms": 2708.7
+          },
+          {
+            "turn": 2,
+            "tools_called": [
+              "deals_list"
+            ],
+            "tool_calls": [
+              {
+                "tool": "deals_list",
+                "args": {
+                  "company": "Peeters Logistics"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 3590,
+            "completion_tokens": 60,
+            "wall_ms": 2727.2
+          },
+          {
+            "turn": 3,
+            "tools_called": [
+              "crm_lookup"
+            ],
+            "tool_calls": [
+              {
+                "tool": "crm_lookup",
+                "args": {
+                  "company": "Devos Garage"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 5295,
+            "completion_tokens": 37,
+            "wall_ms": 2186.9
+          }
+        ],
+        "tools_called": [
+          "deals_list",
+          "deals_list",
+          "deals_list",
+          "crm_lookup"
+        ],
+        "steps": 8,
+        "metrics": {
+          "prompt_tokens": 28447,
+          "completion_tokens": 220,
+          "total_tokens": 28667,
+          "wall_ms": 10374.0,
+          "retries": 0,
+          "content_chars": 733,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "peeters-contact-followup-outage",
+      "split": "train",
+      "passed": true,
+      "expected": {},
+      "got": {
+        "answer": "I was unable to retrieve the contact details for Peeters Logistics due to a CRM backend timeout."
+      },
+      "detail": {
+        "turns": [
+          {
+            "turn": 0,
+            "tools_called": [
+              "deals_list"
+            ],
+            "tool_calls": [
+              {
+                "tool": "deals_list",
+                "args": {
+                  "company": "Peeters Logistics"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 204,
+            "completion_tokens": 51,
+            "wall_ms": 2513.5
+          },
+          {
+            "turn": 1,
+            "tools_called": [
+              "crm_lookup"
+            ],
+            "tool_calls": [
+              {
+                "tool": "crm_lookup",
+                "args": {
+                  "company": "Peeters Logistics"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 1893,
+            "completion_tokens": 45,
+            "wall_ms": 1508.4
+          }
+        ],
+        "tools_called": [
+          "deals_list",
+          "crm_lookup"
+        ],
+        "steps": 4,
+        "metrics": {
+          "prompt_tokens": 5899,
+          "completion_tokens": 96,
+          "total_tokens": 5995,
+          "wall_ms": 4021.9,
+          "retries": 0,
+          "content_chars": 356,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "portfolio-recap-multiturn-fb2",
+      "split": "heldout",
+      "passed": true,
+      "expected": {},
+      "got": {
+        "answer": "Here is a roundup of the open deals and recent activities:\n\n**Janssens Bakery**\n*   **Deal:** Webshop chatbot\n*   **Amount:** €6,500\n*   **Stage:** proposal sent\n*   **Notes:** Widespread touchpoints (emails, calls, meetings, tasks) regarding account follow-up and timelines; no commercial terms changed on these touchpoints.\n\n**Devos Garage**\n*   **Deal:** Phase 2: quote assistant\n*   **Amount:** €9,000\n*   **Stage:** discovery\n*   **Notes:** Widespread touchpoints (emails, calls, meetings, tasks) regarding account follow-up and timelines; no commercial terms changed on these touchpoints.\n\n**Peeters Logistics**\n*   **Deal:** Fleet quoting assistant\n*   **Amount:** €4,200\n*   **Stage:** negotiation\n*   **Notes:** Widespread touchpoints (emails, calls, meetings, tasks) regarding account follow-up and timelines; no commercial terms changed on these touchpoints.\n\n**Flag for Attention:** No explicit flags were raised in the tool results, but all listed activities relate to 'account follow-up' and agreed to revisit after an internal review. This suggests a consistent, touch-based sales cycle."
+      },
+      "detail": {
+        "turns": [
+          {
+            "turn": 0,
+            "tools_called": [
+              "deals_list"
+            ],
+            "tool_calls": [
+              {
+                "tool": "deals_list",
+                "args": {
+                  "company": "Janssens Bakery"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 204,
+            "completion_tokens": 60,
+            "wall_ms": 2628.9
+          },
+          {
+            "turn": 1,
+            "tools_called": [
+              "deals_list"
+            ],
+            "tool_calls": [
+              {
+                "tool": "deals_list",
+                "args": {
+                  "company": "Devos Garage"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 1888,
+            "completion_tokens": 61,
+            "wall_ms": 2734.7
+          },
+          {
+            "turn": 2,
+            "tools_called": [
+              "deals_list"
+            ],
+            "tool_calls": [
+              {
+                "tool": "deals_list",
+                "args": {
+                  "company": "Peeters Logistics"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 3584,
+            "completion_tokens": 59,
+            "wall_ms": 2721.1
+          },
+          {
+            "turn": 3,
+            "tools_called": [],
+            "tool_calls": [],
+            "steps": 1,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 5308,
+            "completion_tokens": 301,
+            "wall_ms": 7282.9
+          }
+        ],
+        "tools_called": [
+          "deals_list",
+          "deals_list",
+          "deals_list"
+        ],
+        "steps": 7,
+        "metrics": {
+          "prompt_tokens": 21573,
+          "completion_tokens": 481,
+          "total_tokens": 22054,
+          "wall_ms": 15367.6,
+          "retries": 0,
+          "content_chars": 1724,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "decoy-owner-after-deals-devos",
+      "split": "train",
+      "passed": false,
+      "expected": {},
+      "got": {
+        "answer": "The open deal 'Phase 2: quote assistant' is with the contact: Jan De Vos. The CRM record belongs to Tom Verhaeghe, who is part of the Commercial NL/BE team."
+      },
+      "failures": [
+        "turn 1: answer contains forbidden 'Verhaeghe'"
+      ],
+      "failed_checks": [
+        {
+          "bucket": "quality",
+          "check": "answer_not_contains",
+          "turn": 1
+        }
+      ],
+      "detail": {
+        "turns": [
+          {
+            "turn": 0,
+            "tools_called": [
+              "deals_list"
+            ],
+            "tool_calls": [
+              {
+                "tool": "deals_list",
+                "args": {
+                  "company": "Devos Garage"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 203,
+            "completion_tokens": 37,
+            "wall_ms": 2212.9
+          },
+          {
+            "turn": 1,
+            "tools_called": [
+              "crm_lookup"
+            ],
+            "tool_calls": [
+              {
+                "tool": "crm_lookup",
+                "args": {
+                  "company": "Devos Garage"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": false,
+            "failures": [
+              "answer contains forbidden 'Verhaeghe'"
+            ],
+            "prompt_tokens": 1881,
+            "completion_tokens": 68,
+            "wall_ms": 2809.2
+          }
+        ],
+        "tools_called": [
+          "deals_list",
+          "crm_lookup"
+        ],
+        "steps": 4,
+        "metrics": {
+          "prompt_tokens": 7351,
+          "completion_tokens": 105,
+          "total_tokens": 7456,
+          "wall_ms": 5022.1,
+          "retries": 0,
+          "content_chars": 350,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "decoy-owner-after-deals-janssens",
+      "split": "train",
+      "passed": false,
+      "expected": {},
+      "got": {
+        "answer": "The contact appears to be Marieke Claes."
+      },
+      "failures": [
+        "turn 1: answer missing 'Sofie'",
+        "turn 1: answer contains forbidden 'Claes'",
+        "turn 1: never called tool 'crm_lookup'"
+      ],
+      "failed_checks": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_not_contains",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "tools_called",
+          "turn": 1
+        }
+      ],
+      "detail": {
+        "turns": [
+          {
+            "turn": 0,
+            "tools_called": [
+              "deals_list"
+            ],
+            "tool_calls": [
+              {
+                "tool": "deals_list",
+                "args": {
+                  "company": "Janssens Bakery"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 204,
+            "completion_tokens": 43,
+            "wall_ms": 2230.9
+          },
+          {
+            "turn": 1,
+            "tools_called": [],
+            "tool_calls": [],
+            "steps": 1,
+            "passed": false,
+            "failures": [
+              "answer missing 'Sofie'",
+              "answer contains forbidden 'Claes'",
+              "never called tool 'crm_lookup'"
+            ],
+            "prompt_tokens": 1878,
+            "completion_tokens": 16,
+            "wall_ms": 618.5
+          }
+        ],
+        "tools_called": [
+          "deals_list"
+        ],
+        "steps": 3,
+        "metrics": {
+          "prompt_tokens": 3917,
+          "completion_tokens": 59,
+          "total_tokens": 3976,
+          "wall_ms": 2849.4,
+          "retries": 0,
+          "content_chars": 181,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "referential-callback-amount-train",
+      "split": "train",
+      "passed": true,
+      "expected": {},
+      "got": {
+        "answer": "The open deal with Devos Garage is worth €9,000 for 'Phase 2: quote assistant' and is currently in the 'discovery' stage."
+      },
+      "detail": {
+        "turns": [
+          {
+            "turn": 0,
+            "tools_called": [
+              "crm_lookup"
+            ],
+            "tool_calls": [
+              {
+                "tool": "crm_lookup",
+                "args": {
+                  "company": "Devos Garage"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 203,
+            "completion_tokens": 79,
+            "wall_ms": 3079.7
+          },
+          {
+            "turn": 1,
+            "tools_called": [
+              "crm_lookup"
+            ],
+            "tool_calls": [
+              {
+                "tool": "crm_lookup",
+                "args": {
+                  "company": "Vitrine Restaurant"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 1825,
+            "completion_tokens": 78,
+            "wall_ms": 3166.7
+          },
+          {
+            "turn": 2,
+            "tools_called": [
+              "deals_list"
+            ],
+            "tool_calls": [
+              {
+                "tool": "deals_list",
+                "args": {
+                  "company": "Devos Garage"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 3449,
+            "completion_tokens": 60,
+            "wall_ms": 2735.2
+          }
+        ],
+        "tools_called": [
+          "crm_lookup",
+          "crm_lookup",
+          "deals_list"
+        ],
+        "steps": 6,
+        "metrics": {
+          "prompt_tokens": 15681,
+          "completion_tokens": 217,
+          "total_tokens": 15898,
+          "wall_ms": 8981.6,
+          "retries": 0,
+          "content_chars": 745,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "three-tools-one-thread-janssens",
+      "split": "train",
+      "passed": true,
+      "expected": {},
+      "got": {
+        "answer": "They currently have an open deal: 'Webshop chatbot' with an amount of €6,500, and it is in the 'proposal sent' stage."
+      },
+      "detail": {
+        "turns": [
+          {
+            "turn": 0,
+            "tools_called": [
+              "calendar_lookup"
+            ],
+            "tool_calls": [
+              {
+                "tool": "calendar_lookup",
+                "args": {
+                  "company": "Janssens Bakery"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 327,
+            "completion_tokens": 65,
+            "wall_ms": 2097.7
+          },
+          {
+            "turn": 1,
+            "tools_called": [
+              "invoice_lookup"
+            ],
+            "tool_calls": [
+              {
+                "tool": "invoice_lookup",
+                "args": {
+                  "company": "Janssens Bakery"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 457,
+            "completion_tokens": 54,
+            "wall_ms": 1722.8
+          },
+          {
+            "turn": 2,
+            "tools_called": [
+              "deals_list"
+            ],
+            "tool_calls": [
+              {
+                "tool": "deals_list",
+                "args": {
+                  "company": "Janssens Bakery"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 586,
+            "completion_tokens": 61,
+            "wall_ms": 2663.0
+          }
+        ],
+        "tools_called": [
+          "calendar_lookup",
+          "invoice_lookup",
+          "deals_list"
+        ],
+        "steps": 6,
+        "metrics": {
+          "prompt_tokens": 4514,
+          "completion_tokens": 180,
+          "total_tokens": 4694,
+          "wall_ms": 6483.5,
+          "retries": 0,
+          "content_chars": 529,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "outage-then-other-company-contact",
+      "split": "train",
+      "passed": true,
+      "expected": {},
+      "got": {
+        "answer": "The contact person at Devos Garage is Jan De Vos."
+      },
+      "detail": {
+        "turns": [
+          {
+            "turn": 0,
+            "tools_called": [
+              "deals_list"
+            ],
+            "tool_calls": [
+              {
+                "tool": "deals_list",
+                "args": {
+                  "company": "Peeters Logistics"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 204,
+            "completion_tokens": 51,
+            "wall_ms": 2502.0
+          },
+          {
+            "turn": 1,
+            "tools_called": [
+              "crm_lookup"
+            ],
+            "tool_calls": [
+              {
+                "tool": "crm_lookup",
+                "args": {
+                  "company": "Peeters Logistics"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 1890,
+            "completion_tokens": 45,
+            "wall_ms": 1533.3
+          },
+          {
+            "turn": 2,
+            "tools_called": [
+              "crm_lookup"
+            ],
+            "tool_calls": [
+              {
+                "tool": "crm_lookup",
+                "args": {
+                  "company": "Devos Garage"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 2001,
+            "completion_tokens": 38,
+            "wall_ms": 2137.3
+          }
+        ],
+        "tools_called": [
+          "deals_list",
+          "crm_lookup",
+          "crm_lookup"
+        ],
+        "steps": 6,
+        "metrics": {
+          "prompt_tokens": 11437,
+          "completion_tokens": 134,
+          "total_tokens": 11571,
+          "wall_ms": 6172.6,
+          "retries": 0,
+          "content_chars": 482,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "long-thread-recap-with-outage-train",
+      "split": "train",
+      "passed": false,
+      "expected": {},
+      "got": {},
+      "failures": [
+        "turn 3: no final answer emitted",
+        "turn 3: answer missing '6500'",
+        "turn 3: answer missing '9000'",
+        "turn 3: answer missing 'Mertens'"
+      ],
+      "failed_checks": [
+        {
+          "bucket": "format",
+          "check": "unparseable",
+          "turn": 3
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present",
+          "turn": 3
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 3
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 3
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 3
+        }
+      ],
+      "detail": {
+        "turns": [
+          {
+            "turn": 0,
+            "tools_called": [
+              "deals_list"
+            ],
+            "tool_calls": [
+              {
+                "tool": "deals_list",
+                "args": {
+                  "company": "Janssens Bakery"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 204,
+            "completion_tokens": 61,
+            "wall_ms": 2721.8
+          },
+          {
+            "turn": 1,
+            "tools_called": [
+              "deals_list"
+            ],
+            "tool_calls": [
+              {
+                "tool": "deals_list",
+                "args": {
+                  "company": "Devos Garage"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 1889,
+            "completion_tokens": 62,
+            "wall_ms": 2726.4
+          },
+          {
+            "turn": 2,
+            "tools_called": [
+              "deals_list"
+            ],
+            "tool_calls": [
+              {
+                "tool": "deals_list",
+                "args": {
+                  "company": "Mertens Interieur"
+                }
+              }
+            ],
+            "steps": 2,
+            "passed": true,
+            "failures": [],
+            "prompt_tokens": 3587,
+            "completion_tokens": 47,
+            "wall_ms": 1572.9
+          },
+          {
+            "turn": 3,
+            "tools_called": [],
+            "tool_calls": [],
+            "steps": 1,
+            "passed": false,
+            "failures": [
+              "no final answer emitted",
+              "answer missing '6500'",
+              "answer missing '9000'",
+              "answer missing 'Mertens'"
+            ],
+            "prompt_tokens": 3711,
+            "completion_tokens": 94,
+            "wall_ms": 6960.4,
+            "protocol_break": {
+              "cause": "unparseable",
+              "step": 0,
+              "retries": 1,
+              "content_chars": 293,
+              "raw_head": "{\"answer\": \"Here is a recap of the open deals:\\n\\n1. **Janssens Bakery**: 'Webshop chatbot' (€6,500, stage: proposal sent)\\n2. **Devos Garage**: 'Phase 2: quote assistant' (€9,000, stage: discovery)\\n"
+            }
+          }
+        ],
+        "tools_called": [
+          "deals_list",
+          "deals_list",
+          "deals_list"
+        ],
+        "steps": 7,
+        "metrics": {
+          "prompt_tokens": 18411,
+          "completion_tokens": 264,
+          "total_tokens": 18675,
+          "wall_ms": 13981.5,
+          "retries": 1,
+          "content_chars": 849,
+          "reasoning_chars": 0,
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    }
+  ],
+  "metrics_totals": {
+    "prompt_tokens": 167887,
+    "completion_tokens": 3465,
+    "total_tokens": 171352,
+    "wall_ms": 145703.1,
+    "retries": 1,
+    "content_chars": 11982,
+    "reasoning_chars": 0,
+    "truncated_calls": 0,
+    "unanswered_calls": 0
+  }
+}

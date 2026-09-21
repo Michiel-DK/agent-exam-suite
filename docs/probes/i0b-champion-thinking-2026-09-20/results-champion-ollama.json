@@ -1,0 +1,1253 @@
+{
+  "agent": "task-intake",
+  "provider": "ollama",
+  "model": "gemma4:e2b-it-qat",
+  "mode": "labels",
+  "train": {
+    "passed": 24,
+    "total": 26,
+    "score": 0.9231
+  },
+  "heldout": {
+    "passed": 19,
+    "total": 20,
+    "score": 0.95
+  },
+  "cases": [
+    {
+      "id": "crm-devos-stage",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "agent": "crm-followup"
+      },
+      "got": {
+        "agent": "crm-followup",
+        "input": "What stage is the Devos Garage deal in?"
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 468,
+          "completion_tokens": 270,
+          "total_tokens": 738,
+          "wall_ms": 10247.9,
+          "retries": 0,
+          "content_chars": 89,
+          "reasoning_chars": 885,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "crm-janssens-contact-lastspeak",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "agent": "crm-followup"
+      },
+      "got": {
+        "agent": "crm-followup",
+        "input": "Quick one before my call — who's our contact at Janssens Bakery and when did we last speak?"
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 480,
+          "completion_tokens": 308,
+          "total_tokens": 788,
+          "wall_ms": 4642.3,
+          "retries": 0,
+          "content_chars": 147,
+          "reasoning_chars": 979,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "crm-peeters-open-deal-slack",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "agent": "crm-followup"
+      },
+      "got": {
+        "agent": "crm-followup",
+        "input": "Slack from Michiel: can you check if Peeters Logistics still has an open deal and how much?"
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 479,
+          "completion_tokens": 383,
+          "total_tokens": 862,
+          "wall_ms": 5449.0,
+          "retries": 0,
+          "content_chars": 147,
+          "reasoning_chars": 1313,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "crm-vitrine-wants-active",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "agent": "crm-followup"
+      },
+      "got": {
+        "agent": "crm-followup",
+        "input": "Remind me what Vitrine Restaurant wanted from us and whether they're still active."
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 476,
+          "completion_tokens": 308,
+          "total_tokens": 784,
+          "wall_ms": 4482.3,
+          "retries": 0,
+          "content_chars": 138,
+          "reasoning_chars": 1011,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "crm-mertens-notes",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "agent": "crm-followup"
+      },
+      "got": {
+        "agent": "crm-followup",
+        "input": "Any notes on Mertens Interieur? I have them at 3pm."
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 474,
+          "completion_tokens": 315,
+          "total_tokens": 789,
+          "wall_ms": 4581.4,
+          "retries": 0,
+          "content_chars": 107,
+          "reasoning_chars": 951,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "triage-bare-client-email",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "agent": "email-triage"
+      },
+      "got": {
+        "agent": "email-triage",
+        "input": "From: sofie@janssens-bakery.com\nSubject: quote for AI chatbot\n\nHi, we saw your work for restaurants. Could you call us this week about a chatbot for our webshop? We want to go live before September. Thanks, Sofie"
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 513,
+          "completion_tokens": 539,
+          "total_tokens": 1052,
+          "wall_ms": 7546.5,
+          "retries": 0,
+          "content_chars": 271,
+          "reasoning_chars": 1811,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "triage-urgent-or-not-newsletter",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "agent": "email-triage"
+      },
+      "got": {
+        "agent": "email-triage",
+        "input": "From: nieuws@ondernemersplatform.be Subject: Weekoverzicht voor ondernemers\n\nDeze week: vijf tips om je administratie te vereenvoudigen en de agenda van netwerkevents. Uitschrijven kan onderaan."
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 518,
+          "completion_tokens": 534,
+          "total_tokens": 1052,
+          "wall_ms": 7667.1,
+          "retries": 0,
+          "content_chars": 252,
+          "reasoning_chars": 1833,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "triage-bare-recruiter",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "agent": "email-triage"
+      },
+      "got": {
+        "agent": "email-triage",
+        "input": "From: talent@bigconsulting.example\nSubject: Senior AI role — are you open to a chat?\n\nHi, I came across your profile. We have a senior AI engineering role in Brussels, hybrid, competitive package. Would you be open to a 20-minute intro call next week?"
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 521,
+          "completion_tokens": 540,
+          "total_tokens": 1061,
+          "wall_ms": 7720.3,
+          "retries": 0,
+          "content_chars": 310,
+          "reasoning_chars": 1783,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "triage-bare-disk-alert",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "agent": "email-triage"
+      },
+      "got": {
+        "agent": "email-triage",
+        "input": "From: alerts@ovh.com\nSubject: Disk usage 91% on vps-2\n\nDisk usage on vps-2 reached 91%. No action is taken automatically. Consider freeing space or upgrading the plan."
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 507,
+          "completion_tokens": 532,
+          "total_tokens": 1039,
+          "wall_ms": 7427.7,
+          "retries": 0,
+          "content_chars": 226,
+          "reasoning_chars": 1774,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "triage-sort-accountant",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "agent": "email-triage"
+      },
+      "got": {
+        "agent": "email-triage",
+        "input": "From: kris@boekhouding-vdb.be\nSubject: BTW aangifte Q3\n\nDag, de BTW-aangifte voor Q3 moet binnen zijn voor 20 oktober. Kan je me de uitgaande facturen van juli-september bezorgen voor 10 oktober?"
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 528,
+          "completion_tokens": 682,
+          "total_tokens": 1210,
+          "wall_ms": 9466.8,
+          "retries": 0,
+          "content_chars": 248,
+          "reasoning_chars": 2179,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "reply-draft-sofie",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "agent": "reply-draft"
+      },
+      "got": {
+        "agent": "reply-draft",
+        "input": "From: sofie@janssens-bakery.com\nSubject: quote for AI chatbot\n\nHi, we saw your work for restaurants. Could you call us this week about a chatbot for our webshop? We want to go live before September. Thanks, Sofie"
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 520,
+          "completion_tokens": 276,
+          "total_tokens": 796,
+          "wall_ms": 4269.5,
+          "retries": 0,
+          "content_chars": 264,
+          "reasoning_chars": 738,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "reply-answer-anna",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "agent": "reply-draft"
+      },
+      "got": {
+        "agent": "reply-draft",
+        "input": "From: anna@northline.example\nSubject: quote timeline\n\nHello, thanks for the call yesterday. When could we expect the written quote? We would like to decide before the board meeting on the 20th. Best regards, Anna"
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 518,
+          "completion_tokens": 532,
+          "total_tokens": 1050,
+          "wall_ms": 7479.7,
+          "retries": 0,
+          "content_chars": 264,
+          "reasoning_chars": 1833,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "reply-nl-antwoord",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "agent": "reply-draft"
+      },
+      "got": {
+        "agent": "reply-draft",
+        "input": "From: jan@devosgarage.be\nSubject: scoping document\n\nDag, kunnen jullie het scoping document tegen vrijdag bezorgen? De raad van bestuur komt maandag samen. Groeten, Jan"
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 507,
+          "completion_tokens": 516,
+          "total_tokens": 1023,
+          "wall_ms": 7259.7,
+          "retries": 0,
+          "content_chars": 220,
+          "reasoning_chars": 1744,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "reply-decline-speaker",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "agent": "reply-draft"
+      },
+      "got": {
+        "agent": "reply-draft",
+        "input": "From: events@aisummit.example\nSubject: Speaker invitation — AI Summit Lisbon\n\nWe would love to have you as a speaker on our SME panel in Lisbon on 14 November. Travel and hotel covered. Could you confirm by Friday?"
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 519,
+          "completion_tokens": 496,
+          "total_tokens": 1015,
+          "wall_ms": 7059.7,
+          "retries": 0,
+          "content_chars": 272,
+          "reasoning_chars": 1697,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "reply-fr-reponds",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "agent": "reply-draft"
+      },
+      "got": {
+        "agent": "reply-draft",
+        "input": "From: marie@atelier-lumiere.fr\nSubject: devis chatbot\n\nBonjour, nous aimerions un devis pour un chatbot sur notre site. Quel serait le prix et le délai? Cordialement, Marie"
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 513,
+          "completion_tokens": 543,
+          "total_tokens": 1056,
+          "wall_ms": 7713.6,
+          "retries": 0,
+          "content_chars": 230,
+          "reasoning_chars": 1805,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "reply-instruction-wins-newsletter",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "agent": "reply-draft"
+      },
+      "got": {
+        "agent": "reply-draft",
+        "input": "From: nieuws@ondernemersplatform.be\nSubject: Weekoverzicht voor ondernemers\n\nDeze week: vijf tips om je administratie te vereenvoudigen en de agenda van netwerkevents. Uitschrijven kan onderaan."
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 520,
+          "completion_tokens": 314,
+          "total_tokens": 834,
+          "wall_ms": 4836.5,
+          "retries": 0,
+          "content_chars": 246,
+          "reasoning_chars": 927,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "expense-book-anthropic",
+      "split": "train",
+      "passed": false,
+      "expected": {
+        "agent": "expense-categorization"
+      },
+      "got": {
+        "agent": "none",
+        "input": "Book this: 2026-08-14 ANTHROPIC API 42.10 EUR"
+      },
+      "failures": [
+        "check_none_hands_over_nothing: agent is 'none' but input is 'book this: 2026-08-14 anthropic api 42.10 eur'"
+      ],
+      "failed_checks": [
+        {
+          "bucket": "quality",
+          "check": "labels"
+        },
+        {
+          "bucket": "format",
+          "check": "check_none_hands_over_nothing"
+        }
+      ],
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 484,
+          "completion_tokens": 454,
+          "total_tokens": 938,
+          "wall_ms": 7004.6,
+          "retries": 0,
+          "content_chars": 87,
+          "reasoning_chars": 1611,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "expense-which-category-ovh",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "agent": "expense-categorization"
+      },
+      "got": {
+        "agent": "expense-categorization",
+        "input": "OVH cloud monthly 23.99"
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 473,
+          "completion_tokens": 308,
+          "total_tokens": 781,
+          "wall_ms": 5368.6,
+          "retries": 0,
+          "content_chars": 83,
+          "reasoning_chars": 1034,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "expense-nmbs-ticket",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "agent": "expense-categorization"
+      },
+      "got": {
+        "agent": "expense-categorization",
+        "input": "NMBS ticket Brussels-Ghent 18.40 EUR"
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 478,
+          "completion_tokens": 318,
+          "total_tokens": 796,
+          "wall_ms": 6663.9,
+          "retries": 0,
+          "content_chars": 96,
+          "reasoning_chars": 1043,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "expense-lunch-colruyt",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "agent": "expense-categorization"
+      },
+      "got": {
+        "agent": "expense-categorization",
+        "input": "Colruyt 54.20 (lunch with client)"
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 475,
+          "completion_tokens": 316,
+          "total_tokens": 791,
+          "wall_ms": 6934.2,
+          "retries": 0,
+          "content_chars": 93,
+          "reasoning_chars": 1000,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "expense-subscription-proximus",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "agent": "expense-categorization"
+      },
+      "got": {
+        "agent": "expense-categorization",
+        "input": "Is this a subscription? Proximus mobile 35.00 EUR August"
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 475,
+          "completion_tokens": 362,
+          "total_tokens": 837,
+          "wall_ms": 7699.4,
+          "retries": 0,
+          "content_chars": 116,
+          "reasoning_chars": 1197,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "recap-summarise-day",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "agent": "recap"
+      },
+      "got": {
+        "agent": "recap",
+        "input": "--- item 1 --- \nFrom: sofie@janssens-bakery.com\nSubject: Re: chatbot proposal\nWe discussed it internally and agree on the amount. Can we plan the kickoff for the week of 15 September?\n\n--- item 2 --- \nFrom: noreply@github.com\nSubject: [agent-sandbox] CI passed on master\nAll checks passed.\n\n--- item 3 --- \nFrom: jan@devosgarage.be\nSubject: Phase 2 scoping\nThanks for the call. Please send the scoping doc by Friday so I can take it to the board."
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 591,
+          "completion_tokens": 639,
+          "total_tokens": 1230,
+          "wall_ms": 13202.2,
+          "retries": 0,
+          "content_chars": 508,
+          "reasoning_chars": 1852,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "recap-what-got-done",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "agent": "recap"
+      },
+      "got": {
+        "agent": "recap",
+        "input": "09:00 call with Devos Garage about Phase 2 — they want a quote by Friday\n10:30 replied to Sofie (Janssens) — kickoff week of 15 Sep confirmed\n13:00 Peeters Logistics: CRM outage, could not pull the contact, retry tomorrow\n15:30 wrote the scoping doc draft, 4 pages, needs pricing table"
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 558,
+          "completion_tokens": 449,
+          "total_tokens": 1007,
+          "wall_ms": 6884.5,
+          "retries": 0,
+          "content_chars": 331,
+          "reasoning_chars": 1182,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "recap-daily-please",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "agent": "recap"
+      },
+      "got": {
+        "agent": "recap",
+        "input": "--- item 1 ---\nFrom: accounting@proximus.be\nSubject: Your invoice for August\nYour invoice of 35.00 EUR is available online.\n\n--- item 2 ---\nFrom: karel@vitrine-restaurant.be\nSubject: pause\nWe are pausing the project until January, the kitchen renovation comes first.\n\n--- item 3 ---\nFrom: els@mertens-interieur.be\nSubject: first meeting\nWould Tuesday 10:00 work for a first meeting about the showroom app?"
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 578,
+          "completion_tokens": 378,
+          "total_tokens": 956,
+          "wall_ms": 5477.8,
+          "retries": 0,
+          "content_chars": 467,
+          "reasoning_chars": 845,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "recap-highlights",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "agent": "recap"
+      },
+      "got": {
+        "agent": "recap",
+        "input": "--- item 1 ---\nFrom: bram@peeters-logistics.be\nSubject: Fleet quoting assistant — questions\nTwo questions before we sign: does it run on our servers, and what happens to the data?\n\n--- item 2 ---\nFrom: newsletter@saas-weekly.io\nSubject: 10 tools you missed this week\nUnsubscribe at the bottom."
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 550,
+          "completion_tokens": 604,
+          "total_tokens": 1154,
+          "wall_ms": 8431.7,
+          "retries": 0,
+          "content_chars": 350,
+          "reasoning_chars": 1866,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "recap-end-of-day",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "agent": "recap"
+      },
+      "got": {
+        "agent": "recap",
+        "input": "--- item 1 --- \nFrom: anna@northline.example\nSubject: proposal received\nGot it, we will come back to you after the board meeting on the 20th.\n\n--- item 2 --- \nFrom: alerts@ovh.com\nSubject: Disk usage 91% on vps-2\nConsider freeing space."
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 537,
+          "completion_tokens": 747,
+          "total_tokens": 1284,
+          "wall_ms": 10295.4,
+          "retries": 0,
+          "content_chars": 287,
+          "reasoning_chars": 2520,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "transcript-clean-up",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "agent": "transcript-en"
+      },
+      "got": {
+        "agent": "transcript-en",
+        "input": "REP: Hi, this is Dana from Northline Software, thanks for taking the call.\nPROSPECT: Sure, happy to chat. I'm Marcus, I run operations at Beacon Freight.\nREP: From the intake form you track shipments in spreadsheets and it is getting hard to scale?\nPROSPECT: Yeah, about 40 shipments a week now, up from 10 last year. Three people update the same sheet.\nREP: Understood. If we set up a pilot for two weeks, who would need to sign off?\nPROSPECT: Me and our CFO, Lena. Send the pricing by Thursday and I will get it in front of her."
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 604,
+          "completion_tokens": 630,
+          "total_tokens": 1234,
+          "wall_ms": 8986.2,
+          "retries": 0,
+          "content_chars": 592,
+          "reasoning_chars": 1755,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "transcript-devos-readable",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "agent": "transcript-en"
+      },
+      "got": {
+        "agent": "transcript-en",
+        "input": "REP: Thanks for making time, Jan. Quick check-in on Phase 2.\nCLIENT: Sure. The board wants the scoping doc before they approve the 9,000 budget.\nREP: I can send it Friday. Anything else blocking?\nCLIENT: Just the data question — where does the quote data live? On our side, right?\nREP: Yes, on your servers. I will put that in writing in the doc.\nCLIENT: Good. Friday then."
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 577,
+          "completion_tokens": 502,
+          "total_tokens": 1079,
+          "wall_ms": 7109.8,
+          "retries": 0,
+          "content_chars": 435,
+          "reasoning_chars": 1407,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "transcript-tidy-support",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "agent": "transcript-en"
+      },
+      "got": {
+        "agent": "transcript-en",
+        "input": "SUPPORT: Hello, you reported the chatbot answering in Dutch to English customers?\nCLIENT: Yes, since yesterday afternoon, about one in five conversations.\nSUPPORT: Did anything change on your side — a new product page, a language setting?\nCLIENT: We added the German product pages Tuesday.\nSUPPORT: That is likely it. I will roll back the language detector today and confirm by email tonight.\nCLIENT: Please do, we have a campaign starting Monday."
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 562,
+          "completion_tokens": 469,
+          "total_tokens": 1031,
+          "wall_ms": 6629.9,
+          "retries": 0,
+          "content_chars": 503,
+          "reasoning_chars": 1362,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "transcript-bare",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "agent": "transcript-en"
+      },
+      "got": {
+        "agent": "transcript-en",
+        "input": "REP: So renewal is up on the 30th. Any changes you want?\nCLIENT: We want to add the second location, same setup.\nREP: That is the plus one seat tier, 20 percent more. I will send the updated order form today.\nCLIENT: Fine. Also the report export is slow, can someone look?\nREP: I will log it with support and copy you."
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 545,
+          "completion_tokens": 555,
+          "total_tokens": 1100,
+          "wall_ms": 7774.9,
+          "retries": 0,
+          "content_chars": 379,
+          "reasoning_chars": 1715,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "transcript-proper-english",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "agent": "transcript-en"
+      },
+      "got": {
+        "agent": "transcript-en",
+        "input": "PROSPECT: We looked at three vendors. Yours is the only one that runs on-prem.\nREP: That is the main reason people pick us. What is your timeline?\nPROSPECT: Decision by end of October, go-live in January.\nREP: Then a two-week pilot in November fits. I will send a proposal by the 10th.\nPROSPECT: Include the pricing for 25 users."
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 562,
+          "completion_tokens": 585,
+          "total_tokens": 1147,
+          "wall_ms": 8265.2,
+          "retries": 0,
+          "content_chars": 390,
+          "reasoning_chars": 1899,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "none-book-train",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "agent": "none"
+      },
+      "got": {
+        "agent": "none",
+        "input": ""
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 468,
+          "completion_tokens": 284,
+          "total_tokens": 752,
+          "wall_ms": 4201.8,
+          "retries": 0,
+          "content_chars": 42,
+          "reasoning_chars": 1044,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "none-weather",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "agent": "none"
+      },
+      "got": {
+        "agent": "none",
+        "input": ""
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 467,
+          "completion_tokens": 281,
+          "total_tokens": 748,
+          "wall_ms": 4170.3,
+          "retries": 0,
+          "content_chars": 42,
+          "reasoning_chars": 992,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "none-generate-invoice-client-bait",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "agent": "none"
+      },
+      "got": {
+        "agent": "none",
+        "input": ""
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 480,
+          "completion_tokens": 284,
+          "total_tokens": 764,
+          "wall_ms": 4182.5,
+          "retries": 0,
+          "content_chars": 42,
+          "reasoning_chars": 991,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "none-translate-contract-bait",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "agent": "none"
+      },
+      "got": {
+        "agent": "none",
+        "input": ""
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 478,
+          "completion_tokens": 301,
+          "total_tokens": 779,
+          "wall_ms": 4413.1,
+          "retries": 0,
+          "content_chars": 42,
+          "reasoning_chars": 1107,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "none-chitchat",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "agent": "none"
+      },
+      "got": {
+        "agent": "none",
+        "input": ""
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 463,
+          "completion_tokens": 339,
+          "total_tokens": 802,
+          "wall_ms": 4980.7,
+          "retries": 0,
+          "content_chars": 42,
+          "reasoning_chars": 1235,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "none-reminder",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "agent": "none"
+      },
+      "got": {
+        "agent": "none",
+        "input": ""
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 472,
+          "completion_tokens": 288,
+          "total_tokens": 760,
+          "wall_ms": 4763.8,
+          "retries": 0,
+          "content_chars": 42,
+          "reasoning_chars": 1038,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "none-pause-email-bait",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "agent": "none"
+      },
+      "got": {
+        "agent": "none",
+        "input": ""
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 508,
+          "completion_tokens": 599,
+          "total_tokens": 1107,
+          "wall_ms": 8674.5,
+          "retries": 0,
+          "content_chars": 42,
+          "reasoning_chars": 2206,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "heavy-two-payloads-reply-wins",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "agent": "reply-draft"
+      },
+      "got": {
+        "agent": "reply-draft",
+        "input": "From: sofie@janssens-bakery.com\nSubject: kickoff\nCan we do the kickoff on 16 September at 10:00? Sofie"
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 519,
+          "completion_tokens": 689,
+          "total_tokens": 1208,
+          "wall_ms": 9643.8,
+          "retries": 0,
+          "content_chars": 159,
+          "reasoning_chars": 2477,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "heavy-question-inside-email-crm",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "agent": "crm-followup"
+      },
+      "got": {
+        "agent": "crm-followup",
+        "input": "Before I answer this — what stage is the Peeters Logistics deal in?"
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 503,
+          "completion_tokens": 383,
+          "total_tokens": 886,
+          "wall_ms": 5541.4,
+          "retries": 0,
+          "content_chars": 123,
+          "reasoning_chars": 1228,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "heavy-nl-crm-question",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "agent": "crm-followup"
+      },
+      "got": {
+        "agent": "crm-followup",
+        "input": "Wat is de status van Devos Garage en wie is daar onze contactpersoon?"
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 475,
+          "completion_tokens": 304,
+          "total_tokens": 779,
+          "wall_ms": 4437.3,
+          "retries": 0,
+          "content_chars": 119,
+          "reasoning_chars": 923,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "heavy-fr-expense-line",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "agent": "expense-categorization"
+      },
+      "got": {
+        "agent": "expense-categorization",
+        "input": "SNCB billet Bruxelles-Lille 31.50 EUR"
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 482,
+          "completion_tokens": 282,
+          "total_tokens": 764,
+          "wall_ms": 4229.6,
+          "retries": 0,
+          "content_chars": 97,
+          "reasoning_chars": 851,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "heavy-transcript-named-summarise-not-translate",
+      "split": "heldout",
+      "passed": true,
+      "expected": {
+        "agent": "transcript-en"
+      },
+      "got": {
+        "agent": "transcript-en",
+        "input": "REP: Thanks for the time, Marie.\nCLIENT: Sure. We need the chatbot live before the Christmas campaign.\nREP: So early December. I will send a plan with two milestones by Monday.\nCLIENT: Perfect, include the price for French and English."
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 528,
+          "completion_tokens": 276,
+          "total_tokens": 804,
+          "wall_ms": 4207.5,
+          "retries": 0,
+          "content_chars": 295,
+          "reasoning_chars": 780,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "heavy-email-with-log-shape-triage",
+      "split": "train",
+      "passed": true,
+      "expected": {
+        "agent": "email-triage"
+      },
+      "got": {
+        "agent": "email-triage",
+        "input": "From: kris@boekhouding-vdb.be\nSubject: overview of the week\n\n--- item 1 ---\nQ3 VAT return due 20 October\n--- item 2 ---\nPlease send July-September invoices by 10 October\n\nKris"
+      },
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 514,
+          "completion_tokens": 672,
+          "total_tokens": 1186,
+          "wall_ms": 9399.5,
+          "retries": 0,
+          "content_chars": 239,
+          "reasoning_chars": 2356,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "heavy-none-edit-document-client-bait",
+      "split": "train",
+      "passed": false,
+      "expected": {
+        "agent": "none"
+      },
+      "got": {
+        "agent": "none",
+        "input": "Rewrite the intro of the Janssens Bakery proposal so it sounds less formal: We are pleased to submit our proposal for a webshop chatbot, covering scope, timeline and pricing."
+      },
+      "failures": [
+        "check_none_hands_over_nothing: agent is 'none' but input is 'rewrite the intro of the janssens bakery proposal so it soun'"
+      ],
+      "failed_checks": [
+        {
+          "bucket": "format",
+          "check": "check_none_hands_over_nothing"
+        }
+      ],
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 494,
+          "completion_tokens": 610,
+          "total_tokens": 1104,
+          "wall_ms": 8483.0,
+          "retries": 0,
+          "content_chars": 216,
+          "reasoning_chars": 2348,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    },
+    {
+      "id": "heavy-none-crm-write-bait",
+      "split": "heldout",
+      "passed": false,
+      "expected": {
+        "agent": "none"
+      },
+      "got": {
+        "agent": "crm-followup",
+        "input": "board meets Monday, scoping doc due Friday"
+      },
+      "failed_checks": [
+        {
+          "bucket": "quality",
+          "check": "labels"
+        }
+      ],
+      "detail": {
+        "metrics": {
+          "prompt_tokens": 478,
+          "completion_tokens": 311,
+          "total_tokens": 789,
+          "wall_ms": 4544.9,
+          "retries": 0,
+          "content_chars": 92,
+          "reasoning_chars": 1037,
+          "finish_reason": "stop",
+          "truncated_calls": 0,
+          "unanswered_calls": 0
+        }
+      }
+    }
+  ],
+  "metrics_totals": {
+    "prompt_tokens": 23439,
+    "completion_tokens": 20307,
+    "total_tokens": 43746,
+    "wall_ms": 310452.0,
+    "retries": 0,
+    "content_chars": 9782,
+    "reasoning_chars": 66164,
+    "truncated_calls": 0,
+    "unanswered_calls": 0
+  }
+}
