@@ -2,7 +2,7 @@
 # I0 — sprint I feasibility spike: LoRA a 2B on this 16 GB Mac, serve it, sit ONE exam through the REAL runner.
 # Kill: training > 2 h, or the served model cannot pass through `runner.py run`. Score is reported, not claimed.
 set -u
-ROOT=/Users/michieldekoninck/code/Michiel-DK/agent-sandbox
+ROOT=${AGENT_SANDBOX_ROOT:-$HOME/code/Michiel-DK/agent-sandbox}
 WT=$ROOT/.claude/worktrees/lane-mlx-provider        # carries the one-line "mlx" PROVIDERS entry
 P=$ROOT/docs/probes/i0-mlx-lora-2026-09-18
 MODEL=$(python3 -c "from huggingface_hub import snapshot_download as s; print(s('mlx-community/gemma-4-e2b-it-4bit'))")

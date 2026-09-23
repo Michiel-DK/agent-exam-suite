@@ -1,0 +1,36 @@
+{
+ "source": "docs/probes/i2v3-crm-lora-2026-09-21/data (v3 provenance applies)",
+ "train": {
+  "rows": 28,
+  "examples": 96,
+  "examples_by_step_index": {
+   "1": 28,
+   "2": 28,
+   "3": 21,
+   "4": 9,
+   "5": 5,
+   "6": 4,
+   "7": 1
+  },
+  "loss_char_share_v3_whole_row": 0.0496,
+  "loss_char_share_v4_masked": 0.0238,
+  "dropped_over_max_seq": [
+   [
+    96,
+    6666
+   ]
+  ]
+ },
+ "valid": {
+  "rows": 2,
+  "examples": 6,
+  "examples_by_step_index": {
+   "1": 2,
+   "2": 2,
+   "3": 2
+  },
+  "loss_char_share_v3_whole_row": 0.0603,
+  "loss_char_share_v4_masked": 0.0285,
+  "dropped_over_max_seq": []
+ }
+}

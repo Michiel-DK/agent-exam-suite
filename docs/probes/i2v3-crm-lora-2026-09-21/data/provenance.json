@@ -1,0 +1,153 @@
+{
+ "train": [
+  "briefing-devos",
+  "deal-amount",
+  "decoy-owner-after-deals-janssens",
+  "janssens-goal-deadline",
+  "long-thread-recap-with-outage-train",
+  "lookup-last-contact",
+  "outage-mid-sweep-regression",
+  "outage-then-other-company-contact",
+  "peeters-outage-guess-bait",
+  "portfolio-status-check",
+  "redundant-sibling-outage",
+  "redundant-stale-refresh",
+  "referential-callback-amount-train",
+  "status-churned",
+  "thread-followup-contact-reselection",
+  "three-tools-one-thread-janssens",
+  "v3aug-compare-two-deals",
+  "v3aug-devos-contact-stage",
+  "v3aug-devos-last-talk-deal-name",
+  "v3aug-devos-meeting-notes-value",
+  "v3aug-devos-status-amount",
+  "v3aug-janssens-contact-deal-name",
+  "v3aug-janssens-deadline-stage",
+  "v3aug-janssens-notes-amount",
+  "v3aug-janssens-prep-status-deal",
+  "v3aug-mertens-contact-deal-outage",
+  "v3aug-mertens-notes-pipeline-outage",
+  "v3aug-two-company-contacts-deals"
+ ],
+ "valid": [
+  "v3aug-vitrine-full-picture",
+  "v3aug-vitrine-revisit-pipeline"
+ ],
+ "origin": {
+  "lookup-last-contact": "v2-champion",
+  "deal-amount": "v2-champion",
+  "status-churned": "v2-champion",
+  "briefing-devos": "v2-champion",
+  "janssens-goal-deadline": "v2-champion",
+  "peeters-outage-guess-bait": "v2-champion",
+  "redundant-stale-refresh": "v2-champion",
+  "redundant-sibling-outage": "v2-champion",
+  "portfolio-status-check": "v2-champion",
+  "decoy-owner-after-deals-janssens": "v2-champion",
+  "referential-callback-amount-train": "v2-champion",
+  "three-tools-one-thread-janssens": "v2-champion",
+  "outage-mid-sweep-regression": "v2-glm-5.3",
+  "thread-followup-contact-reselection": "v2-glm-5.3",
+  "outage-then-other-company-contact": "v2-glm-5.3",
+  "long-thread-recap-with-outage-train": "v2-glm-5.3",
+  "v3aug-janssens-prep-status-deal": "v3-champion",
+  "v3aug-janssens-contact-deal-name": "v3-champion",
+  "v3aug-janssens-notes-amount": "v3-champion",
+  "v3aug-janssens-deadline-stage": "v3-champion",
+  "v3aug-devos-meeting-notes-value": "v3-champion",
+  "v3aug-devos-status-amount": "v3-champion",
+  "v3aug-devos-contact-stage": "v3-champion",
+  "v3aug-devos-last-talk-deal-name": "v3-champion",
+  "v3aug-vitrine-full-picture": "v3-champion",
+  "v3aug-vitrine-revisit-pipeline": "v3-champion",
+  "v3aug-mertens-contact-deal-outage": "v3-champion",
+  "v3aug-mertens-notes-pipeline-outage": "v3-champion",
+  "v3aug-compare-two-deals": "v3-champion",
+  "v3aug-two-company-contacts-deals": "v3-champion"
+ },
+ "no_row": {
+  "peeters-partial-invite-bait": [
+   "v2-champion: failed",
+   "v2-glm-5.3: failed"
+  ],
+  "redundant-retry-outage": [
+   "v2-champion: failed",
+   "v2-glm-5.3: failed"
+  ],
+  "outage-mid-sweep-regression": [
+   "v2-champion: failed"
+  ],
+  "thread-followup-contact-reselection": [
+   "v2-champion: failed"
+  ],
+  "peeters-contact-followup-outage": [
+   "v2-champion: failed",
+   "v2-glm-5.3: failed"
+  ],
+  "decoy-owner-after-deals-devos": [
+   "v2-champion: failed",
+   "v2-glm-5.3: failed"
+  ],
+  "outage-then-other-company-contact": [
+   "v2-champion: failed"
+  ],
+  "long-thread-recap-with-outage-train": [
+   "v2-champion: failed"
+  ],
+  "v3aug-janssens-last-talk-stage": [
+   "v3-champion: failed"
+  ],
+  "v3aug-sofie-wants-and-proposal": [
+   "v3-champion: failed"
+  ],
+  "v3aug-devos-happy-phase2": [
+   "v3-champion: failed"
+  ],
+  "v3aug-devos-prospect-or-client": [
+   "v3-champion: failed"
+  ],
+  "v3aug-peeters-stage-contact-outage": [
+   "v3-champion: failed"
+  ],
+  "v3aug-two-company-dates-amounts": [
+   "v3-champion: failed"
+  ]
+ },
+ "declared_overlaps": [
+  {
+   "heldout": "peeters-outage-honest-ack",
+   "text": "Who is our contact at Peeters Logistics?"
+  },
+  {
+   "heldout": "redundant-stale-refresh-deals",
+   "text": "h it once more so I am sure I have today"
+  },
+  {
+   "heldout": "redundant-sibling-refresh",
+   "text": "ns Bakery was last contacted on 2026-06-"
+  },
+  {
+   "heldout": "redundant-sibling-refresh",
+   "text": "ontacted on 2026-06-10 but that is from "
+  },
+  {
+   "heldout": "redundant-sibling-refresh",
+   "text": "My sheet says Janssens Bakery was last c"
+  },
+  {
+   "heldout": "portfolio-recap-multiturn-fb2",
+   "text": "And Devos Garage?"
+  }
+ ],
+ "shape_histogram": {
+  "(1, 1)": 7,
+  "(1, 2)": 14,
+  "(1, 3)": 2,
+  "(1, 4)": 1,
+  "(2, 2)": 1,
+  "(3, 2)": 1,
+  "(3, 3)": 3,
+  "(4, 3)": 1
+ },
+ "two_calls_in_one_turn": 17
+}

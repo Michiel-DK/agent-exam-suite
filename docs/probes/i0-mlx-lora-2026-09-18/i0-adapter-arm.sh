@@ -1,7 +1,7 @@
 #!/bin/bash
 # I0 adapter arm, take 3 — the router now sends "adapters" from MLX_ADAPTER_PATH (lane worktree).
 set -u
-ROOT=/Users/michieldekoninck/code/Michiel-DK/agent-sandbox; WT=$ROOT/.claude/worktrees/lane-mlx-provider; P=$ROOT/docs/probes/i0-mlx-lora-2026-09-18
+ROOT=${AGENT_SANDBOX_ROOT:-$HOME/code/Michiel-DK/agent-sandbox}; WT=$ROOT/.claude/worktrees/lane-mlx-provider; P=$ROOT/docs/probes/i0-mlx-lora-2026-09-18
 MODEL=$(python3 -c "from huggingface_hub import snapshot_download as s; print(s('mlx-community/gemma-4-e2b-it-4bit'))")
 echo "I0-ADAPTER START $(date '+%F %T')"; pkill -f mlx_lm.server 2>/dev/null; sleep 2
 python3 -m mlx_lm.server --model "$MODEL" --port 8080 > "$P/logs/server4-adapter.log" 2>&1 &

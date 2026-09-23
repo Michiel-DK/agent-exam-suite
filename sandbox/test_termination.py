@@ -788,9 +788,11 @@ def test_trajectory_healthy_run_carries_NO_termination_key():
               '{"answer": "Janssens Bakery was last contacted on 2026-07-02."}']
     _parsed, trace = run_trajectory_case(agent, _TRAJ_CASE, _ScriptedAdapter(script),
                                          "scripted", _traj_tools())
+    # PER-TURN-TRACE (2026-09-21): "raw_steps" joined the unconditional set; the
+    # invariant this pins is unchanged — no "termination" key on a healthy run.
     check("healthy trajectory: no termination key at all",
           set(trace) == {"tools_called", "tool_calls", "tool_results", "steps",
-                         "metrics"}, str(sorted(trace)))
+                         "metrics", "raw_steps"}, str(sorted(trace)))
 
 
 def test_trajectory_case_boundary_records_BOTH_termination_and_answer_present():

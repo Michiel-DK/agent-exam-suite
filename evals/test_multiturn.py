@@ -149,9 +149,13 @@ def test_1_default_path_byte_identical_to_master():
         runner.adapter_for = real_adapter_for
     got = result["cases"][0]
     assert got["passed"] is True, f"golden case must pass: {got}"
+    # PER-TURN-TRACE (2026-09-21): "raw_steps" joined the unconditional set (report-
+    # only; verdict/metrics byte-identity vs master is pinned by blob in
+    # sandbox/test_per_turn_trace.py (d)). Still a hand-written literal, still no
+    # "turns"/"deduped_calls"/"termination" key on the no-turns healthy path.
     assert set(got["detail"].keys()) == {
-        "tools_called", "tool_calls", "tool_results", "steps", "metrics"
-    }, f"trace key set drifted from master's literal 5-key set: {sorted(got['detail'].keys())}"
+        "tools_called", "tool_calls", "tool_results", "steps", "metrics", "raw_steps"
+    }, f"trace key set drifted from master's literal 6-key set: {sorted(got['detail'].keys())}"
     assert got["detail"]["tools_called"] == ["crm_lookup"], got["detail"]
     assert got["detail"]["steps"] == 2, got["detail"]
     assert "failed_checks" not in got, f"a passing case must carry no failed_checks: {got}"

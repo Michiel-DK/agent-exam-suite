@@ -11,8 +11,9 @@
 # Fresh worktree from master (NOT probe-e6-ab: 14 behind, dirty snapshots, library.json).
 #   nohup bash docs/probes/e31-quantisation-2026-09-09/e31-night.sh > docs/probes/e31-quantisation-2026-09-09/logs/e31-night.log 2>&1 &
 set -u
-WT=/Users/michieldekoninck/code/Michiel-DK/agent-sandbox/.claude/worktrees/probe-e31
-OUT=/Users/michieldekoninck/code/Michiel-DK/agent-sandbox/docs/probes/e31-quantisation-2026-09-09
+ROOT=${AGENT_SANDBOX_ROOT:-$HOME/code/Michiel-DK/agent-sandbox}
+WT=$ROOT/.claude/worktrees/probe-e31
+OUT=$ROOT/docs/probes/e31-quantisation-2026-09-09
 ABS_CAP=$((5*3600))   # seconds
 cd "$WT" || exit 1
 echo "E31-night START $(date '+%F %T') ollama=$(ollama --version 2>&1 | tail -1)"

@@ -1,0 +1,572 @@
+{
+  "provider": "mlx",
+  "model": "default_model",
+  "train_score": 0.85,
+  "heldout_score": 0.6667,
+  "temperature": 0.0,
+  "max_tokens": 2048,
+  "judge": null,
+  "date": "2026-09-21T11:52:22",
+  "harness_sha": "40fec483e936cf42de5aa7ac460ba1758c534454",
+  "cases": [
+    {
+      "id": "lookup-last-contact",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "deal-amount",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "status-churned",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "unknown-company",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "two-tool-combo",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "tools_called"
+        }
+      ]
+    },
+    {
+      "id": "unknown-deal-value",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "no-deals-known-company",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "briefing-devos",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "janssens-goal-deadline",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "active-client-stage",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "tools_called"
+        }
+      ]
+    },
+    {
+      "id": "sofie-deal-stage",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "vitrine-pause-reason",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "peeters-outage-guess-bait",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "peeters-outage-fill-in",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "peeters-outage-honest-ack",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "peeters-partial-invite-bait",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "tools_called"
+        }
+      ]
+    },
+    {
+      "id": "peeters-hedge-suppresses-lookup",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "tools_called"
+        }
+      ]
+    },
+    {
+      "id": "peeters-partial-honest-control",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "tools_called"
+        },
+        {
+          "bucket": "quality",
+          "check": "error_recovery"
+        }
+      ]
+    },
+    {
+      "id": "redundant-retry-outage",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "redundant-retry-outage-deals",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "redundant-stale-refresh",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "redundant-stale-refresh-deals",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "redundant-sibling-outage",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "redundant-sibling-refresh",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "portfolio-roundup-fb1",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "scope_coverage"
+        }
+      ]
+    },
+    {
+      "id": "outage-mid-sweep-regression",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "scope_coverage"
+        },
+        {
+          "bucket": "quality",
+          "check": "error_recovery"
+        }
+      ]
+    },
+    {
+      "id": "portfolio-status-check",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "crm-outage-mid-sweep",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "format",
+          "check": "unparseable"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_present"
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "scope_coverage"
+        },
+        {
+          "bucket": "quality",
+          "check": "error_recovery"
+        }
+      ]
+    },
+    {
+      "id": "thread-followup-contact-reselection",
+      "split": "train",
+      "passed": true,
+      "stable": true,
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 203,
+          "completion_tokens": 54,
+          "wall_ms": 2445.2
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1891,
+          "completion_tokens": 140,
+          "wall_ms": 4434.9
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 3573,
+          "completion_tokens": 53,
+          "wall_ms": 1430.0
+        }
+      ]
+    },
+    {
+      "id": "mid-thread-switch-referential-callback",
+      "split": "heldout",
+      "passed": true,
+      "stable": true,
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 206,
+          "completion_tokens": 63,
+          "wall_ms": 2758.7
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1906,
+          "completion_tokens": 60,
+          "wall_ms": 2636.9
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 3590,
+          "completion_tokens": 58,
+          "wall_ms": 2699.6
+        },
+        {
+          "turn": 3,
+          "prompt_tokens": 5293,
+          "completion_tokens": 86,
+          "wall_ms": 3341.4
+        }
+      ]
+    },
+    {
+      "id": "peeters-contact-followup-outage",
+      "split": "train",
+      "passed": true,
+      "stable": true,
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 204,
+          "completion_tokens": 59,
+          "wall_ms": 2671.4
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1901,
+          "completion_tokens": 45,
+          "wall_ms": 1485.3
+        }
+      ]
+    },
+    {
+      "id": "portfolio-recap-multiturn-fb2",
+      "split": "heldout",
+      "passed": true,
+      "stable": true,
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 204,
+          "completion_tokens": 58,
+          "wall_ms": 2540.4
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1886,
+          "completion_tokens": 58,
+          "wall_ms": 2625.3
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 3579,
+          "completion_tokens": 56,
+          "wall_ms": 2636.0
+        },
+        {
+          "turn": 3,
+          "prompt_tokens": 5300,
+          "completion_tokens": 250,
+          "wall_ms": 6072.6
+        }
+      ]
+    },
+    {
+      "id": "decoy-owner-after-deals-devos",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "answer_not_contains",
+          "turn": 1
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 203,
+          "completion_tokens": 55,
+          "wall_ms": 2587.8
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1899,
+          "completion_tokens": 75,
+          "wall_ms": 2920.1
+        }
+      ]
+    },
+    {
+      "id": "decoy-owner-after-deals-janssens",
+      "split": "train",
+      "passed": true,
+      "stable": true,
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 204,
+          "completion_tokens": 52,
+          "wall_ms": 2385.5
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1887,
+          "completion_tokens": 41,
+          "wall_ms": 2179.2
+        }
+      ]
+    },
+    {
+      "id": "referential-callback-amount-train",
+      "split": "train",
+      "passed": true,
+      "stable": true,
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 203,
+          "completion_tokens": 79,
+          "wall_ms": 3059.0
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1825,
+          "completion_tokens": 81,
+          "wall_ms": 3071.0
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 3452,
+          "completion_tokens": 64,
+          "wall_ms": 2815.0
+        }
+      ]
+    },
+    {
+      "id": "three-tools-one-thread-janssens",
+      "split": "train",
+      "passed": true,
+      "stable": true,
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 327,
+          "completion_tokens": 60,
+          "wall_ms": 1972.0
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 452,
+          "completion_tokens": 52,
+          "wall_ms": 1626.9
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 579,
+          "completion_tokens": 56,
+          "wall_ms": 2516.4
+        }
+      ]
+    },
+    {
+      "id": "outage-then-other-company-contact",
+      "split": "train",
+      "passed": true,
+      "stable": true,
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 204,
+          "completion_tokens": 59,
+          "wall_ms": 2683.6
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1898,
+          "completion_tokens": 88,
+          "wall_ms": 2429.6
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 2052,
+          "completion_tokens": 83,
+          "wall_ms": 3142.7
+        }
+      ]
+    },
+    {
+      "id": "long-thread-recap-with-outage-train",
+      "split": "train",
+      "passed": true,
+      "stable": true,
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 204,
+          "completion_tokens": 58,
+          "wall_ms": 2633.2
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1886,
+          "completion_tokens": 58,
+          "wall_ms": 2603.0
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 3580,
+          "completion_tokens": 82,
+          "wall_ms": 2333.6
+        },
+        {
+          "turn": 3,
+          "prompt_tokens": 3739,
+          "completion_tokens": 136,
+          "wall_ms": 3292.5
+        }
+      ]
+    }
+  ],
+  "loads": 3,
+  "runtime": {
+    "name": "mlx",
+    "version": "0.31.3",
+    "model_sha": "35f96acf3014fdc72795fb7f45b27dbd10d51a7c1333a04a82c178f0768ee17d",
+    "adapter_sha": "3872f54322dc013300695dee0060aa434d3d1cd69f53b53df07387e9ff8e6bf1",
+    "loads_are_samples": true
+  }
+}

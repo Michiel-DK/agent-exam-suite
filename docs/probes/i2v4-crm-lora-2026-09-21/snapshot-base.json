@@ -1,0 +1,555 @@
+{
+  "provider": "mlx",
+  "model": "default_model",
+  "train_score": 0.8,
+  "heldout_score": 0.6667,
+  "temperature": 0.0,
+  "max_tokens": 2048,
+  "judge": null,
+  "date": "2026-09-21T17:36:20",
+  "harness_sha": "40fec483e936cf42de5aa7ac460ba1758c534454",
+  "cases": [
+    {
+      "id": "lookup-last-contact",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "deal-amount",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "status-churned",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "unknown-company",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "two-tool-combo",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "unknown-deal-value",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "no-deals-known-company",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "briefing-devos",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "janssens-goal-deadline",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "active-client-stage",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "sofie-deal-stage",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "vitrine-pause-reason",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "peeters-outage-guess-bait",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "peeters-outage-fill-in",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "peeters-outage-honest-ack",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "peeters-partial-invite-bait",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "error_recovery"
+        }
+      ]
+    },
+    {
+      "id": "peeters-hedge-suppresses-lookup",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "tools_called"
+        }
+      ]
+    },
+    {
+      "id": "peeters-partial-honest-control",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "tools_called"
+        },
+        {
+          "bucket": "quality",
+          "check": "error_recovery"
+        }
+      ]
+    },
+    {
+      "id": "redundant-retry-outage",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "redundancy"
+        }
+      ]
+    },
+    {
+      "id": "redundant-retry-outage-deals",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "redundancy"
+        }
+      ]
+    },
+    {
+      "id": "redundant-stale-refresh",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "redundant-stale-refresh-deals",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "redundant-sibling-outage",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "redundant-sibling-refresh",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "portfolio-roundup-fb1",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "scope_coverage"
+        }
+      ]
+    },
+    {
+      "id": "outage-mid-sweep-regression",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "scope_coverage"
+        }
+      ]
+    },
+    {
+      "id": "portfolio-status-check",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "crm-outage-mid-sweep",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains"
+        },
+        {
+          "bucket": "quality",
+          "check": "scope_coverage"
+        },
+        {
+          "bucket": "quality",
+          "check": "error_recovery"
+        }
+      ]
+    },
+    {
+      "id": "thread-followup-contact-reselection",
+      "split": "train",
+      "passed": true,
+      "stable": true,
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 203,
+          "completion_tokens": 107,
+          "wall_ms": 3034.7
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1888,
+          "completion_tokens": 84,
+          "wall_ms": 2670.5
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 3480,
+          "completion_tokens": 172,
+          "wall_ms": 3168.7
+        }
+      ]
+    },
+    {
+      "id": "mid-thread-switch-referential-callback",
+      "split": "heldout",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 0
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "tools_called",
+          "turn": 1
+        },
+        {
+          "bucket": "quality",
+          "check": "answer_contains",
+          "turn": 2
+        },
+        {
+          "bucket": "quality",
+          "check": "tools_called",
+          "turn": 2
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 206,
+          "completion_tokens": 266,
+          "wall_ms": 5762.1
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1922,
+          "completion_tokens": 141,
+          "wall_ms": 3651.6
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 3556,
+          "completion_tokens": 105,
+          "wall_ms": 2304.0
+        },
+        {
+          "turn": 3,
+          "prompt_tokens": 3695,
+          "completion_tokens": 216,
+          "wall_ms": 5019.3
+        }
+      ]
+    },
+    {
+      "id": "peeters-contact-followup-outage",
+      "split": "train",
+      "passed": true,
+      "stable": true,
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 204,
+          "completion_tokens": 117,
+          "wall_ms": 3262.9
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1908,
+          "completion_tokens": 88,
+          "wall_ms": 1967.9
+        }
+      ]
+    },
+    {
+      "id": "portfolio-recap-multiturn-fb2",
+      "split": "heldout",
+      "passed": true,
+      "stable": true,
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 204,
+          "completion_tokens": 99,
+          "wall_ms": 2884.1
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1888,
+          "completion_tokens": 61,
+          "wall_ms": 2323.1
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 3584,
+          "completion_tokens": 112,
+          "wall_ms": 3293.4
+        },
+        {
+          "turn": 3,
+          "prompt_tokens": 5308,
+          "completion_tokens": 551,
+          "wall_ms": 9940.1
+        }
+      ]
+    },
+    {
+      "id": "decoy-owner-after-deals-devos",
+      "split": "train",
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "answer_not_contains",
+          "turn": 1
+        }
+      ],
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 203,
+          "completion_tokens": 110,
+          "wall_ms": 3129.5
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1893,
+          "completion_tokens": 149,
+          "wall_ms": 3807.0
+        }
+      ]
+    },
+    {
+      "id": "decoy-owner-after-deals-janssens",
+      "split": "train",
+      "passed": true,
+      "stable": true,
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 204,
+          "completion_tokens": 127,
+          "wall_ms": 3337.3
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1907,
+          "completion_tokens": 91,
+          "wall_ms": 2768.9
+        }
+      ]
+    },
+    {
+      "id": "referential-callback-amount-train",
+      "split": "train",
+      "passed": true,
+      "stable": true,
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 203,
+          "completion_tokens": 139,
+          "wall_ms": 3588.5
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1835,
+          "completion_tokens": 126,
+          "wall_ms": 3382.7
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 3471,
+          "completion_tokens": 116,
+          "wall_ms": 3366.6
+        }
+      ]
+    },
+    {
+      "id": "three-tools-one-thread-janssens",
+      "split": "train",
+      "passed": true,
+      "stable": true,
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 327,
+          "completion_tokens": 131,
+          "wall_ms": 2795.4
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 466,
+          "completion_tokens": 103,
+          "wall_ms": 2195.5
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 606,
+          "completion_tokens": 71,
+          "wall_ms": 2458.9
+        }
+      ]
+    },
+    {
+      "id": "outage-then-other-company-contact",
+      "split": "train",
+      "passed": true,
+      "stable": true,
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 204,
+          "completion_tokens": 117,
+          "wall_ms": 3302.7
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1905,
+          "completion_tokens": 88,
+          "wall_ms": 1960.2
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 2026,
+          "completion_tokens": 91,
+          "wall_ms": 2792.4
+        }
+      ]
+    },
+    {
+      "id": "long-thread-recap-with-outage-train",
+      "split": "train",
+      "passed": true,
+      "stable": true,
+      "turn_metrics": [
+        {
+          "turn": 0,
+          "prompt_tokens": 204,
+          "completion_tokens": 221,
+          "wall_ms": 5001.2
+        },
+        {
+          "turn": 1,
+          "prompt_tokens": 1898,
+          "completion_tokens": 109,
+          "wall_ms": 3157.4
+        },
+        {
+          "turn": 2,
+          "prompt_tokens": 3605,
+          "completion_tokens": 97,
+          "wall_ms": 2152.8
+        },
+        {
+          "turn": 3,
+          "prompt_tokens": 3739,
+          "completion_tokens": 364,
+          "wall_ms": 6490.1
+        }
+      ]
+    }
+  ],
+  "loads": 3,
+  "runtime": {
+    "name": "mlx",
+    "version": "0.31.3",
+    "model_sha": "35f96acf3014fdc72795fb7f45b27dbd10d51a7c1333a04a82c178f0768ee17d",
+    "adapter_sha": null,
+    "loads_are_samples": true
+  }
+}

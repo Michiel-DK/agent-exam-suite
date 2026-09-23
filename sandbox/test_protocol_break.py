@@ -313,8 +313,11 @@ def test_isolation_marker_fires_only_on_a_parse_failure():
     # (c) healthy: literal key set unchanged (the byte-identity invariant)
     _p, trace = run_trajectory_case(AGENT, SINGLE, _ScriptedAdapter([TOOL, ANSWER]),
                                     "s", _tools())
+    # PER-TURN-TRACE (2026-09-21): "raw_steps" joined the unconditional set; the
+    # invariant this pins is unchanged — no "protocol_break" key on a healthy run.
     check("isolation: healthy trace key set is literally the master set",
-          set(trace) == {"tools_called", "tool_calls", "tool_results", "steps", "metrics"},
+          set(trace) == {"tools_called", "tool_calls", "tool_results", "steps", "metrics",
+                         "raw_steps"},
           str(sorted(trace)))
 
 

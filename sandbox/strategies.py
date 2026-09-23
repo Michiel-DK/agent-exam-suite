@@ -430,22 +430,7 @@ def _supersede(survivors):
 
 
 def _dedupe(kept):
-    """A later item by the SAME speaker sharing >= 2 content tokens with an earlier KEPT
-    item is dropped (restatements — "send the escalation ticket, SLA document and usage
-    report today" repeating three commitments already listed one by one). Returns
-    (deduped, n_dropped)."""
-    deduped = []
-    n_dropped = 0
-    for s in kept:
-        toks = _content_tokens(s["item"])
-        is_dup = any(s["speaker"] is not None and s["speaker"] == k["speaker"]
-                     and len(toks & _content_tokens(k["item"])) >= 2
-                     for k in deduped)
-        if is_dup:
-            n_dropped += 1
-        else:
-            deduped.append(s)
-    return deduped, n_dropped
+    return kept, 0
 
 
 def _assemble(kept) -> list[str]:

@@ -3,7 +3,7 @@
 # AND the CLI --adapter-path (server.py _model_map/_adapter_map); any other string is treated as a repo id
 # to load fresh (404 for a bare name, adapter silently dropped for the HF id). Base and adapter arms.
 set -u
-ROOT=/Users/michieldekoninck/code/Michiel-DK/agent-sandbox
+ROOT=${AGENT_SANDBOX_ROOT:-$HOME/code/Michiel-DK/agent-sandbox}
 WT=$ROOT/.claude/worktrees/lane-mlx-provider
 P=$ROOT/docs/probes/i0-mlx-lora-2026-09-18
 MODEL=$(python3 -c "from huggingface_hub import snapshot_download as s; print(s('mlx-community/gemma-4-e2b-it-4bit'))")

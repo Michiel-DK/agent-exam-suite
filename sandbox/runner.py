@@ -479,6 +479,26 @@ def _run_tool_loop(agent, messages: list, expected: dict, adapter, model, tools_
     per-turn metrics, criterion 3) reads step_metrics[0]; trace["metrics"] stays
     the combine_metrics() total it always was.
 
+    PER-TURN-TRACE (2026-09-21, sprint-map LOCKED item 2(a)): ONE unconditional
+    key added to that set — `raw_steps`, the ordered list of the exact strings
+    this loop appended to `messages` as assistant content (a tool call's raw
+    text, the final answer's raw text, or an unparseable reply's raw text — in
+    step order, byte-for-byte what the model was fed back). Together with
+    `tool_calls`/`tool_results` (index-aligned: `tool_results[i]` is the user
+    message that followed `raw_steps[i]` for every i < len(tool_calls)) a row
+    builder can rebuild every message the loop sent WITHOUT the messages list,
+    which no record keeps. REPORT-ONLY: nothing in score_trajectory or any check
+    reads `raw_steps`; the four literal key-set witnesses (test_termination,
+    test_dedupe_tools, test_protocol_break, evals/test_multiturn) were moved from
+    the 5-key to the 6-key set in the same PR, and sandbox/test_per_turn_trace.py
+    pins verdicts, failures, failed_checks and metrics byte-identical to master's
+    runner (blob-pinned) for every committed crm-followup case. A step that
+    appends nothing (a D2 death, or a "neither tool nor answer" break) adds no
+    entry — raw_steps records what was SENT, not what was parsed. With
+    dedupe_tools ON a suppressed repeat still appends (it is a real model turn),
+    so raw_steps then holds len(tool_calls) + len(deduped_calls) + 1 entries;
+    the A/B knob is off on every committed path.
+
     dedupe_tools (gate-0 intervention, default OFF) is the runtime half of the
     redundancy monitor: the monitor GRADES a repeated call post-hoc, this suppresses
     it live, so an A/B has an on/off switch to measure. When on, a call whose
@@ -512,6 +532,7 @@ def _run_tool_loop(agent, messages: list, expected: dict, adapter, model, tools_
     tool_results = []  # what the tools actually RETURNED — the grounding corpus.
     parsed: dict = {}  # Results used to live only inside `messages`, where the scorer
     step_metrics = []  # could never see them; now they ride the trace (Stage 3).
+    raw_steps: list = []  # every string appended below as assistant content, in order
     cache: dict = {}   # call key -> the result of that key's first CLEAN execution
     deduped_calls: list = []  # suppressed repeats, for the A/B's exposure count
     termination: dict | None = None  # D2: set only when a call emitted no answer
@@ -539,6 +560,7 @@ def _run_tool_loop(agent, messages: list, expected: dict, adapter, model, tools_
             # case before, and _score_one_turn forces it False now).
             step_metrics.append(exc.metrics)
             messages.append({"role": "assistant", "content": exc.raw})
+            raw_steps.append(exc.raw)
             protocol_break = {"cause": "unparseable", "step": _step,
                               "retries": exc.attempts - 1,
                               "content_chars": len(exc.raw or ""),
@@ -572,6 +594,7 @@ def _run_tool_loop(agent, messages: list, expected: dict, adapter, model, tools_
             # function returns, and nothing about the RETURNED (parsed, trace)
             # depends on this append — byte-identity of the single-turn path holds.
             messages.append({"role": "assistant", "content": raw})
+            raw_steps.append(raw)
             break
         if "tool" in parsed:
             name = parsed["tool"]
@@ -602,6 +625,7 @@ def _run_tool_loop(agent, messages: list, expected: dict, adapter, model, tools_
                 if cacheable:
                     cache[key] = tool_result
             messages.append({"role": "assistant", "content": raw})
+            raw_steps.append(raw)
             messages.append({"role": "user",
                              "content": json.dumps({"tool_result": tool_result},
                                                    ensure_ascii=False)})
@@ -634,7 +658,8 @@ def _run_tool_loop(agent, messages: list, expected: dict, adapter, model, tools_
         trace_extra = {**trace_extra, "protocol_break": protocol_break}
     return parsed, {"tools_called": called, "tool_calls": tool_calls,
                      "tool_results": tool_results, "steps": steps,
-                     "metrics": combine_metrics(step_metrics), **trace_extra}, step_metrics
+                     "metrics": combine_metrics(step_metrics),
+                     "raw_steps": raw_steps, **trace_extra}, step_metrics
 
 
 def run_trajectory_case(agent, case, adapter, model, tools_mod,
@@ -819,7 +844,19 @@ def _run_turns(agent, case, adapter, model, tools_mod,
     `scoring_trace` below therefore carries BOTH shapes: `tool_results` stays the
     accumulated membership corpus clause 4/grounding need, and a NEW
     `tool_results_this_turn` key carries this turn's own results, correctly
-    aligned with `tool_calls`, for clause 1's index-paired lookup."""
+    aligned with `tool_calls`, for clause 1's index-paired lookup.
+
+    PER-TURN-TRACE (2026-09-21): each RECORDED turn entry also carries, report-
+    only, what a fine-tune row builder needs to replay the turn — `got` (the
+    turn's own parsed answer, the SAME object `_score_one_turn` graded; the
+    case-level `got` stays the LAST turn's, unchanged), `tool_results` (this
+    turn's OWN results, index-aligned with the entry's per-turn `tool_calls` —
+    NOT the accumulated scoring corpus, which is never recorded) and
+    `raw_steps` (the assistant strings the loop appended this turn, see
+    `_run_tool_loop`). None of the three is read by any check: the scoring
+    trace is built from trace_k exactly as before, and the snapshot writer
+    (`_snapshot_case`) copies only per-turn metrics, so no model output reaches
+    a committed snapshot (sandbox/test_per_turn_trace.py (e))."""
     if assembly not in ASSEMBLY_MODES:
         raise ValueError(f"assembly must be one of {ASSEMBLY_MODES}, got {assembly!r}")
     # E6-train: a turns-bearing case has no "input" key — retrieval keys on the
@@ -882,6 +919,11 @@ def _run_turns(agent, case, adapter, model, tools_mod,
             "turn": k,
             "tools_called": trace_k["tools_called"],
             "tool_calls": trace_k["tool_calls"],
+            # PER-TURN-TRACE: the turn's own results (aligned with tool_calls
+            # above), the exact assistant strings, and the graded answer object.
+            "tool_results": trace_k["tool_results"],
+            "raw_steps": trace_k["raw_steps"],
+            "got": parsed_k,
             "steps": trace_k["steps"],
             "passed": passed_k,
             "failures": failures_k,

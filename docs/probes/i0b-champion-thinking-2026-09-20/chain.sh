@@ -3,7 +3,7 @@
 # I0 "−85% output tokens" must be quoted against; (b) precondition for I2-on-crm: does the crm trajectory exam
 # (tools in the request) pass through mlx_lm.server at all, base model, no adapter?
 set -u
-ROOT=/Users/michieldekoninck/code/Michiel-DK/agent-sandbox; P=$ROOT/docs/probes/i0b-champion-thinking-2026-09-20
+ROOT=${AGENT_SANDBOX_ROOT:-$HOME/code/Michiel-DK/agent-sandbox}; P=$ROOT/docs/probes/i0b-champion-thinking-2026-09-20
 cd "$ROOT"; echo "I0b START $(date '+%F %T') ollama=$(ollama --version 2>&1 | tail -1)"
 echo "=== (a) task-intake @ champion gemma4:e2b-it-qat via ollama, plain run $(date +%T) ==="
 python3 -u sandbox/runner.py run task-intake --timeout 300 > "$P/logs/run-champion.log" 2>&1; rc=$?

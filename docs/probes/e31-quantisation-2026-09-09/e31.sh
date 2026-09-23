@@ -7,8 +7,9 @@
 # aggregate is copied aside as <exam>.<tag>.json. snapshot.json is REMOVED before
 # each run so a refused/failed arm can never silently hand the previous tag's
 # file to the copy (refuse_snapshot_on_outage sys.exits mid-arm).
-WT=/Users/michieldekoninck/code/Michiel-DK/agent-sandbox/.claude/worktrees/probe-e6-ab
-OUT=/Users/michieldekoninck/code/Michiel-DK/agent-sandbox/docs/probes/e31-quantisation-2026-09-09
+ROOT=${AGENT_SANDBOX_ROOT:-$HOME/code/Michiel-DK/agent-sandbox}
+WT=$ROOT/.claude/worktrees/probe-e6-ab
+OUT=$ROOT/docs/probes/e31-quantisation-2026-09-09
 cd "$WT" || exit 1
 for exam in task-intake crm-followup; do
   for tag in qwen3-8b-ctx16k qwen3-8b-ctx16k-q8 gemma4-e4b-ctx16k gemma4-e4b-ctx16k-plain; do

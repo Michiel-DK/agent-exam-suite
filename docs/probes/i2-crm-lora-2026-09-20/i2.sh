@@ -1,7 +1,7 @@
 #!/bin/bash
 # I2 — LoRA on the crm champion family from replayed passing TRAIN trajectories; base vs adapter through the
 # real runner (plain run ×1 first; the rule-A --snapshot with the mlx stamp runs once PR #94 is merged).
-set -u; ROOT=/Users/michieldekoninck/code/Michiel-DK/agent-sandbox; P=$ROOT/docs/probes/i2-crm-lora-2026-09-20
+set -u; ROOT=${AGENT_SANDBOX_ROOT:-$HOME/code/Michiel-DK/agent-sandbox}; P=$ROOT/docs/probes/i2-crm-lora-2026-09-20
 MODEL=$(python3 -c "from huggingface_hub import snapshot_download as s; print(s('mlx-community/gemma-4-e2b-it-4bit'))")
 echo "I2 START $(date '+%F %T')"; cd "$P" && python3 build_data_crm.py --selftest && python3 build_data_crm.py || { echo "DATA/GUARD FAILED"; exit 2; }
 echo "=== LoRA train START $(date +%T) ==="; t0=$(date +%s)

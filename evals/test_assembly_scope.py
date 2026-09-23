@@ -9,7 +9,12 @@ turn. Nothing else. Single-turn cases and turn 0 never see the knob.
 Each test names the criterion it witnesses (docs/e27-lane-kit-2026-09-03.md, v1 draft):
   (1) default path byte-identical to master — GOLDEN records generated on master
       (1e04ff1) with master's runner, embedded below, compared after stripping the
-      only nondeterministic field (wall_ms).
+      only nondeterministic field (wall_ms). PER-TURN-TRACE (2026-09-21) added three
+      REPORT-ONLY keys to the live record (`raw_steps` on every trace; `got`,
+      `tool_results`, `raw_steps` on every per-turn entry); the golden stays
+      master's literal bytes and the comparison strips exactly those keys
+      (`_strip_lane_keys`), after asserting they are present so the strip cannot be
+      vacuous. Their own witness is sandbox/test_per_turn_trace.py.
   (2) scoping is observable and bounded — asserted by CONTENT of the messages the
       model actually received, not by count alone.
   (3) the scope-drop trap is RED under scoped and GREEN under full — the kill test:
@@ -48,6 +53,33 @@ def _strip_wall(o):
     if isinstance(o, list):
         return [_strip_wall(x) for x in o]
     return o
+
+
+_LANE_TURN_KEYS = {"got", "tool_results", "raw_steps"}
+
+
+def _strip_lane_keys(o):
+    """PER-TURN-TRACE: drop `raw_steps` from any trace dict and, inside a per-turn
+    entry (a dict carrying "turn"), also `got` and `tool_results` — the three keys
+    that lane added on top of master's golden. The single-turn trace's own
+    top-level `tool_results` is master's and is kept."""
+    if isinstance(o, dict):
+        drop = _LANE_TURN_KEYS if "turn" in o else {"raw_steps"}
+        return {k: _strip_lane_keys(v) for k, v in o.items() if k not in drop}
+    if isinstance(o, list):
+        return [_strip_lane_keys(x) for x in o]
+    return o
+
+
+def _assert_lane_keys_present(record: list, case_id: str) -> None:
+    """The strip above must have something to strip, or a runner that dropped the
+    lane's keys would still compare equal to master's golden."""
+    trace = record[1]
+    if "turns" in trace:
+        assert all(_LANE_TURN_KEYS <= set(t) for t in trace["turns"]), \
+            f"{case_id}: per-turn entries lack the lane's keys: {[sorted(t) for t in trace['turns']]}"
+    else:
+        assert "raw_steps" in trace, f"{case_id}: single-turn trace lacks raw_steps: {sorted(trace)}"
 
 
 def _committed(case_id: str) -> dict:
@@ -104,6 +136,9 @@ def test_1_default_and_full_equal_master_golden():
         case = _committed(case_id)
         default = _strip_wall(list(_score(case, ScriptedAdapter(fx["script"]))))
         full = _strip_wall(list(_score(case, ScriptedAdapter(fx["script"]), assembly="full")))
+        _assert_lane_keys_present(default, case_id)
+        _assert_lane_keys_present(full, case_id)
+        default, full = _strip_lane_keys(default), _strip_lane_keys(full)
         assert default == fx["golden"], f"{case_id}: default path drifted from master's golden:\n{json.dumps(default)[:600]}"
         assert full == fx["golden"], f"{case_id}: --assembly full drifted from master's golden"
         keys = set(_walk(full[1]))
@@ -183,6 +218,8 @@ def test_4_turn0_and_single_turn_identical_across_arms():
     case = _committed("lookup-last-contact")
     assert "turns" not in case
     scoped = _strip_wall(list(_score(case, ScriptedAdapter(fx["script"]), assembly="scoped")))
+    _assert_lane_keys_present(scoped, "lookup-last-contact")
+    scoped = _strip_lane_keys(scoped)
     assert scoped == fx["golden"], "a single-turn case under --assembly scoped must equal master's golden"
     assert "assembly" not in set(_walk(scoped[1]))
     t2 = "Back to Devos Garage — what did the record say about phase 2?"

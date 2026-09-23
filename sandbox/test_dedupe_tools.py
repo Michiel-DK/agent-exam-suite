@@ -104,7 +104,11 @@ class CountingTools:
 # deliberately NOT derived from the new code (a set built from the runner would agree
 # with the runner no matter what the runner did). Flag-off byte-identity means this
 # exact set, with no `deduped_calls` in it. Pass 1 emitted 6 keys where master has 5.
-_MASTER_TRACE_KEYS = {"tools_called", "tool_calls", "tool_results", "steps", "metrics"}
+# PER-TURN-TRACE (2026-09-21): master's set gained the unconditional "raw_steps" key
+# (report-only, present with the guard on or off); the invariant this fixture pins is
+# still "no `deduped_calls` with the flag off", and the set stays a hand-written literal.
+_MASTER_TRACE_KEYS = {"tools_called", "tool_calls", "tool_results", "steps", "metrics",
+                      "raw_steps"}
 
 _DUP_SCRIPT = [
     '{"tool": "crm_lookup", "args": {"company": "Janssens Bakery"}}',

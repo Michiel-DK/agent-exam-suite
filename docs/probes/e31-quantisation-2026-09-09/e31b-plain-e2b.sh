@@ -4,8 +4,9 @@
 # same exam, rule-A snapshot (3 loads). Comparator = the committed champion snapshot (15/18 heldout).
 # The worktree's evals/crm-followup/snapshot.json is overwritten by the run; the main loop restores it after.
 set -u
-WT=/Users/michieldekoninck/code/Michiel-DK/agent-sandbox/.claude/worktrees/probe-e31
-OUT=/Users/michieldekoninck/code/Michiel-DK/agent-sandbox/docs/probes/e31-quantisation-2026-09-09
+ROOT=${AGENT_SANDBOX_ROOT:-$HOME/code/Michiel-DK/agent-sandbox}
+WT=$ROOT/.claude/worktrees/probe-e31
+OUT=$ROOT/docs/probes/e31-quantisation-2026-09-09
 echo "E31b START $(date '+%F %T') ollama=$(ollama --version 2>&1 | tail -1)"
 ollama pull gemma4:e2b 2>&1 | tail -2 || { echo "PULL FAILED — gemma4:e2b not in the library; arm dropped, not substituted"; exit 2; }
 printf 'FROM gemma4:e2b\nPARAMETER num_ctx 16384\n' > "$OUT/Modelfile.gemma4-e2b-ctx16k-plain"
