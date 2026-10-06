@@ -124,6 +124,15 @@ footer{margin-top:48px;color:var(--muted);font-size:.85rem;border-top:1px solid 
 <div class="ev"><b>Evidence:</b> LoRA on the 2B for the CRM brief, 30 training rows. v1–v3 trained with no prompt mask on rows that were 95% tool payload by characters, so the loss never saw the decisions: held-out 12→11, the adapter contradicting its own training row. v4 cut one example per assistant step with the prompt masked: it fixed the two-call case for the first time and taught a "call again" reflex, held-out 12→9. Every attempt was killed by its pre-registered rule (any stable held-out case down). <span class="tag">metered</span></div>
 <p>The same gate that picks a model refuses a fine-tune. What the loop can show honestly on synthetic cases is a smaller model holding the champion's score and a format failure fixed; an accuracy gain needs cases that are not at ceiling, which means a client's.</p>
 
+<h2>What this looks like on your task</h2>
+<p>The process, not the agents, is the transferable part. On a new task it runs in this order: write the exam from your real cases and your definition of correct, with a held-out split from day one that nobody tunes against. Every candidate model sits it, local and hosted, three loads at temperature 0, a case counts only when all three agree. The cheapest model that passes takes the task; a one-case gap is noise, and the pick is reported with how many candidates competed. Any change — a model, a prompt, a runtime, a fine-tune — re-sits the exam per case before it ships, and a challenger replaces the incumbent only if it passes every stable case the incumbent passes. The grading is deterministic and judge-free; a judge, if ever used, is one more model under test with its own exam.</p>
+<h2>Three times the instrument was wrong</h2>
+<p>The build ledger stays private; three of its entries are public as post-mortems, each in the same shape: what we believed, what the probe showed, what changed.</p>
+<ul>
+<li><a href="https://github.com/Michiel-DK/agent-exam-suite/blob/master/docs/post-mortems/01-the-window-not-the-weights.md">The window, not the weights</a> — three capability verdicts that were a 4,096-token truncation nobody had checked.</li>
+<li><a href="https://github.com/Michiel-DK/agent-exam-suite/blob/master/docs/post-mortems/02-the-gate-said-ok.md">The gate said ok while five verdicts moved</a> — an aggregate regression check, blind to cancelling flips; what replaced it.</li>
+<li><a href="https://github.com/Michiel-DK/agent-exam-suite/blob/master/docs/post-mortems/03-a-green-gate-that-cannot-go-red.md">A green gate that cannot go red</a> — a test runner that reports "passed" by construction, and an answer key inside the instrument.</li>
+</ul>
 <h2>Reproduce it</h2>
 <pre><code>git clone https://github.com/Michiel-DK/agent-exam-suite && cd agent-exam-suite
 python3 docs/probes/pass3-column-2026-09-28/pass_k.py     # finding 2, from the committed snapshots and the six-run files
