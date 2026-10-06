@@ -60,3 +60,17 @@ and the tie band. **Rule change:** loop doc rule 6 (winner's denominator + confi
 
 | exam | held-out n | candidates that competed | one case = | tie band (best or one case below) |
 |---|---|---|---|---|
+
+## Local champions at Ollama 0.35.0 (re-snapshot of 2 Oct evening, `docs/probes/l0-resnapshot-2026-10-02/`) — identity holds again
+
+| exam | model | runtime | held-out n | single-run (held-out) | pass^3 | unstable cases |
+|---|---|---|---|---|---|---|
+| transcript-en | gemma4-e4b-ctx16k | ollama 0.35.0 | 19 | 10/19 | **10**/19 | 0 |
+| call-fields | gemma4-e4b-ctx16k | ollama 0.35.0 | 19 | 14/19 | **14**/19 | 0 |
+| crm-followup | gemma4-e2b-ctx16k | ollama 0.35.0 | 18 | 15/18 | **15**/18 | 0 |
+| recap | gemma4:e4b-it-qat | ollama 0.35.0 | 10 | 7/10 | **7**/10 | 0 |
+| email-triage | gemma4:e2b-it-qat | ollama 0.35.0 | 11 | 10/11 | **10**/11 | 0 |
+| expense-categorization | gemma4:e2b-it-qat | ollama 0.35.0 | 9 | 8/9 | **8**/9 | 0 |
+| reply-draft | gemma4:e2b-it-qat | ollama 0.35.0 | 10 | 10/10 | **10**/10 | 0 |
+| task-intake | gemma4:e2b-it-qat | ollama 0.35.0 | 22 | 21/22 | **21**/22 | 0 |
+

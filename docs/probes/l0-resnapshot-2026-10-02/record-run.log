@@ -1,0 +1,18 @@
+L0 start 2026-10-02T18:25:02+01:00 ollama=ollama version is 0.35.0 head=84b6973
+=== expense-categorization start 2026-10-02T18:25:02+01:00
+=== expense-categorization rc=0 wall=180s 2026-10-02T18:28:02+01:00
+=== email-triage start 2026-10-02T18:28:02+01:00
+=== email-triage rc=0 wall=318s 2026-10-02T18:33:20+01:00
+=== reply-draft start 2026-10-02T18:33:20+01:00
+=== reply-draft rc=0 wall=408s 2026-10-02T18:40:08+01:00
+=== recap start 2026-10-02T18:40:08+01:00
+=== recap rc=0 wall=1454s 2026-10-02T19:04:22+01:00
+=== task-intake start 2026-10-02T19:04:22+01:00
+=== task-intake rc=0 wall=952s 2026-10-02T19:20:14+01:00
+=== call-fields start 2026-10-02T19:20:14+01:00
+=== call-fields rc=0 wall=1944s 2026-10-02T19:52:38+01:00
+=== crm-followup start 2026-10-02T19:52:38+01:00
+=== crm-followup rc=0 wall=1406s 2026-10-02T20:16:04+01:00
+=== transcript-en start 2026-10-02T20:16:04+01:00
+=== transcript-en rc=0 wall=2385s 2026-10-02T20:55:49+01:00
+L0 done 2026-10-02T20:55:49+01:00

@@ -6,8 +6,8 @@
   "temperature": 0.0,
   "max_tokens": 2048,
   "judge": null,
-  "date": "2026-09-07T12:20:48",
-  "harness_sha": "26e991c19b73d399c5d1edb3f61f21aee146158d",
+  "date": "2026-10-02T20:16:04",
+  "harness_sha": "40fec483e936cf42de5aa7ac460ba1758c534454",
   "cases": [
     {
       "id": "lookup-last-contact",
@@ -211,6 +211,10 @@
         },
         {
           "bucket": "quality",
+          "check": "scope_coverage"
+        },
+        {
+          "bucket": "quality",
           "check": "error_recovery"
         }
       ]
@@ -254,7 +258,7 @@
           "turn": 0,
           "prompt_tokens": 203,
           "completion_tokens": 322,
-          "wall_ms": 6882.1
+          "wall_ms": 6728.5
         },
         {
           "turn": 1,
@@ -266,7 +270,7 @@
           "turn": 2,
           "prompt_tokens": 1959,
           "completion_tokens": 509,
-          "wall_ms": 7319.2
+          "wall_ms": 7311.2
         }
       ]
     },
@@ -280,25 +284,25 @@
           "turn": 0,
           "prompt_tokens": 206,
           "completion_tokens": 294,
-          "wall_ms": 6377.1
+          "wall_ms": 6375.6
         },
         {
           "turn": 1,
           "prompt_tokens": 1908,
           "completion_tokens": 199,
-          "wall_ms": 5071.1
+          "wall_ms": 5094.0
         },
         {
           "turn": 2,
           "prompt_tokens": 3594,
           "completion_tokens": 160,
-          "wall_ms": 4794.8
+          "wall_ms": 4813.1
         },
         {
           "turn": 3,
           "prompt_tokens": 5300,
           "completion_tokens": 402,
-          "wall_ms": 8565.0
+          "wall_ms": 8622.2
         }
       ]
     },
@@ -324,13 +328,13 @@
           "turn": 0,
           "prompt_tokens": 204,
           "completion_tokens": 221,
-          "wall_ms": 5285.8
+          "wall_ms": 5308.2
         },
         {
           "turn": 1,
           "prompt_tokens": 1891,
           "completion_tokens": 224,
-          "wall_ms": 3278.2
+          "wall_ms": 3306.0
         }
       ]
     },
@@ -354,6 +358,11 @@
           "bucket": "quality",
           "check": "answer_contains",
           "turn": 3
+        },
+        {
+          "bucket": "quality",
+          "check": "scope_coverage",
+          "turn": 3
         }
       ],
       "turn_metrics": [
@@ -361,25 +370,25 @@
           "turn": 0,
           "prompt_tokens": 204,
           "completion_tokens": 203,
-          "wall_ms": 5048.5
+          "wall_ms": 5137.3
         },
         {
           "turn": 1,
           "prompt_tokens": 1889,
           "completion_tokens": 180,
-          "wall_ms": 4814.2
+          "wall_ms": 4844.4
         },
         {
           "turn": 2,
           "prompt_tokens": 3585,
           "completion_tokens": 169,
-          "wall_ms": 4892.7
+          "wall_ms": 4910.1
         },
         {
           "turn": 3,
           "prompt_tokens": 5309,
           "completion_tokens": 816,
-          "wall_ms": 26944.8
+          "wall_ms": 26896.2
         }
       ]
     },
@@ -400,13 +409,13 @@
           "turn": 0,
           "prompt_tokens": 203,
           "completion_tokens": 441,
-          "wall_ms": 8368.7
+          "wall_ms": 8368.8
         },
         {
           "turn": 1,
           "prompt_tokens": 1888,
           "completion_tokens": 510,
-          "wall_ms": 9397.4
+          "wall_ms": 9418.0
         }
       ]
     },
@@ -420,13 +429,13 @@
           "turn": 0,
           "prompt_tokens": 204,
           "completion_tokens": 276,
-          "wall_ms": 6037.9
+          "wall_ms": 6161.7
         },
         {
           "turn": 1,
           "prompt_tokens": 1887,
           "completion_tokens": 259,
-          "wall_ms": 5810.0
+          "wall_ms": 5819.3
         }
       ]
     },
@@ -440,19 +449,19 @@
           "turn": 0,
           "prompt_tokens": 203,
           "completion_tokens": 220,
-          "wall_ms": 5281.4
+          "wall_ms": 5186.6
         },
         {
           "turn": 1,
           "prompt_tokens": 1825,
           "completion_tokens": 230,
-          "wall_ms": 5460.7
+          "wall_ms": 5485.5
         },
         {
           "turn": 2,
           "prompt_tokens": 3452,
           "completion_tokens": 271,
-          "wall_ms": 6399.1
+          "wall_ms": 6443.8
         }
       ]
     },
@@ -466,19 +475,19 @@
           "turn": 0,
           "prompt_tokens": 327,
           "completion_tokens": 371,
-          "wall_ms": 5528.0
+          "wall_ms": 5559.2
         },
         {
           "turn": 1,
           "prompt_tokens": 452,
           "completion_tokens": 168,
-          "wall_ms": 2513.8
+          "wall_ms": 2544.6
         },
         {
           "turn": 2,
           "prompt_tokens": 579,
           "completion_tokens": 653,
-          "wall_ms": 11345.9
+          "wall_ms": 11197.5
         }
       ]
     },
@@ -504,19 +513,19 @@
           "turn": 0,
           "prompt_tokens": 204,
           "completion_tokens": 221,
-          "wall_ms": 5321.7
+          "wall_ms": 5302.5
         },
         {
           "turn": 1,
           "prompt_tokens": 1888,
           "completion_tokens": 149,
-          "wall_ms": 2248.5
+          "wall_ms": 2256.8
         },
         {
           "turn": 2,
           "prompt_tokens": 1929,
           "completion_tokens": 143,
-          "wall_ms": 4200.2
+          "wall_ms": 4206.4
         }
       ]
     },
@@ -557,25 +566,25 @@
           "turn": 0,
           "prompt_tokens": 204,
           "completion_tokens": 202,
-          "wall_ms": 5075.6
+          "wall_ms": 5145.8
         },
         {
           "turn": 1,
           "prompt_tokens": 1889,
           "completion_tokens": 211,
-          "wall_ms": 5330.3
+          "wall_ms": 5293.6
         },
         {
           "turn": 2,
           "prompt_tokens": 3586,
           "completion_tokens": 386,
-          "wall_ms": 7965.3
+          "wall_ms": 7945.7
         },
         {
           "turn": 3,
           "prompt_tokens": 5205,
           "completion_tokens": 392,
-          "wall_ms": 14029.4
+          "wall_ms": 14068.6
         }
       ]
     }
@@ -583,6 +592,6 @@
   "loads": 3,
   "runtime": {
     "name": "ollama",
-    "version": "0.33.2"
+    "version": "0.35.0"
   }
 }

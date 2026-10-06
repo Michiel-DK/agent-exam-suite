@@ -6,7 +6,7 @@
   "temperature": 0.0,
   "max_tokens": 4096,
   "judge": null,
-  "date": "2026-09-26T11:51:27",
+  "date": "2026-10-02T19:52:37",
   "harness_sha": "40fec483e936cf42de5aa7ac460ba1758c534454",
   "cases": [
     {
@@ -253,6 +253,6 @@
   "loads": 3,
   "runtime": {
     "name": "ollama",
-    "version": "0.33.2"
+    "version": "0.35.0"
   }
 }

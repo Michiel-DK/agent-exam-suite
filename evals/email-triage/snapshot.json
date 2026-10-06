@@ -6,8 +6,8 @@
   "temperature": 0.0,
   "max_tokens": 2048,
   "judge": null,
-  "date": "2026-09-07T11:16:34",
-  "harness_sha": "26e991c19b73d399c5d1edb3f61f21aee146158d",
+  "date": "2026-10-02T18:33:20",
+  "harness_sha": "40fec483e936cf42de5aa7ac460ba1758c534454",
   "cases": [
     {
       "id": "client-quote-request",
@@ -139,6 +139,6 @@
   "loads": 3,
   "runtime": {
     "name": "ollama",
-    "version": "0.33.2"
+    "version": "0.35.0"
   }
 }
