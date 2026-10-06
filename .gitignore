@@ -10,3 +10,16 @@ results/
 e8_*.log
 sweep_*.log
 .cache/
+
+# probe run artefacts (30 Sep 2026): server/run logs, pids, nohup, adapters, held-out jsonl —
+# the RESULTS.md and the results/*.json are the evidence; these are not (tracked ones stay tracked)
+# (earlier probes DO commit evidence logs such as record-*.log — so only the noisy classes are ignored here)
+docs/probes/**/server*.log
+docs/probes/**/run*.log
+docs/probes/**/*.pid
+docs/probes/**/nohup.out
+docs/probes/**/pull.log
+docs/probes/**/adapters-*/
+docs/probes/**/data/test.jsonl
+docs/probes/**/.stamp
+docs/probes/**/.*_done

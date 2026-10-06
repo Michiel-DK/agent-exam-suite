@@ -64,3 +64,13 @@ sequence base rate. Each is one free GPU hour; none is authorised.
 ## What this cannot say
 - Nothing about the Ollama champion (15/18); both arms are the MLX 4-bit build at 12/18 base.
 - Whether (a), (b) or (c) fixes the reflex without losing the second call — unrun.
+
+## v4b — the iteration-200 checkpoint, snapshotted (23 Sep, 18:13–18:24, $0, `i2v4b-iter200.sh`)
+Registered on 22 Sep as "the cheapest next test": val loss was 0.29 at iter 200 vs 0.40 at 400, so the hypothesis was that
+the 400-iteration adapter had overfit and the 200 checkpoint might hold. **Refuted, decisively:** rule-A snapshot, 0/38 unstable,
+adapter_sha 3461d805 — **train 16/20 → 4/20, heldout 12/18 → 5/18, 0 up, 19 down** (7 stable heldout down). Every failure has
+one signature: `no final answer emitted` — the model calls a tool, reads the result, calls again (often the identical call:
+`deal-amount` = deals_list ×3) until `max_steps`. The lower val loss at 200 was measured on six masked valid steps and says
+nothing about the stop decision. **Reading:** the per-step cut's "result → call again" reflex is strongest mid-training and the
+400-iteration adapter had partly unlearned it; the checkpoint is not a hidden win, it is the reflex undiluted. **v5 = weight the
+answer steps** (or a payload-only mask on whole rows). The 200 checkpoint is retired; `adapters-iter200/` stays gitignored.

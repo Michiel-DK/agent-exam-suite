@@ -2162,6 +2162,18 @@ def cmd_run(args) -> int:
         # before any inference is spent.
         raise SystemExit(f"--snapshot requires --assembly full (got {args.assembly!r}): "
                          f"the committed snapshot is always a full-history run")
+    split = getattr(args, "split", "all")
+    if args.snapshot and split != "all":
+        # The committed snapshot IS the whole case set (`check` refuses on a changed set);
+        # a scoped snapshot would silently redefine the gate. Refused before any inference.
+        raise SystemExit(f"--snapshot requires --split all (got {split!r}): "
+                         f"the committed snapshot always covers every case")
+    if split != "all":
+        exam = {**exam, "cases": [c for c in exam["cases"] if c.get("split", "train") == split]}
+        if not exam["cases"]:
+            # Fail loud, never a vacuous 0/0 score written as if it were data (repo convention).
+            raise SystemExit(f"--split {split}: no cases in that split for {args.agent!r}")
+        print(f"split: {split} only — {len(exam['cases'])} cases")
     if args.snapshot:
         aggregate, runtime = take_snapshot_loads(
             agent, exam, provider, model, args.loads, timeout=args.timeout,
@@ -2178,7 +2190,15 @@ def cmd_run(args) -> int:
         return 0
     result = run_exam(agent, exam, provider, model, timeout=args.timeout,
                       dedupe_tools=args.dedupe_tools, assembly=args.assembly)
-    path = save_result(result)
+    if split != "all":
+        # A partial run must never pose as the full one: taxonomy.py and policy.py glob
+        # results/*.json at the top level and would adopt it as the canonical row. Same
+        # mechanism as per-load files (results/snapshot_loads/): a SUBDIR keeps it out of
+        # that glob, and the JSON says which split it is.
+        result["split"] = split
+        path = save_result(result, subdir="split", suffix=f"split-{split}")
+    else:
+        path = save_result(result)
     print(f"{_summary_line(result)}  -> {path.relative_to(ROOT)}")
     return 0
 
@@ -3262,6 +3282,9 @@ def main() -> int:
         if name == "run":
             sp.add_argument("--model")
             sp.add_argument("--snapshot", action="store_true")
+            sp.add_argument("--split", choices=["all", "train", "heldout"], default="all",
+                            help="run one split only (the pages report held-out; a hosted pass "
+                                 "need not spend on train). Refused with --snapshot.")
             # SNAPSHOT-REPRODUCIBILITY: default 3, validated (odd, >= 3) in
             # cmd_run via _validate_loads BEFORE any inference. Only --snapshot
             # runs the multi-load protocol; a plain `run` ignores this flag.

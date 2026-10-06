@@ -16,7 +16,7 @@ import re
 from pathlib import Path
 
 ROSTER = ("email-triage", "reply-draft", "crm-followup", "expense-categorization",
-          "recap", "transcript-en")
+          "recap", "transcript-en", "call-fields")
 NONE = "none"
 
 # Coverage floor for a hand-over: a contiguous span of the request holding at least

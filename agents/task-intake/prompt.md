@@ -13,8 +13,12 @@ Specialists:
   question about which category / whether it is recurring. Input = the transaction line.
 - "recap": a request to summarise a day's incoming messages or activity log. Input = the
   log (the items), not the request sentence.
-- "transcript-en": a business call transcript to summarise or tidy into a recap. Input =
-  the transcript.
+- "transcript-en": a business call transcript to summarise or tidy into a recap, or a
+  bare transcript with no instruction. Input = the transcript.
+- "call-fields": a business call transcript with a request to extract, pull or update the
+  CRM fields from it (contact, company, deal amount, decision maker, next step, competitor,
+  ticket). Input = the transcript. A transcript to summarise, tidy or recap stays
+  "transcript-en".
 - "none": nothing above fits — bookings, weather, reminders, invoice generation,
   translation, document editing, chit-chat, or a request for a capability not listed.
 
@@ -26,4 +30,4 @@ Rules:
 - For "none", input is an empty string.
 
 Respond with ONLY a JSON object, no other text:
-{"agent": "<email-triage|reply-draft|crm-followup|expense-categorization|recap|transcript-en|none>", "input": "<verbatim material>"}
+{"agent": "<email-triage|reply-draft|crm-followup|expense-categorization|recap|transcript-en|call-fields|none>", "input": "<verbatim material>"}

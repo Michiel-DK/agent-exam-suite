@@ -6,7 +6,9 @@
     "The label half is exact-match on 'agent' only. The hand-over half is graded by properties.py: the input must be a contiguous verbatim span of the request covering >= 50% of its non-whitespace characters — a multi-payload case commits a `handover` span and is graded by containment instead (evals/task-intake/properties.py _golden_handover); it does NOT check that the instruction sentence was stripped (a hand-over of the whole request passes, decoy payload included), does not check that the RIGHT span was chosen when a request holds two candidate payloads, and does not grade the downstream agent's result.",
     "Policy is house policy, not ground truth: a bare email with no instruction is email-triage; 'reply/answer/write back' is reply-draft even on a newsletter (instruction wins); a bare call transcript is transcript-en. A different shop would label some of these differently; the exam measures adherence to THIS policy as stated in prompt.md.",
     "7 'none' cases in the first 38 (9 of 46), 3 of them baits that name a client, a document or an email; a model that dispatches every request somewhere is caught by those, a model that abstains on everything is caught by the other 31.",
-    "Heavy band (8 cases, 2026-09-05): added because the first 38 saturated at the top (2B and 4B both 16/16 heldout, 21/22 train); their split was assigned at authoring, before any model ran them, and ratified with the rest at merge."
+    "Heavy band (8 cases, 2026-09-05): added because the first 38 saturated at the top (2B and 4B both 16/16 heldout, 21/22 train); their split was assigned at authoring, before any model ran them, and ratified with the rest at merge.",
+    "call-fields band (4 cases, 2026-09-25, PR call-fields-exam): a transcript WITH an extract/pull/update-the-CRM instruction dispatches to call-fields; a bare transcript or a summarise/tidy/recap instruction stays transcript-en (house policy, prompt.md). Split assigned at authoring before any model ran them, ratified with the rest at merge. The existing 'heavy-none-crm-write-bait' (a CRM write with NO transcript) stays 'none' and is the counter-bait.",
+    "Re-snapshot 2026-09-26 after the roster grew to 7 specialists (50 cases, 3 loads, 0 unstable): heldout 21/22 (the 19 old passes unchanged + both new call-fields cases), train 24/28. Two TRAIN cases flipped pass->fail against the 7 Sep snapshot: recap-end-of-day now routes to 'none', transcript-proper-english now routes to 'recap'. Neither routes to call-fields; the 2B dispatcher moved on a longer specialist list. Declared, not tuned (iterate on train, report heldout)."
   ],
   "cases": [
     {
@@ -386,6 +388,38 @@
         "agent": "none"
       },
       "note": "HEAVY BAND (added 2026-09-05 after the 38-case exam tied 2B/4B at 16/16 heldout — gotcha 10): two payloads in one request, a question wrapped around an email, NL/FR requests, an email shaped like a log, write/edit baits."
+    },
+    {
+      "id": "callfields-pull-fields-train",
+      "split": "train",
+      "input": "Pull the CRM fields out of this call:\n\nREP: Hi Lotte, thanks for making the time. PROSPECT: Sure. I'm Lotte, I run sales ops at Verhulst Tiles. REP: For 12 users the Team plan is 1150 EUR a month, billed annually. PROSPECT: That's in range, but our CFO, Bart, has to approve anything over a thousand. REP: Understood, I'll send the quote today. Could we talk again Wednesday once he's seen it? PROSPECT: Wednesday works.",
+      "expected": {
+        "agent": "call-fields"
+      }
+    },
+    {
+      "id": "callfields-update-deal-train",
+      "split": "train",
+      "input": "Update the deal record in the CRM with what was agreed on this call:\n\nCUSTOMER: This is Rik from Maes Cold Storage, the renewal is due next month. REP: Right, same plan is 2300 EUR a year, no change. CUSTOMER: Fine by me, send the invoice to accounting. REP: I'll send it Friday. CUSTOMER: Thanks.",
+      "expected": {
+        "agent": "call-fields"
+      }
+    },
+    {
+      "id": "callfields-extract-heldout",
+      "split": "heldout",
+      "input": "Extract contact, company, amount, competitor and next step from this transcript for the CRM:\n\nREP: Thanks for hopping on, Noor. PROSPECT: Sure. We're Delvaux Interiors, eight people. REP: The Starter plan for eight seats is 480 EUR a month. PROSPECT: We're also looking at Planbase, they quoted 400. REP: I can match 400 on an annual term. PROSPECT: Then I'll take it to our director, Els, and get back to you Monday.",
+      "expected": {
+        "agent": "call-fields"
+      }
+    },
+    {
+      "id": "callfields-which-fields-heldout",
+      "split": "heldout",
+      "input": "Which CRM fields change after this support call? Fill them in from the transcript:\n\nCUSTOMER: Hi, it's Jonas at Peeters Print. Our export job has failed three mornings in a row, ticket PP-2210. REP: I see it, escalating PP-2210 to the platform team now. CUSTOMER: When will I hear back? REP: I'll call you tomorrow with an update either way.",
+      "expected": {
+        "agent": "call-fields"
+      }
     }
   ]
 }

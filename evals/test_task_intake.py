@@ -53,8 +53,8 @@ AGENTS = sorted(p.name for p in (ROOT / "agents").iterdir()
 
 def test_roster_matches_committed_agents_and_the_prompt():
     expected = sorted({c["expected"]["agent"] for c in EXAM["cases"]} - {"none"})
-    check("exam roster == the six committed agents", expected == AGENTS, f"{expected} vs {AGENTS}")
-    check("properties ROSTER == the six committed agents", sorted(props.ROSTER) == AGENTS,
+    check("exam roster == the committed agents (dynamic, agents/ dir)", expected == AGENTS, f"{expected} vs {AGENTS}")
+    check("properties ROSTER == the committed agents (dynamic, agents/ dir)", sorted(props.ROSTER) == AGENTS,
           str(sorted(props.ROSTER)))
     missing = [a for a in AGENTS + ["none"] if f'"{a}"' not in PROMPT]
     check("prompt.md names every specialist and 'none'", not missing, str(missing))

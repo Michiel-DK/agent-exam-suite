@@ -30,6 +30,9 @@
 # accuracy pick over its cohort; each was taken on the mechanism its comment names
 # (window, cost, same-day rep, a case no local tier passes). Read the fractions with
 # that width, never as a ranking of the whole matrix.
+call-fields:
+  - {provider: ollama, model: gemma4-e4b-ctx16k}     # champion PROPOSED 2026-09-25 (transcript-en's window config; first snapshot in the same PR; operator signs at merge)
+  - {provider: ollama, model: qwen3-8b-ctx16k}       # 12/19 heldout (26 Sep, one load, 39 s/call); passes 3 cases the champion fails (discovery-heldout-easy, mixed-heldout-dense, longcall-renewal-train-1) — the fallback mechanism, not an accuracy pick (docs/probes/call-fields-2026-09-25/RESULTS.md)
 crm-followup:
   - {provider: ollama, model: gemma4-e2b-ctx16k}     # champion 09-04: 15/18 (16k window; Modelfile in agents/crm-followup/)
   - {provider: ollama, model: qwen3-8b-ctx16k}       # threads: 3/4 multi-turn (ladder row 5)

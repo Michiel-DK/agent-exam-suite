@@ -1,0 +1,20 @@
+name: call-fields
+description: Extract the CRM fields a rep would write back after one English business call (contact, company, amount, currency, decision maker, next-step date, competitor, ticket id)
+provider: ollama
+model: gemma4-e4b-ctx16k
+# PROPOSED champion (operator signs at merge): the transcript-en champion's exact config —
+# gemma4:e4b-it-qat at a 16,384-token window (agents/call-fields/Modelfile is a copy of
+# agents/transcript-en/Modelfile; `ollama create gemma4-e4b-ctx16k -f` it first). The window is
+# a precondition, not a tuning: the long-call band (12k-33k chars, up to 8,545 prompt tokens
+# measured on transcript-en 9 Sep) is unscoreable under Ollama's 4,096 default (CLAUDE.md
+# gotcha 16). Same 32 inputs as transcript-en, same split; only the expected block differs.
+tier: local
+temperature: 0.0
+# max_tokens 1024 -> 4096 (25 Sep, first hosted pass): the JSON answer is ~150 tokens, but GLM-5.3
+# and Kimi K3 spend their budget THINKING first -- at 1024 GLM died on 7/32 cases and Kimi on 2/32
+# with finish_reason=length, 1024 completion tokens, 0 content chars, ~4,200 reasoning chars
+# (docs/probes/call-fields-2026-09-25/results/hosted-*-2026-09-25.json, termination.cause=no_answer).
+# The budget is a precondition like the window (CLAUDE.md gotcha 16): a verdict on a reasoning
+# model is a verdict about the budget until the budget is stated. The local champion never
+# exceeded 1024 (smoke: truncated_calls 0), so its train score does not move.
+max_tokens: 4096

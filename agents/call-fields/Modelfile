@@ -1,0 +1,16 @@
+# The transcript-en champion is a CONFIG of gemma4:e4b-it-qat, not new weights: the
+# same model at a 16,384-token window. Reproduce it before `runner.py check`:
+#
+#   ollama create gemma4-e4b-ctx16k -f agents/transcript-en/Modelfile
+#
+# Why (CHAMPION CHANGE 2026-09-06, agent.yaml): under Ollama's 4,096 default the
+# long-call band (12k-35k char transcripts, the lead's real call length) is DEAD —
+# step-0 measured a 19.6k-char call at 5,317 prompt tokens, well past the default
+# window: finish_reason=length, 0 content chars on one arm, truncated-system-prompt
+# prose on the other (docs/probes/transcript-long-step0-2026-09-06/RESULTS.md,
+# finding 1). Same weights at 16k: 41.0s / 41.8s wall on the 11.8k/19.6k probe
+# transcripts, comfortably under the untunable 120s `check` ceiling. Per-request
+# temperature/max_tokens still come from agent.yaml — this file sets only the
+# window (crm-followup's agents/crm-followup/Modelfile is the template this copies).
+FROM gemma4:e4b-it-qat
+PARAMETER num_ctx 16384

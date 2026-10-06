@@ -1,0 +1,5 @@
+queue2 (12:15): the four arms that 404'd in the first minute of queue.tsv.
+- x-ai/grok-4.6 was pinned "x-ai"; OpenRouter's provider slug for xAI is "xai" (checked via /models/x-ai/grok-4.6/endpoints). Requeued pinned "xai".
+- deepseek/deepseek-v4-pro-0813 pinned "deepseek" is refused by the account's guardrail: "Filter by Guardrails removed deepseek
+  (Paid model training violation (account settings))" -- the setting that forbids providers training on our prompts excludes
+  DeepSeek's own endpoint. Kept the setting; requeued UNPINNED (open weights served by a third-party host, marked in the table).

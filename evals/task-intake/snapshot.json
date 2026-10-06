@@ -1,13 +1,13 @@
 {
   "provider": "ollama",
   "model": "gemma4:e2b-it-qat",
-  "train_score": 0.9231,
-  "heldout_score": 0.95,
+  "train_score": 0.8571,
+  "heldout_score": 0.9545,
   "temperature": 0.0,
   "max_tokens": 2048,
   "judge": null,
-  "date": "2026-09-07T13:29:27",
-  "harness_sha": "26e991c19b73d399c5d1edb3f61f21aee146158d",
+  "date": "2026-09-26T13:32:14",
+  "harness_sha": "40fec483e936cf42de5aa7ac460ba1758c534454",
   "cases": [
     {
       "id": "crm-devos-stage",
@@ -114,10 +114,6 @@
         {
           "bucket": "quality",
           "check": "labels"
-        },
-        {
-          "bucket": "format",
-          "check": "check_none_hands_over_nothing"
         }
       ]
     },
@@ -172,8 +168,14 @@
     {
       "id": "recap-end-of-day",
       "split": "train",
-      "passed": true,
-      "stable": true
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "labels"
+        }
+      ]
     },
     {
       "id": "transcript-clean-up",
@@ -202,8 +204,14 @@
     {
       "id": "transcript-proper-english",
       "split": "train",
-      "passed": true,
-      "stable": true
+      "passed": false,
+      "stable": true,
+      "failures": [
+        {
+          "bucket": "quality",
+          "check": "labels"
+        }
+      ]
     },
     {
       "id": "none-book-train",
@@ -306,6 +314,30 @@
           "check": "labels"
         }
       ]
+    },
+    {
+      "id": "callfields-pull-fields-train",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "callfields-update-deal-train",
+      "split": "train",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "callfields-extract-heldout",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
+    },
+    {
+      "id": "callfields-which-fields-heldout",
+      "split": "heldout",
+      "passed": true,
+      "stable": true
     }
   ],
   "loads": 3,
