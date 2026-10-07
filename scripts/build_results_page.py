@@ -2,7 +2,8 @@
 """build_results_page.py — the one-page results poster (docs/results-2026-10.html) from committed files only. No inference.
 Reads: docs/probes/matrix-2026-09-27/tables.md (per-task tables, $ at the ledger date in the file), the pass^k probe script's
 output (docs/probes/pass3-column-2026-09-28/pass_k.py), docs/probes/l0-resnapshot-2026-10-02/RESULTS.md (runtime-bump diff),
-docs/probes/l3-own-gpu-cost-2026-10-02/RESULTS.md (own-card lines). Fails loud if any source is missing — never a placeholder.
+docs/probes/l3-own-gpu-cost-2026-10-02/RESULTS.md (own-card lines), the six fine-tune probes under docs/probes/i0-*, i0b-*, i2* (the
+refusal table: every held-out number is parsed from the probe's own evidence cell). Fails loud if any source is missing — never a placeholder.
 Run from the repo root: python3 scripts/build_results_page.py  → writes docs/results-2026-10.html"""
 import os, re, sys, subprocess, html, math, datetime
 REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
@@ -41,6 +42,39 @@ l0 = re.search(r"moved \*\*(\d+) of (\d+) cases\*\*.*?\*\*(\d+) held-out cases, 
 l0_moved, l0_total, l0_held, l0_unst = l0.groups()
 l3_line = re.search(r"Example, (call-fields on gemma-4-26b-a4b: hosted \$[\d.]+ per 10k \(ledger\)\s*\nvs \$[\d.]+ on a RunPod L4 vs €[\d.]+ on a Scaleway L4)", L3)
 l3_txt = l3_line.group(1).replace("\n", " ") if l3_line else "see the L3 probe"
+# ---- fine-tune refusal table: every number parsed from the probe's evidence cell / verdict table ----
+def ft(path, rx):
+    txt = need(path); m = re.search(rx, txt, re.S)
+    if not m: sys.exit(f"pattern not found in {path}: {rx}")
+    return m, txt
+FT = []
+for what, path, cause in [
+    ("CRM follow-up, LoRA v1 · 11 training rows", "docs/probes/i2-crm-lora-2026-09-20/RESULTS.md", "nine of the eleven rows made one tool call; the adapter stops after one call"),
+    ("CRM follow-up, LoRA v2 · 16 rows", "docs/probes/i2v2-crm-lora-2026-09-21/RESULTS.md", "flat total hiding two up, two down; too few rows with two calls in one turn"),
+    ("CRM follow-up, LoRA v3 · 30 rows", "docs/probes/i2v3-crm-lora-2026-09-21/RESULTS.md", "no prompt mask, so the loss was 95% tool payload; it failed two of its own training rows"),
+    ("CRM follow-up, LoRA v4 · 96 per-step examples, prompt masked", "docs/probes/i2v4-crm-lora-2026-09-21/RESULTS.md", "learned the decisions, and a “call again” reflex with them"),
+]:
+    m, txt = ft(path, r"heldout (\d+)/(\d+) → (\d+)/(\d+)\D{0,12}(\d+) up / (\d+) down")
+    st = re.search(r"REFUTED[^\n]*?(\d+) stable heldout (?:cases )?down", txt)   # the verdict line, never the prediction line
+    FT.append(dict(what=what, before=int(m.group(1)), after=int(m.group(3)), n=int(m.group(2)), up=int(m.group(5)), down=int(m.group(6)),
+                   note=(f"{st.group(1)} stable held-out cases down, three loads" if st else f"{m.group(6)} held-out cases down, one pass"), verdict="refused", cause=cause))
+m0, _ = ft("docs/probes/i0-mlx-lora-2026-09-18/RESULTS.md", r"heldout (\d+)/(\d+) → (\d+)/(\d+) \((\d+) up / (\d+) down\)")
+ms, _ = ft("docs/probes/i0b-champion-thinking-2026-09-20/RESULTS.md", r"switch heldout (\d+)/(\d+)")
+mt, _ = ft("docs/probes/i0b-champion-thinking-2026-09-20/RESULTS.md", r"−(\d+)% completion tokens, ([\d.]+)× wall")
+FT.append(dict(what="Request intake, thinking switched off by the chat template (no training)", before=int(m0.group(1)), after=int(ms.group(1)), n=int(ms.group(2)), up=0, down=int(m0.group(1))-int(ms.group(1)),
+               note="same speed as the adapter", verdict="refused", cause="the switch loses the hand-over rules the adapter kept"))
+FT.append(dict(what="Request intake, LoRA · 22 rows, 9 minutes of training", before=int(m0.group(1)), after=int(m0.group(3)), n=int(m0.group(2)), up=int(m0.group(5)), down=int(m0.group(6)),
+               note=f"−{mt.group(1)}% output tokens, {mt.group(2)}× faster; one pass, not snapshotted", verdict="held within one case; not promoted", cause="removes the thinking channel; the one lost case is at N=20"))
+# ---- the pick rule, per task: bar = best score or one case from it; cheapest row at or above the bar takes the task ----
+def pick(exam):
+    rows = tasks[exam]["rows"]; best = max(r["held"] for r in rows); bar = best - 1
+    ok = [r for r in rows if r["held"] >= bar]; p = min(ok, key=lambda r: (r["cost"], -r["held"]))
+    sol = next((r for r in rows if "gpt-5.6-sol" in r["model"]), None)
+    return dict(best=best, bar=bar, pick=p, sol=sol, n=tasks[exam]["n"], ok=len(ok))
+# ---- the model library by tier, from the tables (nothing listed that did not sit the exams) ----
+LIB = {"local": {}, "ownvm": {}, "vendor": {}}
+for t in tasks.values():
+    for r in t["rows"]: LIB[r["tier"]].setdefault(r["model"].split("/")[-1], r["can"])
 # ---- chart: small multiples, score (fraction) vs $/10k (log), one panel per task ----
 C = {"vendor": "var(--s1)", "ownvm": "var(--s2)", "local": "var(--s3)"}
 NAME = {"vendor": "vendor only", "ownvm": "own VM (open weights)", "local": "local machine"}
@@ -86,12 +120,35 @@ def task_table(exam):
     for r in sorted(t["rows"], key=lambda r: (-r["held"], r["cost"])):
         out.append(f'<tr><td>{html.escape(r["model"])}</td><td>{html.escape(r["can"])}</td><td><b>{r["held"]}</b>/{r["n"]}</td><td>{html.escape(r["passk"])}</td><td>{html.escape(r["cost_txt"])}</td><td>{html.escape(r["run"])}</td></tr>')
     return "\n".join(out) + "</tbody></table>"
+def qbar(exam):
+    t = tasks[exam]; rows = sorted(t["rows"], key=lambda r: (-r["held"], r["cost"])); pk = pick(exam)
+    RH, LW, TW, X0 = 19, 150, 250, 158; Wq = 560; Hq = 30 + RH * len(rows) + 30
+    bx = X0 + TW * pk["bar"] / t["n"]; g = []
+    g.append(f'<text x="0" y="12" class="ptitle">{html.escape(TITLE[exam])} · {t["n"]} held-out · bar = best score or one case from it</text>')
+    for i, r in enumerate(rows):
+        y = 26 + i * RH; w = TW * r["held"] / t["n"]; fade = ' opacity="0.4"' if r["held"] < pk["bar"] else ""
+        short = r["model"].split("/")[-1]; short = short[:22] + "…" if len(short) > 23 else short
+        bold = ' font-weight="600"' if r is pk["pick"] else ""
+        g.append(f'<g{fade}><text x="{LW}" y="{y+13}" class="tick" text-anchor="end"{bold}>{html.escape(short)}</text>'
+                 f'<rect x="{X0}" y="{y+3}" width="{w:.1f}" height="{RH-6}" rx="2" fill="{C[r["tier"]]}"/>'
+                 f'<text x="{X0+w+5:.1f}" y="{y+13}" class="tick"{bold}>{r["held"]}/{t["n"]} · {html.escape(r["cost_txt"].replace(" (ledger)",""))}{" · picked" if r is pk["pick"] else ""}</text></g>')
+    g.append(f'<line x1="{bx:.1f}" y1="20" x2="{bx:.1f}" y2="{Hq-26}" stroke="var(--ink)" stroke-dasharray="3 3"/><text x="{bx:.1f}" y="{Hq-12}" class="tick" text-anchor="middle">quality bar · {pk["bar"]} of {t["n"]}</text>')
+    return f'<svg viewBox="0 0 {Wq} {Hq}" class="panel qb" role="img" aria-label="{html.escape(TITLE[exam])}: held-out cases passed per model, the quality bar, and the cheapest model at the bar">{"".join(g)}</svg>'
+pick_rows = []
+for e in ORDER:
+    pk = pick(e); p = pk["pick"]; sol = pk["sol"]
+    pick_rows.append(f'<tr><td>{html.escape(TITLE[e])}</td><td>{pk["bar"]} of {pk["n"]}</td><td><b>{html.escape(p["model"].split("/")[-1])}</b> · {html.escape(p["can"])}</td><td>{p["held"]}/{pk["n"]}</td><td>{html.escape(p["cost_txt"])}</td>'
+                     f'<td>{(str(sol["held"]) + "/" + str(pk["n"]) + " · " + html.escape(sol["cost_txt"])) if sol else "—"}</td></tr>')
+pick_rows = "\n".join(pick_rows)
+ft_rows = "\n".join(f'<tr><td>{html.escape(f["what"])}</td><td>{f["before"]} → <b>{f["after"]}</b> of {f["n"]}</td><td>{f["up"]} up / {f["down"]} down · {html.escape(f["note"])}</td><td>{html.escape(f["verdict"])}</td><td>{html.escape(f["cause"])}</td></tr>' for f in FT)
+lib_html = "".join(f'<tr><td><b>{html.escape(lbl)}</b><br><span class="muted">{html.escape(sub)}</span></td><td>{", ".join(html.escape(m) + ("" if k != "ownvm" else " <span class=muted>(" + html.escape(LIB[k][m].replace("own VM, ", "")) + ")</span>") for m in sorted(LIB[k]))}</td></tr>'
+                   for k, lbl, sub in [("local", "your laptop", "a 16 GB machine; nothing leaves it; ≈$0 in tokens"), ("ownvm", "your own cloud", "open weights on a GPU you rent or own; data stays in your account"), ("vendor", "vendor API", "closed weights, pay per call")])
 hosted_rows = "\n".join(f'<tr><td>{html.escape(TITLE[c[0]])}</td><td>{html.escape(c[1])}</td><td>{c[2]}</td><td>{c[3]}</td><td>{c[4]}</td><td>{c[5]}</td><td><b>{c[6].replace("**","")}</b></td></tr>' for c in hosted)
 today = datetime.date.today().isoformat()
 page = f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Local models, measured</title>
-<meta name="description" content="Three findings from a year of judge-free exams on small local models: where they hold, why temperature zero is not determinism, and a fine-tune refuted four times. Every number tagged metered or modelled; one command reproduces it.">
+<meta name="description" content="Which small model passes an office task, what it costs, and how you know the day it gets worse: four steps, three findings, one command. Judge-free exams, every number tagged metered or modelled.">
 <style>
 :root{{--bg:#fcfcfb;--surface:#fcfcfb;--ink:#1a1a19;--ink2:#5a5955;--muted:#8a8984;--line:#e4e3de;--card:#f4f3ef;--s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--grid:#e9e8e3}}
 @media (prefers-color-scheme:dark){{:root:not([data-theme="light"]){{--bg:#1a1a19;--surface:#1a1a19;--ink:#fff;--ink2:#c3c2b7;--muted:#8d8c86;--line:#33332f;--card:#232322;--s1:#3987e5;--s2:#d95926;--s3:#199e70;--grid:#2c2c29}}}}
@@ -103,6 +160,7 @@ p{{margin:8px 0;max-width:72ch}} .lead{{font-size:1.1rem;color:var(--ink2)}} .mu
 .tag{{display:inline-block;font-size:.72rem;letter-spacing:.03em;text-transform:uppercase;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink2);margin-left:6px;vertical-align:middle}}
 .grid7{{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;margin:14px 0}} .panel{{width:100%;height:auto;background:var(--surface);border:1px solid var(--line);border-radius:6px}}
 .ptitle{{font-size:11px;fill:var(--ink);font-weight:600}} .tick{{font-size:9.5px;fill:var(--muted)}} .lbl{{font-size:9.5px;fill:var(--ink2);paint-order:stroke;stroke:var(--surface);stroke-width:3px;stroke-linejoin:round}} .grid{{stroke:var(--grid);stroke-width:1}} .pt{{cursor:default}}
+.steps{{counter-reset:s;list-style:none;padding:0;margin:12px 0}} .steps li{{margin:14px 0 18px;padding-left:38px;position:relative}} .steps li::before{{counter-increment:s;content:counter(s);position:absolute;left:0;top:2px;width:26px;height:26px;border-radius:50%;background:var(--card);border:1px solid var(--line);text-align:center;line-height:26px;font-weight:600;font-size:.85rem}} .qb{{max-width:620px}}
 .legend{{display:flex;gap:18px;flex-wrap:wrap;font-size:.85rem;color:var(--ink2);margin:6px 0}} .legend i{{display:inline-block;width:10px;height:10px;margin-right:6px;vertical-align:-1px}}
 table{{border-collapse:collapse;width:100%;font-size:.85rem;margin:6px 0 10px}} th,td{{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top}} th{{color:var(--ink2);font-weight:600}}
 details summary{{cursor:pointer;color:var(--ink2);margin:8px 0}} pre{{background:var(--card);padding:12px 14px;border-radius:6px;overflow:auto;font-size:.85rem}} code{{font-size:.9em}}
@@ -110,8 +168,25 @@ details summary{{cursor:pointer;color:var(--ink2);margin:8px 0}} pre{{background
 footer{{margin-top:48px;color:var(--muted);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}} a{{color:var(--s1)}}
 </style></head><body><main>
 <h1>Small local models, measured on office tasks</h1>
-<p class="lead">Eight agents (seven in the hosted comparison), 220 committed cases, deterministic grading with no LLM judge, every candidate sat the same held-out cases at temperature 0. Three findings, one chart, one command.</p>
+<p class="lead">Eight agents (seven in the hosted comparison), 220 committed cases, deterministic grading with no LLM judge, every candidate sat the same held-out cases at temperature 0. How it works in four steps, then three findings, one chart, one command.</p>
 <p class="muted">Scores are held-out cases passed, never percentages. Dollars are per 10,000 tasks on the tokens of that run at the OpenRouter rate of {ledger_date}; <span class="tag">metered</span> means a run of that model, <span class="tag">modelled</span> means arithmetic on stated inputs. The private repo holds the build ledger; everything on this page has a probe folder in the public one.</p>
+
+<h2>How it works, in four steps</h2>
+<ol class="steps">
+<li><b>Name the tasks you already send to a model.</b> Triage, extraction, drafting, summaries. The one requirement: a person can say, case by case, whether the answer was right. A task nobody can check is not scored here, and the page says so. The eight tasks below are the demo set; a client's exam is never published.</li>
+<li><b>Write down what a correct answer looks like.</b> Twenty to forty cases per task with their checks: the label, the fields, the facts that must appear, the tools that must be called. A third is held out and never tuned on. No model grades another model's answer, anywhere. Every local case runs three times at temperature 0 and counts only if all three agree.</li>
+<li><b>The cheapest model that passes takes the task.</b> Every candidate sits the exam. The bar is the best score any model reached, or one case from it; models under it drop out; the cheapest left wins and its score is committed as the snapshot. One task drawn out, then the pick for all seven:
+{qbar("crm-followup")}
+<table><thead><tr><th>task</th><th>bar</th><th>cheapest at the bar</th><th>held-out</th><th>$ / 10k</th><th>GPT-5.6-Sol, same task</th></tr></thead><tbody>{pick_rows}</tbody></table>
+<p class="muted">Hosted rows are one pass; a one-case gap is noise, so the bar is one case wide. Dollars: tokens of that run at the {ledger_date} ledger rate. The vendor flagship column is there for the reader's own subtraction; this page states no saving in advance.</p></li>
+<li><b>A fine-tune ships only if it passes the same exam.</b> When a small model almost passes, it is trained on the task's own training rows, on the machine it runs on, in minutes, and then sits the exam. If any held-out case that used to pass now fails, the version is refused, even when the total went up. Six attempts so far:
+<table><thead><tr><th>candidate</th><th>held-out</th><th>what moved</th><th>verdict</th><th>cause named</th></tr></thead><tbody>{ft_rows}</tbody></table>
+<p class="muted">An average would have shipped v2 (flat total). The gate refused it. Every row is a probe folder under <code>docs/probes/i0-*</code>, <code>i0b-*</code>, <code>i2*</code>; the numbers here are parsed from those files.</p></li>
+</ol>
+<p>Then the loop: every model release, runtime bump or price change re-sits the exam per case and the report lists what moved in both directions. A challenger replaces the incumbent only if it passes every stable case the incumbent passes. On 2 October a runtime upgrade moved {l0_moved} of {l0_total} cases, {l0_held} held-out.</p>
+<h3>Where the model runs</h3>
+<table><thead><tr><th>tier</th><th>models that sat the exams</th></tr></thead><tbody>{lib_html}</tbody></table>
+<p class="muted">A score was taken on the runtime the row names. A build on your own card re-sits the exam before its row is claimed for it.</p>
 
 <h2>1. A 2B–4B model on a laptop holds every short decision task. It loses only long summaries.</h2>
 <div class="ev"><b>Evidence:</b> the local champion ties or beats the hosted flagships on email triage, expense fields, reply drafts, the CRM brief over tool calls (where the 2B is the best model of any size) and the digest; it sits one case behind the top group on CRM field write-back and four behind on long call summaries. Cost: local ≈0, the best open-weights hosted rows $0.23–$5.41, the vendor flagship $5–$127 per 10k. <span class="tag">metered</span></div>
@@ -130,8 +205,6 @@ footer{{margin-top:48px;color:var(--muted);font-size:.85rem;border-top:1px solid
 <div class="ev"><b>Evidence:</b> LoRA on the 2B for the CRM brief, 30 training rows. v1–v3 trained with no prompt mask on rows that were 95% tool payload by characters, so the loss never saw the decisions: held-out 12→11, the adapter contradicting its own training row. v4 cut one example per assistant step with the prompt masked: it fixed the two-call case for the first time and taught a "call again" reflex, held-out 12→9. Every attempt was killed by its pre-registered rule (any stable held-out case down). <span class="tag">metered</span></div>
 <p>The same gate that picks a model refuses a fine-tune. What the loop can show honestly on synthetic cases is a smaller model holding the champion's score and a format failure fixed; an accuracy gain needs cases that are not at ceiling, which means a client's.</p>
 
-<h2>What this looks like on your task</h2>
-<p>The process, not the agents, is the transferable part. On a new task it runs in this order: write the exam from your real cases and your definition of correct, with a held-out split from day one that nobody tunes against. Every candidate model sits it, local and hosted, three loads at temperature 0, a case counts only when all three agree. The cheapest model that passes takes the task; a one-case gap is noise, and the pick is reported with how many candidates competed. Any change — a model, a prompt, a runtime, a fine-tune — re-sits the exam per case before it ships, and a challenger replaces the incumbent only if it passes every stable case the incumbent passes. The grading is deterministic and judge-free; a judge, if ever used, is one more model under test with its own exam.</p>
 <h2>Three times the instrument was wrong</h2>
 <p>The build ledger stays private; three of its entries are public as post-mortems, each in the same shape: what we believed, what the probe showed, what changed.</p>
 <ul>
@@ -146,11 +219,11 @@ python3 docs/probes/matrix-2026-09-27/build_tables.py       # the seven tables (
 ./.cline/test.sh                                            # the deterministic test gate, one process per file</code></pre>
 <p class="muted">Re-sitting an exam locally needs Ollama and the champion model: <code>python3 sandbox/runner.py check email-triage</code> compares a fresh run with the committed snapshot per case.</p>
 
-<footer>Built {today} by <code>scripts/build_results_page.py</code> from committed files; no number on this page was typed by hand. Probe folders: <code>docs/probes/matrix-2026-09-27</code>, <code>pass3-column-2026-09-28</code>, <code>l0-resnapshot-2026-10-02</code>, <code>l3-own-gpu-cost-2026-10-02</code>, <code>i2v3-crm-lora-2026-09-21</code>, <code>i2v4-crm-lora-2026-09-21</code>. Earlier write-up: <a href="eval-suite-is-the-asset.html">Agents are disposable, the eval suite is the asset</a>.</footer>
+<footer>Built {today} by <code>scripts/build_results_page.py</code> from committed files; no number on this page was typed by hand. Probe folders: <code>docs/probes/matrix-2026-09-27</code>, <code>pass3-column-2026-09-28</code>, <code>l0-resnapshot-2026-10-02</code>, <code>l3-own-gpu-cost-2026-10-02</code>, <code>i0-mlx-lora-2026-09-18</code>, <code>i0b-champion-thinking-2026-09-20</code>, <code>i2-crm-lora-2026-09-20</code>, <code>i2v2-</code>/<code>i2v3-</code>/<code>i2v4-crm-lora-2026-09-21</code>. Earlier write-up: <a href="eval-suite-is-the-asset.html">Agents are disposable, the eval suite is the asset</a>.</footer>
 </main><div id="tip"></div>
 <script>
 const tip=document.getElementById('tip');
 document.querySelectorAll('.pt').forEach(g=>{{g.addEventListener('mousemove',e=>{{tip.textContent=g.dataset.tip;tip.style.display='block';tip.style.left=(e.clientX+12)+'px';tip.style.top=(e.clientY+12)+'px';}});g.addEventListener('mouseleave',()=>tip.style.display='none');}});
 </script></body></html>"""
 out = os.path.join(REPO, "docs/results-2026-10.html"); open(out, "w").write(page)
-print(f"wrote {os.path.relpath(out, REPO)} ({len(page):,} bytes); tasks {len(tasks)}, hosted rows {len(hosted)}, L0 {l0_moved}/{l0_total} moved")
+print(f"wrote {os.path.relpath(out, REPO)} ({len(page):,} bytes); tasks {len(tasks)}, hosted rows {len(hosted)}, fine-tune rows {len(FT)}, L0 {l0_moved}/{l0_total} moved; picks: " + ", ".join(f"{e}={pick(e)['pick']['model'].split('/')[-1]}" for e in ORDER))
