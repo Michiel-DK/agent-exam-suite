@@ -25,14 +25,14 @@ for blk in TABLES.split("\n### ")[1:]:
         if not l.startswith("| ") or l.startswith("| model") or l.startswith("|---"): continue
         c = [x.strip() for x in l.strip("|").split("|")]
         if len(c) < 9: continue
-        model, can, held, passk, wall, out, died, cost, run = c[:9]
+        model, can, held, passk, wall, out, died, cost, run = c[:9]; inj = c[9] if len(c) > 9 else "—"   # 10th cell = resists injection (M1), optional
         hm = re.search(r"\*\*(\d+)\*\*/(\d+)", held)
         cm = re.search(r"([\d,.]+)", cost); usd = float(cm.group(1).replace(",", "")) if cm and cost != "≈0" else 0.0
         tier = "local" if can.startswith("local") else ("vendor" if can.startswith("vendor") else "ownvm")
         label = model.split(" (")[0]
-        rows.append(dict(model=label, can=can, held=int(hm.group(1)), n=int(hm.group(2)), passk=passk, cost=usd, cost_txt=cost, tier=tier, died=died, run=run))
+        rows.append(dict(model=label, can=can, held=int(hm.group(1)), n=int(hm.group(2)), passk=passk, cost=usd, cost_txt=cost, tier=tier, died=died, run=run, inj=inj))
     tasks[exam] = dict(n=n, cand=m.group(3), band=m.group(4), rows=rows)
-ledger_date = re.search(r"ledger", TABLES) and "2026-10-02"
+ledger_date = re.search(r"ledger", TABLES) and "2026-10-08"   # the date tables.md was last rebuilt against the repo-radar ledger
 # ---- parse pass^k hosted table + L0 line ----
 hosted = []
 for l in PASSK.split("## Hosted")[1].split("## Candidates")[0].splitlines():
@@ -116,9 +116,9 @@ for exam in ORDER:
 # ---- tables ----
 def task_table(exam):
     t = tasks[exam]; out = [f'<h4>{html.escape(TITLE[exam])} <span class="muted">· {t["n"]} held-out cases · {t["cand"]} candidates, {t["band"]} within one case of the best</span></h4>',
-                            '<table><thead><tr><th>model</th><th>can run on</th><th>held-out</th><th>pass^k</th><th>$ / 10k</th><th>run</th></tr></thead><tbody>']
+                            '<table><thead><tr><th>model</th><th>can run on</th><th>held-out</th><th>pass^k</th><th>resists injection</th><th>$ / 10k</th><th>run</th></tr></thead><tbody>']
     for r in sorted(t["rows"], key=lambda r: (-r["held"], r["cost"])):
-        out.append(f'<tr><td>{html.escape(r["model"])}</td><td>{html.escape(r["can"])}</td><td><b>{r["held"]}</b>/{r["n"]}</td><td>{html.escape(r["passk"])}</td><td>{html.escape(r["cost_txt"])}</td><td>{html.escape(r["run"])}</td></tr>')
+        out.append(f'<tr><td>{html.escape(r["model"])}</td><td>{html.escape(r["can"])}</td><td><b>{r["held"]}</b>/{r["n"]}</td><td>{html.escape(r["passk"])}</td><td>{html.escape(r["inj"])}</td><td>{html.escape(r["cost_txt"])}</td><td>{html.escape(r["run"])}</td></tr>')
     return "\n".join(out) + "</tbody></table>"
 def qbar(exam):
     t = tasks[exam]; rows = sorted(t["rows"], key=lambda r: (-r["held"], r["cost"])); pk = pick(exam)
@@ -137,7 +137,7 @@ def qbar(exam):
 pick_rows = []
 for e in ORDER:
     pk = pick(e); p = pk["pick"]; sol = pk["sol"]
-    pick_rows.append(f'<tr><td>{html.escape(TITLE[e])}</td><td>{pk["bar"]} of {pk["n"]}</td><td><b>{html.escape(p["model"].split("/")[-1])}</b> · {html.escape(p["can"])}</td><td>{p["held"]}/{pk["n"]}</td><td>{html.escape(p["cost_txt"])}</td>'
+    pick_rows.append(f'<tr><td>{html.escape(TITLE[e])}</td><td>{pk["bar"]} of {pk["n"]}</td><td><b>{html.escape(p["model"].split("/")[-1])}</b> · {html.escape(p["can"])}</td><td>{p["held"]}/{pk["n"]}</td><td>{html.escape(p["cost_txt"])}</td><td>{html.escape(p["inj"])}</td>'
                      f'<td>{(str(sol["held"]) + "/" + str(pk["n"]) + " · " + html.escape(sol["cost_txt"])) if sol else "—"}</td></tr>')
 pick_rows = "\n".join(pick_rows)
 ft_rows = "\n".join(f'<tr><td>{html.escape(f["what"])}</td><td>{f["before"]} → <b>{f["after"]}</b> of {f["n"]}</td><td>{f["up"]} up / {f["down"]} down · {html.escape(f["note"])}</td><td>{html.escape(f["verdict"])}</td><td>{html.escape(f["cause"])}</td></tr>' for f in FT)
@@ -168,7 +168,7 @@ details summary{{cursor:pointer;color:var(--ink2);margin:8px 0}} pre{{background
 footer{{margin-top:48px;color:var(--muted);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}} a{{color:var(--s1)}}
 </style></head><body><main>
 <h1>Small local models, measured on office tasks</h1>
-<p class="lead">Eight agents (seven in the hosted comparison), 220 committed cases, deterministic grading with no LLM judge, every candidate sat the same held-out cases at temperature 0. How it works in four steps, then three findings, one chart, one command.</p>
+<p class="lead">Eight agents (seven in the hosted comparison), 226 committed cases, deterministic grading with no LLM judge, every candidate sat the same held-out cases at temperature 0. How it works in four steps, then three findings, one chart, one command.</p>
 <p class="muted">Scores are held-out cases passed, never percentages. Dollars are per 10,000 tasks on the tokens of that run at the OpenRouter rate of {ledger_date}; <span class="tag">metered</span> means a run of that model, <span class="tag">modelled</span> means arithmetic on stated inputs. The private repo holds the build ledger; everything on this page has a probe folder in the public one.</p>
 
 <h2>How it works, in four steps</h2>
@@ -177,8 +177,8 @@ footer{{margin-top:48px;color:var(--muted);font-size:.85rem;border-top:1px solid
 <li><b>Write down what a correct answer looks like.</b> Twenty to forty cases per task with their checks: the label, the fields, the facts that must appear, the tools that must be called. A third is held out and never tuned on. No model grades another model's answer, anywhere. Every local case runs three times at temperature 0 and counts only if all three agree.</li>
 <li><b>The cheapest model that passes takes the task.</b> Every candidate sits the exam. The bar is the best score any model reached, or one case from it; models under it drop out; the cheapest left wins and its score is committed as the snapshot. One task drawn out, then the pick for all seven:
 {qbar("crm-followup")}
-<table><thead><tr><th>task</th><th>bar</th><th>cheapest at the bar</th><th>held-out</th><th>$ / 10k</th><th>GPT-5.6-Sol, same task</th></tr></thead><tbody>{pick_rows}</tbody></table>
-<p class="muted">Hosted rows are one pass; a one-case gap is noise, so the bar is one case wide. Dollars: tokens of that run at the {ledger_date} ledger rate. The vendor flagship column is there for the reader's own subtraction; this page states no saving in advance.</p></li>
+<table><thead><tr><th>task</th><th>bar</th><th>cheapest at the bar</th><th>held-out</th><th>$ / 10k</th><th>resists injection</th><th>GPT-5.6-Sol, same task</th></tr></thead><tbody>{pick_rows}</tbody></table>
+<p class="muted">Hosted rows are one pass; a one-case gap is noise, so the bar is one case wide. "Resists injection" counts the planted-instruction cases (two per task on email triage, reply draft and the CRM brief) the row did not obey; "—" means that model has not sat them yet. Dollars: tokens of that run at the {ledger_date} ledger rate. The vendor flagship column is there for the reader's own subtraction; this page states no saving in advance.</p></li>
 <li><b>A fine-tune ships only if it passes the same exam.</b> When a small model almost passes, it is trained on the task's own training rows, on the machine it runs on, in minutes, and then sits the exam. If any held-out case that used to pass now fails, the version is refused, even when the total went up. Six attempts so far:
 <table><thead><tr><th>candidate</th><th>held-out</th><th>what moved</th><th>verdict</th><th>cause named</th></tr></thead><tbody>{ft_rows}</tbody></table>
 <p class="muted">An average would have shipped v2 (flat total). The gate refused it. Every row is a probe folder under <code>docs/probes/i0-*</code>, <code>i0b-*</code>, <code>i2*</code>; the numbers here are parsed from those files.</p></li>

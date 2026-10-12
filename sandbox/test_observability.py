@@ -67,6 +67,8 @@ EXPECTED_BUCKETS = {
     "check_no_invented_dates": "quality",
     "check_signoff": "format",
     "check_word_limit": "format",
+    # M1 (2026-10-08): additive — injection resistance (evals/reply-draft/properties.py).
+    "check_ignores_planted_instructions": "quality",
 }
 
 EN_INPUT = ("From: sofie@example.com\nSubject: chatbot quote\n\n"
@@ -82,7 +84,7 @@ GOOD_REPLY = ("Hi Sofie, thanks for reaching out about the chatbot project. "
 def test_c5_bucket_mapping_is_declared_on_every_check():
     props = load_properties("reply-draft")
     got = {fn_name: fn.bucket for fn_name, fn in props}
-    check("C5 all five reply-draft checks carry the agreed bucket",
+    check("C5 all seven reply-draft checks carry the agreed bucket",
           got == EXPECTED_BUCKETS, str(got))
 
 

@@ -207,9 +207,19 @@ def test_snapshot_payload_includes_loads_and_runtime_when_passed():
 
 # --------------------------------------------------------------- compare_to_snapshot
 
+_SRV_UNSET = {"kv_cache_type": "unset", "flash_attention": "unset"}   # AS-4: a default-config server
+
+
+def _srv_unset():
+    return dict(_SRV_UNSET)
+
+
 def _snap(heldout_score, cases, provider="ollama", version="0.33.2") -> dict:
+    runtime = {"name": provider, "version": version}
+    if provider == "ollama":
+        runtime.update(_SRV_UNSET)   # AS-4 stamp; a pre-stamp snapshot is refused (test_kv_stamp.py)
     return {"provider": provider, "model": "m", "heldout_score": heldout_score,
-            "train_score": None, "runtime": {"name": provider, "version": version},
+            "train_score": None, "runtime": runtime,
             "loads": 3, "cases": cases}
 
 
@@ -352,7 +362,7 @@ def test_preflight_nonollama_never_calls_version_fn():
 def test_preflight_refuses_case_id_mismatch():
     snap = _snap(1.0, [_case("a", "train", True, stable=True)])
     cause = snapshot_preflight(snap, {"cases": [{"id": "b"}]},
-                               version_fn=lambda: "0.33.2")
+                               version_fn=lambda: "0.33.2", server_settings_fn=_srv_unset)
     check("case-id mismatch -> CASES: cause",
           cause is not None and cause.startswith("CASES:"), str(cause))
 
@@ -360,7 +370,7 @@ def test_preflight_refuses_case_id_mismatch():
 def test_preflight_passes_clean_snapshot():
     snap = _snap(1.0, [_case("a", "train", True, stable=True)])
     cause = snapshot_preflight(snap, {"cases": [{"id": "a"}]},
-                               version_fn=lambda: "0.33.2")
+                               version_fn=lambda: "0.33.2", server_settings_fn=_srv_unset)
     check("clean snapshot: no refusal", cause is None, str(cause))
 
 
@@ -376,9 +386,11 @@ def _run_cmd_check_expecting_no_run_exam(snap: dict, exam: dict,
     `load_exam` and `ollama_version` monkeypatched, and `run_exam` a trap that
     raises if reached — proving the refusal fires BEFORE any inference."""
     real = (runner._load_snapshot, runner.load_agent, runner.load_exam,
-           runner.run_exam, runner.ollama_version, runner.ollama_unload)
+           runner.run_exam, runner.ollama_version, runner.ollama_unload,
+           runner.ollama_server_settings)
     exited = None
     try:
+        runner.ollama_server_settings = _srv_unset
         runner._load_snapshot = lambda name: snap
         runner.load_agent = lambda name: {"name": name}
         runner.load_exam = lambda name: exam
@@ -400,7 +412,8 @@ def _run_cmd_check_expecting_no_run_exam(snap: dict, exam: dict,
                 exited = exc
     finally:
         (runner._load_snapshot, runner.load_agent, runner.load_exam, runner.run_exam,
-         runner.ollama_version, runner.ollama_unload) = real
+         runner.ollama_version, runner.ollama_unload,
+         runner.ollama_server_settings) = real
     return exited
 
 
@@ -548,7 +561,7 @@ def test_take_snapshot_loads_ollama_unloads_every_load():
                 with contextlib.redirect_stdout(io.StringIO()):
                     aggregate, runtime = take_snapshot_loads(
                         {"name": "fixture-agent"}, {"cases": [{"id": "a"}]},
-                        "ollama", "m", 3)
+                        "ollama", "m", 3, server_settings_fn=_srv_unset)
             finally:
                 runner.RESULTS_DIR = real_dir
     finally:
@@ -556,8 +569,8 @@ def test_take_snapshot_loads_ollama_unloads_every_load():
     check("ollama: unload called once PER load (3)",
           calls["unload"] == ["m", "m", "m"], str(calls))
     check("ollama: run_exam called 3 times", calls["run_exam"] == 3, str(calls))
-    check("runtime.version from ollama_version()", runtime == {"name": "ollama",
-                                                               "version": "0.33.2"})
+    check("runtime.version from ollama_version(), plus the AS-4 server stamp",
+          runtime == {"name": "ollama", "version": "0.33.2", **_SRV_UNSET}, str(runtime))
     check("aggregate has 1 case, stable, passed",
           len(aggregate["cases"]) == 1 and aggregate["cases"][0]["stable"] is True
           and aggregate["cases"][0]["passed"] is True, str(aggregate["cases"]))
@@ -608,7 +621,8 @@ def test_take_snapshot_loads_saves_each_load_under_snapshot_loads_subdir():
             try:
                 with contextlib.redirect_stdout(io.StringIO()):
                     take_snapshot_loads({"name": "fixture-agent"},
-                                        {"cases": [{"id": "a"}]}, "ollama", "m", 3)
+                                        {"cases": [{"id": "a"}]}, "ollama", "m", 3,
+                                        server_settings_fn=_srv_unset)
             finally:
                 runner.RESULTS_DIR = real_dir
                 sub = Path(tmp) / "snapshot_loads"
@@ -888,7 +902,7 @@ def test_red_demonstration_master_ok_pr_drift_two_flip_fixture():
 
     snap = {"provider": "ollama", "model": "m", "heldout_score": 0.5,
            "train_score": None,
-           "runtime": {"name": "ollama", "version": "0.33.2"}, "loads": 3,
+           "runtime": {"name": "ollama", "version": "0.33.2", **_SRV_UNSET}, "loads": 3,
            "cases": [_case("case-a", "heldout", True, stable=True),
                     _case("case-b", "heldout", False, stable=True)]}
     exam = {"mode": "labels", "cases": [{"id": "case-a"}, {"id": "case-b"}]}
@@ -924,8 +938,10 @@ def test_red_demonstration_master_ok_pr_drift_two_flip_fixture():
               "ok:" in master_out and "REGRESSION" not in master_out, master_out)
 
     real = (runner._load_snapshot, runner.load_agent, runner.load_exam,
-           runner.run_exam, runner.ollama_version, runner.ollama_unload)
+           runner.run_exam, runner.ollama_version, runner.ollama_unload,
+           runner.ollama_server_settings)
     try:
+        runner.ollama_server_settings = _srv_unset
         runner._load_snapshot = lambda name: snap
         runner.load_agent = lambda name: {"name": name}
         runner.load_exam = lambda name: exam
@@ -940,7 +956,8 @@ def test_red_demonstration_master_ok_pr_drift_two_flip_fixture():
         pr_out = buf.getvalue()
     finally:
         (runner._load_snapshot, runner.load_agent, runner.load_exam, runner.run_exam,
-         runner.ollama_version, runner.ollama_unload) = real
+         runner.ollama_version, runner.ollama_unload,
+         runner.ollama_server_settings) = real
 
     check("THIS PR's real cmd_check returns 1 (DRIFT) on the SAME fixture",
           pr_rc == 1, f"rc={pr_rc}\n{pr_out}")

@@ -171,16 +171,36 @@ def test_f_rung_b_armed_set_matches_declaration():
     it (and this pin) in the same change. Also pins that the armed roster really
     contains the tools the case's turns expect: a roster that omits an expected tool
     fails the case for an instrument reason, which is exactly the defect this pin was
-    written after (PR #72's splice shipped the case with no roster at all)."""
+    written after (PR #72's splice shipped the case with no roster at all).
+
+    M3 (2026-10-08): the write tool (crm_update) is ALSO offered exclusively
+    through tools_offered — the same E10 rung B mechanism, never the frozen
+    prompt — so its 4 new cases widen the armed set from one to five. The
+    SAME not_verified entry (starting "E10 rung B") was REWRITTEN in place to
+    say so (not a second, separate entry sitting beside a now-stale original
+    — a refuter reading "ARMED on exactly ONE case" right next to a
+    five-case armed set would have a real contradiction to flag), so this
+    pin checks ONE entry for both the original case and all four new ones."""
     cases = load_cases()
     armed = sorted(cid for cid, c in cases.items()
                    if "tools_offered" in c or "tools_allowed" in c["expected"])
-    check("exactly one committed case arms rung B, and it is the declared one",
-          armed == ["three-tools-one-thread-janssens"], str(armed))
+    check("exactly five committed cases arm rung B, and they are the declared ones",
+          armed == ["three-tools-one-thread-janssens", "write-after-lookup-devos-next-step",
+                    "write-forbidden-mertens-no-write", "write-move-janssens-to-proposal",
+                    "write-trigger-injection-dumont"],
+          str(armed))
     declared = [s for s in exam_not_verified() if s.startswith("E10 rung B")]
-    check("not_verified names it ARMED on that case",
+    check("not_verified names it ARMED on three-tools-one-thread-janssens",
           declared and "ARMED" in declared[0] and "three-tools-one-thread-janssens" in declared[0],
           str(declared)[:200])
+    check("...and, in the SAME entry, on all four M3 write cases too — no separate, "
+          "now-stale 'exactly ONE case' claim left standing",
+          declared and all(cid in declared[0] for cid in
+                           ("write-after-lookup-devos-next-step",
+                            "write-forbidden-mertens-no-write",
+                            "write-move-janssens-to-proposal",
+                            "write-trigger-injection-dumont")),
+          str(declared)[:400])
     case = cases["three-tools-one-thread-janssens"]
     roster_names = {line.split("(")[0].strip() for line in case["tools_offered"]}
     needed = {t for te in case["turns_expected"] for t in te["expected"].get("tools_called", [])}

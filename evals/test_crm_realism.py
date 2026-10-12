@@ -274,13 +274,22 @@ def test_v_backend_down_still_raises():
 # CRM-realism lane, PASS 2 (docs/crm-realism-pass2-resume-2026-08-31.md) — the
 # operator's CLASS RULE, replacing item 7's former per-field enumeration: no
 # normalized digit token of length >= 3 may appear in the enveloped payloads of
-# more than one of the FIVE companies (janssens bakery, devos garage, vitrine
-# restaurant, mertens interieur, peeters logistics — peeters has no _CRM entry
-# but its deals_list renders a full envelope, so the domain below is derived
-# from _CRM ∪ _DEALS, never from _CRM.keys() alone; a domain keyed off _CRM
-# alone would silently miss the peeters gap this rule exists to catch — the
-# RED demo against exactly that 4-company-keyed domain is pasted in the PR
-# body, not re-run here as a permanent test).
+# more than one of the SIX companies (janssens bakery, devos garage, vitrine
+# restaurant, mertens interieur, peeters logistics, hendrickx tuinbouw —
+# peeters has no _CRM entry but its deals_list renders a full envelope, so the
+# domain below is derived from _CRM ∪ _DEALS, never from _CRM.keys() alone; a
+# domain keyed off _CRM alone would silently miss the peeters gap this rule
+# exists to catch — the RED demo against exactly that 4-company-keyed domain
+# is pasted in the PR body, not re-run here as a permanent test).
+#
+# "hendrickx tuinbouw" (M1, 2026-10-08) is the sixth company — a brand-new
+# fixture record for the two injection cases (evals/crm-followup/cases.json),
+# added to _CRM only. Widening this domain from five to six is the direct,
+# intended consequence of that addition, not a drift this test should hide:
+# the whole point of the digit-token-uniqueness and needle-collision guards
+# below is to catch a NEW company's filler leaking into an OLD company's
+# grounding corpus (or vice versa), and a new company must be IN the swept
+# domain for that protection to apply to it at all.
 #
 # Token extraction and normalization MIRROR the runner's own grounding
 # semantics BY IMPORT — never reimplemented: the token grammar is the runner's
@@ -310,7 +319,9 @@ from runner import _norm_digits, _needle_matches  # noqa: E402  (sanctioned impo
 _TOKEN_RE = re.compile(r"\d[\d.,/-]*")
 
 _FIVE_COMPANIES = ["janssens bakery", "devos garage", "vitrine restaurant",
-                   "mertens interieur", "peeters logistics"]
+                   "mertens interieur", "peeters logistics",
+                   "hendrickx tuinbouw",  # M1 (2026-10-08): the sixth, injection-only company
+                   "dumont makelaardij"]  # M3 (2026-10-08): the seventh, write-trigger-injection company
 
 
 def _digit_tokens(text: str) -> set:
@@ -362,7 +373,7 @@ def _scored_fact_tokens_by_company() -> dict:
 def test_vi_digit_token_uniqueness():
     m = mock()
     companies = sorted(set(m._CRM) | set(m._DEALS))
-    check("company domain is the FIVE companies (_CRM UNION _DEALS), not "
+    check("company domain is the SEVEN companies (_CRM UNION _DEALS), not "
           "_CRM.keys() alone (that would drop peeters logistics)",
           companies == sorted(_FIVE_COMPANIES), repr(companies))
     envelopes = _enveloped_payloads(m, companies)
@@ -462,6 +473,14 @@ NEEDLE_COMPANY = {
     # 'Jan De Vos' read as belonging to a different company, and 'de vos'
     # (the needle, lowercased) is not a substring of 'devos' (no space).
     ("crm-outage-mid-sweep", "De Vos"): "devos garage",
+    # M1 (2026-10-08): the two injection cases, same mapping discipline as every
+    # other entry above.
+    ("briefing-hendrickx-injection", "Wouter Hendrickx"): "hendrickx tuinbouw",
+    ("status-hendrickx-injection", "2026-05-17"): "hendrickx tuinbouw",
+    # M3 (2026-10-08): the write cases, same mapping discipline.
+    ("write-move-janssens-to-proposal", "proposal"): "janssens bakery",
+    ("write-after-lookup-devos-next-step", "Jan De Vos"): "devos garage",
+    ("write-trigger-injection-dumont", "Elke Dumont"): "dumont makelaardij",
 }
 
 

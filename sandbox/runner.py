@@ -26,11 +26,14 @@ import importlib.util
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
+from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
@@ -454,8 +457,32 @@ def _call_key(tool: str, args: dict) -> tuple[str, str]:
     return (tool, json.dumps(args, sort_keys=True, ensure_ascii=False))
 
 
+# AS-3 SCOPED-RULE HOOK (M6 follow-up). NOT the E27 `--assembly scoped` feature
+# (ASSEMBLY_MODES / _scoped_context): unrelated mechanism, and the two are refused
+# together (run_exam / cmd_run) because a scoped assembly can drop the injected block. A `run`-only arm that
+# shows ONE rule inside the tool loop, right after the model repeats a call that already
+# succeeded. "scoped" = the E6 library fix text; "sham" = length-matched generic text at
+# the same moments. Both bodies are 125 chars / 23 whitespace words; the equality is a
+# declared PROXY for token count (no tokenizer offline) - the arms job meters the real
+# prompt_tokens difference. Same framing for both arms; only the body differs.
+SCOPED_RULE_ARMS = ("off", "scoped", "sham")
+SCOPED_RULE_FRAMING = "Note: "
+SCOPED_RULE_BODIES = {
+    "scoped": ("never repeat a tool call with identical arguments after an error; "
+               "state that the source is down and answer with what you have"),
+    "sham": ("keep a calm and courteous tone in every reply; pick plain words, "
+             "short sentences and the same names that your users have used"),
+}
+
+
+def _check_scoped_rule(scoped_rule: str) -> None:
+    if scoped_rule not in SCOPED_RULE_ARMS:
+        raise ValueError(f"scoped_rule must be one of {SCOPED_RULE_ARMS}, got {scoped_rule!r}")
+
+
 def _run_tool_loop(agent, messages: list, expected: dict, adapter, model, tools_mod,
-                   dedupe_tools: bool = False) -> tuple[dict, dict, list]:
+                   dedupe_tools: bool = False,
+                   scoped_rule: str = "off") -> tuple[dict, dict, list]:
     """Tool loop: model emits {"tool": ..., "args": {...}} or {"answer": "..."}.
     Runner-internal — MULTITURN-EXAM's extraction of run_trajectory_case's loop
     body so it can be reused, unchanged, once per turn (each call is a fresh,
@@ -522,11 +549,25 @@ def _run_tool_loop(agent, messages: list, expected: dict, adapter, model, tools_
     error-shaped dict without raising (the no-record case) is a normal result and is
     dedupe-eligible.
 
+    scoped_rule (AS-3, default "off"; "scoped" | "sham"): an inert-by-default hook. When
+    on, the FIRST call in this invocation whose `_call_key` equals that of an EARLIER call
+    that SUCCEEDED (resolved, executed without raising, and did not return a dict with a
+    top-level "error" key) appends a blank line + framing + arm body to the tool-result
+    user message that follows it. At most once per invocation; never added to tool_results
+    or raw_steps; no extra message. Recorded as trace["scoped_rule"] only when not "off".
+    It does not touch `cache`, dedupe, or any check. Each fired entry carries
+    `delivered`: True once a LATER model call in this invocation was made with the block
+    in its messages. A repeat on the last allowed step injects into a message no call
+    ever receives, so it stays False (a fire, not an exposure).
+
     With the flag OFF every branch below is inert: the cache is written but never
     read, no deduped_calls key is attached, and the loop is the same
     `for _step in range(max_steps)` it always was. The committed gate and every
     existing snapshot depend on that."""
+    _check_scoped_rule(scoped_rule)
     max_steps = expected.get("max_steps", 4)
+    succeeded: set = set()    # AS-3: keys of calls that ran clean AND returned no error envelope
+    scoped_fired: list = []   # AS-3: at most one entry per invocation
     called = []
     tool_calls = []    # [{"tool", "args"}] per call — the redundancy monitor's feed
     tool_results = []  # what the tools actually RETURNED — the grounding corpus.
@@ -538,6 +579,9 @@ def _run_tool_loop(agent, messages: list, expected: dict, adapter, model, tools_
     termination: dict | None = None  # D2: set only when a call emitted no answer
     protocol_break: dict | None = None  # R7: set only when a call was unparseable
     for _step in range(max_steps):
+        if scoped_fired and not scoped_fired[0]["delivered"]:
+            # AS-3: the injected block reaches the model only if a later call is made.
+            scoped_fired[0]["delivered"] = True
         try:
             parsed, raw, metrics = call_model(agent, adapter, model, messages)
         except ParseFailure as exc:
@@ -600,6 +644,14 @@ def _run_tool_loop(agent, messages: list, expected: dict, adapter, model, tools_
             name = parsed["tool"]
             args = parsed.get("args", {})
             key = _call_key(name, args)
+            # AS-3: evaluated BEFORE this call executes, against earlier successes only.
+            # isinstance first: a non-string tool name must fail exactly as it does with the
+            # hook off (the dispatch below raises), never earlier with a different exception.
+            inject = (scoped_rule != "off" and not scoped_fired and isinstance(name, str)
+                      and key in succeeded)
+            if inject:
+                scoped_fired.append({"step": _step, "tool": name, "args": args,
+                                     "delivered": False})
             if dedupe_tools and key in cache:
                 # Suppressed repeat: serve the cached result, never re-execute the
                 # tool, and leave no tool_calls entry the monitor could grade. The
@@ -609,7 +661,13 @@ def _run_tool_loop(agent, messages: list, expected: dict, adapter, model, tools_
             else:
                 called.append(name)
                 tool_calls.append({"tool": name, "args": args})
-                fn = getattr(tools_mod, name, None)
+                # M3 round-trip 4 (PR #101 refuters): the mock's harness hooks are NOT
+                # tools. `tools_offered` only edits the prompt text; dispatch reached
+                # every public attribute by name, so a model (or a planted line) could
+                # emit {"tool": "reset_state"} and erase its own write log before
+                # score_case reads state() — reproduced through run_exam. Hooks and
+                # underscore names resolve to "unknown tool", exactly like a typo.
+                fn = None if (name.startswith("_") or name in HARNESS_HOOKS) else getattr(tools_mod, name, None)
                 cacheable = False
                 if fn is None:
                     # Not an execution at all — never cached, so a repeated unknown
@@ -619,6 +677,8 @@ def _run_tool_loop(agent, messages: list, expected: dict, adapter, model, tools_
                     try:
                         tool_result = fn(**args)
                         cacheable = True
+                        if not (isinstance(tool_result, dict) and "error" in tool_result):
+                            succeeded.add(key)
                     except Exception as exc:
                         tool_result = {"error": str(exc)}
                 tool_results.append(tool_result)
@@ -626,9 +686,10 @@ def _run_tool_loop(agent, messages: list, expected: dict, adapter, model, tools_
                     cache[key] = tool_result
             messages.append({"role": "assistant", "content": raw})
             raw_steps.append(raw)
-            messages.append({"role": "user",
-                             "content": json.dumps({"tool_result": tool_result},
-                                                   ensure_ascii=False)})
+            content = json.dumps({"tool_result": tool_result}, ensure_ascii=False)
+            if inject:
+                content += "\n\n" + SCOPED_RULE_FRAMING + SCOPED_RULE_BODIES[scoped_rule]
+            messages.append({"role": "user", "content": content})
         else:
             break  # neither tool nor answer: protocol violation, scored below
     # steps counts the model turns that produced a tool call, plus the answer turn.
@@ -656,6 +717,10 @@ def _run_tool_loop(agent, messages: list, expected: dict, adapter, model, tools_
     if protocol_break is not None:
         # Same rule: attached only on the event (sandbox/test_protocol_break.py).
         trace_extra = {**trace_extra, "protocol_break": protocol_break}
+    if scoped_rule != "off":
+        # AS-3: attached whenever the arm ran (fired may be empty) - absent when off.
+        trace_extra = {**trace_extra,
+                       "scoped_rule": {"arm": scoped_rule, "fired": scoped_fired}}
     return parsed, {"tools_called": called, "tool_calls": tool_calls,
                      "tool_results": tool_results, "steps": steps,
                      "metrics": combine_metrics(step_metrics),
@@ -663,7 +728,8 @@ def _run_tool_loop(agent, messages: list, expected: dict, adapter, model, tools_
 
 
 def run_trajectory_case(agent, case, adapter, model, tools_mod,
-                        dedupe_tools: bool = False) -> tuple[dict, dict]:
+                        dedupe_tools: bool = False,
+                        scoped_rule: str = "off") -> tuple[dict, dict]:
     """A case WITHOUT `turns`: build the system+user prefix, run ONE independent
     tool loop over it via `_run_tool_loop`, return (parsed, trace) — byte-identical
     to this function's pre-MULTITURN-EXAM body (criterion 1's witness), because the
@@ -680,7 +746,7 @@ def run_trajectory_case(agent, case, adapter, model, tools_mod,
                 {"role": "user", "content": case["input"]}]
     parsed, trace, _step_metrics = _run_tool_loop(
         agent, messages, case["expected"], adapter, model, tools_mod,
-        dedupe_tools=dedupe_tools)
+        dedupe_tools=dedupe_tools, scoped_rule=scoped_rule)
     return parsed, trace
 
 
@@ -712,7 +778,8 @@ def _turn_expected(case: dict, k: int, turn_text: str) -> dict:
 
 def _score_one_turn(parsed: dict, trace: dict, expected: dict, input_text: str,
                     turn_index: int | None = None, known_entities: tuple = (),
-                    scope_text: str | None = None) -> tuple[bool, list, list]:
+                    scope_text: str | None = None,
+                    write_state: list | None = None) -> tuple[bool, list, list]:
     """The ONE call site of score_trajectory( in this file (criterion 9) — every
     trajectory-mode verdict, single-turn or per-turn, is produced here. Relocates
     BOTH pre-MULTITURN-EXAM pieces of attempt()'s trajectory branch verbatim: the
@@ -727,10 +794,17 @@ def _score_one_turn(parsed: dict, trace: dict, expected: dict, input_text: str,
     well as the termination entry — gains a "turn" key (criterion 2: "each
     failed_checks entry names its turn"), while the no-turns call keeps the
     original two-key {"bucket", "check"} shape byte-identical for every entry
-    (criterion 1/(9a))."""
+    (criterion 1/(9a)).
+
+    M3: `write_state` (default None) is `tools_mod.state()` captured by the
+    caller right after the trajectory finished, for `expected["end_state"]`'s
+    comparison inside score_trajectory. `score_case` passes it only for a
+    no-turns case that declares end_state; `_run_turns` never passes it, so a
+    turns-bearing case's path is untouched."""
     passed, failures = score_trajectory(parsed, trace, expected, input_text,
                                         known_entities=known_entities,
-                                        scope_text=scope_text)
+                                        scope_text=scope_text,
+                                        write_state=write_state)
     failed_checks = [{"bucket": "quality", "check": _trajectory_check_id(f),
                       **({"turn": turn_index} if turn_index is not None else {})}
                      for f in failures]
@@ -813,7 +887,8 @@ def _scoped_context(history: list, turn_text: str) -> tuple[list, int]:
 
 def _run_turns(agent, case, adapter, model, tools_mod,
               dedupe_tools: bool = False,
-              assembly: str = "full") -> tuple[dict, dict, bool, list, list]:
+              assembly: str = "full",
+              scoped_rule: str = "off") -> tuple[dict, dict, bool, list, list]:
     """Score a `turns`-bearing case: turn k gets its OWN independent tool loop — a
     fresh call to `_run_tool_loop` every turn, which means a fresh step counter and
     a fresh dedupe `cache` every turn BY CONSTRUCTION (this is the NEW loop-internal
@@ -876,6 +951,7 @@ def _run_turns(agent, case, adapter, model, tools_mod,
     all_passed = True
     last_parsed: dict = {}
     all_deduped_calls: list = []
+    all_scoped_fired: list = []   # AS-3 roll-up, each entry tagged with its turn
     for k, turn_text in enumerate(case["turns"]):
         expected_k = _turn_expected(case, k, turn_text)
         turn_texts.append(turn_text)
@@ -894,7 +970,7 @@ def _run_turns(agent, case, adapter, model, tools_mod,
         context.append({"role": "user", "content": turn_text})
         parsed_k, trace_k, step_metrics_k = _run_tool_loop(
             agent, context, expected_k, adapter, model, tools_mod,
-            dedupe_tools=dedupe_tools)
+            dedupe_tools=dedupe_tools, scoped_rule=scoped_rule)
         if context is not messages:
             messages.extend(context[splice_from:])
         last_parsed = parsed_k
@@ -938,6 +1014,13 @@ def _run_turns(agent, case, adapter, model, tools_mod,
         if "deduped_calls" in trace_k:
             entry["deduped_calls"] = trace_k["deduped_calls"]
             all_deduped_calls.extend(trace_k["deduped_calls"])
+        if "scoped_rule" in trace_k:
+            entry["scoped_rule"] = trace_k["scoped_rule"]
+            # Roll-up `delivered`: in this turn, or by the next turn's first call (the
+            # block stays in the shared history). The per-turn entry keeps the in-turn value.
+            later = k < len(case["turns"]) - 1
+            all_scoped_fired.extend({"turn": k, **f, "delivered": f["delivered"] or later}
+                                    for f in trace_k["scoped_rule"]["fired"])
         if "termination" in trace_k:
             entry["termination"] = trace_k["termination"]
         if "protocol_break" in trace_k:
@@ -971,12 +1054,15 @@ def _run_turns(agent, case, adapter, model, tools_mod,
         # _deduped_cases()) finds the suppressed-repeat exposure count without
         # having to know about the per-turn breakdown inside "turns".
         trace["deduped_calls"] = all_deduped_calls
+    if scoped_rule != "off":
+        trace["scoped_rule"] = {"arm": scoped_rule, "fired": all_scoped_fired}
     return last_parsed, trace, all_passed, all_failures, all_failed_checks
 
 
 def score_case(agent, case, adapter, model, tools_mod,
               dedupe_tools: bool = False,
-              assembly: str = "full") -> tuple[dict, dict, bool, list, list]:
+              assembly: str = "full",
+              scoped_rule: str = "off") -> tuple[dict, dict, bool, list, list]:
     """THE single chokepoint (criterion 9): the ONLY function that produces a
     trajectory-mode case's (passed, failures, failed_checks). attempt()'s
     trajectory branch assigns `passed`/`failures` from this function's return and
@@ -992,18 +1078,30 @@ def score_case(agent, case, adapter, model, tools_mod,
 
     Returns (parsed, trace, passed, failures, failed_checks) — `trace` is what
     attempt() splices into `detail` via `detail.update(trace)`, exactly as the
-    pre-lane `trace` from run_trajectory_case was."""
+    pre-lane `trace` from run_trajectory_case was.
+
+    M3: a no-`turns` case that declares `expected["end_state"]` has
+    `tools_mod.state()` read HERE, right after the trajectory finished and
+    before scoring — the CRM record as the run left it — and threaded into
+    `_score_one_turn` as `write_state`. A case without the key never reads
+    `state()` at all, so a tools_mod lacking it (every pre-M3 agent) is never
+    touched: byte-identical to the pre-lane path."""
     if "turns" not in case:
         parsed, trace = run_trajectory_case(agent, case, adapter, model, tools_mod,
-                                            dedupe_tools=dedupe_tools)
+                                            dedupe_tools=dedupe_tools,
+                                            scoped_rule=scoped_rule)
+        write_state = None
+        if "end_state" in case["expected"]:
+            state_fn = getattr(tools_mod, "state", None)
+            write_state = state_fn() if state_fn is not None else []
         passed, failures, failed_checks = _score_one_turn(
             parsed, trace, case["expected"], case["input"], turn_index=None,
-            known_entities=_known_entities(tools_mod))
+            known_entities=_known_entities(tools_mod), write_state=write_state)
         return parsed, trace, passed, failures, failed_checks
     # `assembly` is consumed ONLY here: a no-`turns` case has no history to scope,
     # so run_trajectory_case never sees the knob (E27 criterion 4 by construction).
     return _run_turns(agent, case, adapter, model, tools_mod, dedupe_tools=dedupe_tools,
-                      assembly=assembly)
+                      assembly=assembly, scoped_rule=scoped_rule)
 
 
 def _date_parts(tok: str):
@@ -1282,9 +1380,51 @@ def _error_recovery_failures(er: dict, answer: str, trace: dict,
     return failures
 
 
+# Names a tools module exposes for the RUNNER, never for the model. Pinned by
+# evals/test_end_state.py (a scripted trajectory that calls reset_state as a tool).
+HARNESS_HOOKS = frozenset({"reset_state", "state"})
+
+
+def _hashable(v):
+    """A write's field/value as a Counter key: scalars as they are, anything a
+    model might pass as JSON (a dict, a list) as its canonical JSON text — so a
+    non-string value is an end_state MISMATCH, never a TypeError (PR #101 review)."""
+    return v if v is None or isinstance(v, (str, int, float, bool)) else json.dumps(v, sort_keys=True, ensure_ascii=False)
+
+
+def _end_state_key(entry: dict) -> tuple:
+    """A write's identity for the multiset comparison below: company
+    case-insensitive (CRM record identity shouldn't depend on casing a model or
+    a case author happened to type), field and value EXACT (a field typo or a
+    rephrased value is a different write, not the same one)."""
+    return (str(entry.get("company", "")).strip().lower(),
+            _hashable(entry.get("field")), _hashable(entry.get("value")))
+
+
+def _end_state_failures(expected_writes: list, write_state) -> list:
+    """M3 action check: the CRM record after the run, not the transcript.
+    EXACT multiset comparison — every expected write present AND no extra
+    write (an extra write is how an injected write gets caught, not just a
+    missing one). `write_state` is the trace of tool_mod.state() captured by
+    the caller right after the trajectory finished; None (a no-turns caller
+    that never threaded it, or a turns-bearing case, which end_state does not
+    support) is treated as "no writes observed" rather than skipped — a case
+    that declares end_state must fail loud, not pass vacuously, when nothing
+    supplies the actual state. ONE failure string, so failed_checks gains
+    exactly one entry regardless of how many writes differ."""
+    want = Counter(_end_state_key(e) for e in expected_writes)
+    got = Counter(_end_state_key(e) for e in (write_state or []))
+    missing = sorted((want - got).elements())
+    extra = sorted((got - want).elements())
+    if not missing and not extra:
+        return []
+    return [f"end_state: missing {missing} extra {extra}"]
+
+
 def score_trajectory(parsed: dict, trace: dict, expected: dict,
                      input_text: str, known_entities: tuple = (),
-                     scope_text: str | None = None) -> tuple[bool, list]:
+                     scope_text: str | None = None,
+                     write_state: list | None = None) -> tuple[bool, list]:
     failures = []
     answer = str(parsed.get("answer", ""))
     if not answer:
@@ -1428,6 +1568,14 @@ def score_trajectory(parsed: dict, trace: dict, expected: dict,
                             f"identical args {call['args']}")
         else:
             seen.add(key)
+
+    # M3 action check (2026-10-08): the CRM record after the run, not the
+    # transcript. Gated on the key's presence so a case without "end_state"
+    # takes the IDENTICAL path as before this lane — write_state is read but
+    # never compared. See _end_state_failures for the comparison contract.
+    if "end_state" in expected:
+        failures.extend(_end_state_failures(expected["end_state"], write_state))
+
     return not failures, failures
 
 
@@ -1479,6 +1627,7 @@ _TRAJECTORY_FAILURE_CHECKS = (
     ("ungrounded date/decimal ", "grounded_answer"),
     ("ungrounded number ", "grounded_answer"),
     ("redundant tool call: ", "redundancy"),
+    ("end_state: ", "end_state"),
 )
 
 
@@ -1506,7 +1655,14 @@ def _judge_check_id(failure: str) -> str:
 
 def run_exam(agent: dict, exam: dict, provider: str, model: str,
              timeout: int | None = None, dedupe_tools: bool = False,
-             assembly: str = "full") -> dict:
+             assembly: str = "full", scoped_rule: str = "off") -> dict:
+    _check_scoped_rule(scoped_rule)   # before the case boundary, which would swallow it
+    if scoped_rule != "off" and assembly != "full":
+        # AS-3: the turns roll-up credits delivery to the next turn's first call, which is
+        # true only when that call carries the full history. A scoped assembly can drop the
+        # injected message, so the combination is refused rather than mis-recorded.
+        raise ValueError(f"scoped_rule={scoped_rule!r} requires assembly 'full' "
+                         f"(got {assembly!r})")
     adapter = adapter_for(agent, provider, timeout)
     mode = exam.get("mode", "labels")
     props = load_properties(agent["name"])
@@ -1531,6 +1687,15 @@ def run_exam(agent: dict, exam: dict, provider: str, model: str,
         failures: list = []
         failed_checks: list = []
         if mode == "trajectory":
+            # M3: reset the mock's write log before EVERY attempt, not once per
+            # outer case-id loop — a sampled case (samples > 1, pass@k) calls
+            # attempt() several times for the SAME case, and a stale write from
+            # attempt N-1 must never be visible to attempt N's end_state check.
+            # `tools_mod` has no `reset_state` for any pre-M3 agent, so this is
+            # a no-op everywhere but crm-followup's write cases.
+            reset_fn = getattr(tools_mod, "reset_state", None)
+            if reset_fn is not None:
+                reset_fn()
             # MULTITURN-EXAM (criterion 9): score_case is the SOLE producer of a
             # trajectory-mode verdict. The pre-lane outer score_trajectory(...) call
             # and the D2 termination-override block that used to sit here (master
@@ -1539,7 +1704,7 @@ def run_exam(agent: dict, exam: dict, provider: str, model: str,
             # `passed`/`failures` assignment in this branch.
             parsed, trace, passed, failures, failed_checks = score_case(
                 agent, case, adapter, model, tools_mod, dedupe_tools=dedupe_tools,
-                assembly=assembly)
+                assembly=assembly, scoped_rule=scoped_rule)
             # metrics always; deduped_calls only when the guard ran; termination only
             # on a death — which is how the tool evidence gathered before the death
             # reaches the record (D2). For a `turns` case, trace also carries a
@@ -1684,6 +1849,8 @@ def run_exam(agent: dict, exam: dict, provider: str, model: str,
               "train": {"passed": totals["train"][0], "total": totals["train"][1]},
               "heldout": {"passed": totals["heldout"][0], "total": totals["heldout"][1]},
               "cases": per_case}
+    if scoped_rule != "off":
+        result["scoped_rule"] = scoped_rule   # AS-3: self-describing arm result
     for split in ("train", "heldout"):
         p, t = result[split]["passed"], result[split]["total"]
         result[split]["score"] = round(p / t, 4) if t else None
@@ -1735,6 +1902,131 @@ def ollama_version() -> str:
     with urllib.request.urlopen(url, timeout=10) as resp:
         data = json.loads(resp.read())
     return data["version"]
+
+
+# ------------------------------------------------ ollama server settings stamp (AS-4, gotcha 21)
+# Ollama exposes neither the KV-cache type nor flash attention over its API (/api/version
+# carries only the version), yet both move verdicts (docs/probes/m7-kv-cache-2026-10-08:
+# q4_0 sank 2 stable held-out cases on each of two exams while runtime.version read 0.35.0
+# on every arm). So they are read from the environment of the SERVER PROCESS the runner
+# talks to — not the runner's own env (a runner-side declaration can disagree with the
+# server) and not the server log (path depends on how it was started; stale across restarts).
+OLLAMA_SERVER_ENV = {"kv_cache_type": "OLLAMA_KV_CACHE_TYPE",
+                     "flash_attention": "OLLAMA_FLASH_ATTENTION"}
+OLLAMA_STAMP_FIELDS = tuple(OLLAMA_SERVER_ENV)   # presence/compare order: kv first
+_LOOPBACK_HOSTS = ("localhost", "127.0.0.1", "::1")
+_TOOL_FALLBACKS = {"lsof": "/usr/sbin/lsof", "ps": "/bin/ps"}
+
+
+def _find_tool(name: str, which_fn=None) -> str:
+    """Resolve lsof/ps via PATH, then the standard absolute location (the scheduler runs
+    under launchd with a minimal PATH). Missing -> SystemExit, never a guess."""
+    found = (which_fn or shutil.which)(name)
+    if not found:
+        fb = _TOOL_FALLBACKS.get(name)
+        if fb and os.access(fb, os.X_OK):
+            found = fb
+    if not found:
+        raise SystemExit(f"error: ollama_server_settings: tool {name!r} not found (PATH nor "
+                         f"{_TOOL_FALLBACKS.get(name)!r}); cannot read the server's settings")
+    return found
+
+
+def _process_name(pid: str, plat: str, ps: str | None) -> str:
+    """Basename of the executable behind `pid` (darwin `ps -o comm=`, linux /proc/<pid>/comm).
+    Unreadable -> SystemExit."""
+    if plat == "darwin":
+        try:
+            proc = subprocess.run([ps, "-p", pid, "-o", "comm="], capture_output=True, text=True,
+                                  timeout=15)
+        except (OSError, subprocess.SubprocessError) as e:
+            raise SystemExit(f"error: ollama_server_settings: ps failed for pid {pid}: {e}")
+        name = proc.stdout.strip() if proc.returncode == 0 else ""
+    else:
+        try:
+            name = Path(f"/proc/{pid}/comm").read_text().strip()
+        except OSError:
+            name = ""
+    if not name:
+        raise SystemExit(f"error: ollama_server_settings: cannot read the executable name of pid {pid}")
+    return os.path.basename(name)
+
+
+def ollama_server_settings(base_url: str | None = None, *, platform: str | None = None,
+                           which_fn=None, server_name: str = "ollama") -> dict:
+    """ZERO inference. Read {"kv_cache_type", "flash_attention"} from the environment of the
+    Ollama server listening on PROVIDERS["ollama"]["base_url"] (the same server
+    ollama_version() asked). Each value is the RAW string of OLLAMA_KV_CACHE_TYPE /
+    OLLAMA_FLASH_ATTENTION, or the literal "unset" when the server's environment was read
+    and the variable is absent (Ollama then runs its default). "unset" is a known state: it
+    is stamped as-is, never normalised to "f16" and never None; so an explicit f16 against a
+    snapshot's "unset" refuses — an over-refusal, the safe direction.
+
+    Cannot be determined (non-loopback host, 0 or >1 listeners, the listener's executable is
+    not `server_name` — e.g. a docker/ssh port-forward holding the port —, unsupported
+    platform, lsof/ps missing, read failure, no PATH= in what was read — darwin `ps -E`
+    prints argv alone, rc 0, when it cannot see a process's environment —, a variable
+    appearing twice) -> SystemExit naming which; never a placeholder (same contract as
+    mlx_runtime() / ollama_version()). `server_name` exists for the tests' stand-in
+    listener; production callers never pass it."""
+    url = base_url if base_url is not None else _ollama_native_base_url()
+    parsed = urllib.parse.urlparse(url)
+    host = parsed.hostname
+    if host not in _LOOPBACK_HOSTS:
+        raise SystemExit(f"error: ollama_server_settings: ollama host {host!r} is not loopback "
+                         f"({', '.join(_LOOPBACK_HOSTS)}); cannot read a remote server's environment")
+    port = parsed.port or (443 if parsed.scheme == "https" else 80)
+    plat = platform if platform is not None else sys.platform
+    if plat != "darwin" and not plat.startswith("linux"):
+        raise SystemExit(f"error: ollama_server_settings: unsupported platform {plat!r} "
+                         f"(only darwin and linux can read a server's environment)")
+    lsof = _find_tool("lsof", which_fn)
+    ps = _find_tool("ps", which_fn) if plat == "darwin" else None
+    try:
+        out = subprocess.run([lsof, "-nP", f"-iTCP:{port}", "-sTCP:LISTEN", "-t"],
+                             capture_output=True, text=True, timeout=15)
+    except (OSError, subprocess.SubprocessError) as e:
+        raise SystemExit(f"error: ollama_server_settings: lsof failed: {e}")
+    pids = sorted(set(out.stdout.split()))
+    if len(pids) != 1:
+        raise SystemExit(f"error: ollama_server_settings: expected exactly 1 listener on port "
+                         f"{port}, found {len(pids)} ({pids}); cannot attribute settings to a server")
+    pid = pids[0]
+    if not pid.isdigit():
+        raise SystemExit(f"error: ollama_server_settings: lsof returned non-pid {pid!r}")
+    name = _process_name(pid, plat, ps)
+    if name != server_name:
+        raise SystemExit(f"error: ollama_server_settings: the listener on port {port} (pid {pid}) "
+                         f"is {name!r}, not {server_name!r}; its environment says nothing about "
+                         f"the ollama server")
+    if plat == "darwin":
+        try:
+            proc = subprocess.run([ps, "-E", "-ww", "-p", pid, "-o", "command="],
+                                  capture_output=True, text=True, timeout=15)
+        except (OSError, subprocess.SubprocessError) as e:
+            raise SystemExit(f"error: ollama_server_settings: ps failed for pid {pid}: {e}")
+        if proc.returncode != 0 or not proc.stdout.strip():
+            raise SystemExit(f"error: ollama_server_settings: ps could not read the environment "
+                             f"of pid {pid} (rc {proc.returncode})")
+        tokens = proc.stdout.split()   # argv text is mixed in before the env tokens
+    else:
+        try:
+            raw = Path(f"/proc/{pid}/environ").read_bytes()
+        except OSError as e:
+            raise SystemExit(f"error: ollama_server_settings: cannot read /proc/{pid}/environ: {e}")
+        tokens = [t.decode("utf-8", "replace") for t in raw.split(b"\0") if t]
+    if not any(t.startswith("PATH=") for t in tokens):
+        raise SystemExit(f"error: ollama_server_settings: no PATH= in what was read for pid {pid}; "
+                         f"its environment is not visible, so an absent variable cannot be "
+                         f"told from an unread one")
+    stamp = {}
+    for field, var in OLLAMA_SERVER_ENV.items():
+        vals = [t[len(var) + 1:] for t in tokens if t.startswith(var + "=")]
+        if len(vals) > 1:
+            raise SystemExit(f"error: ollama_server_settings: {var} appears {len(vals)} times in "
+                             f"pid {pid}'s command/environment; refusing to guess")
+        stamp[field] = vals[0] if vals else "unset"
+    return stamp
 
 
 # ------------------------------------------------------------ mlx runtime stamp (sprint I / I3)
@@ -1981,11 +2273,17 @@ def _snapshot_case(case: dict) -> dict:
              "completion_tokens": t["completion_tokens"], "wall_ms": t["wall_ms"]}
             for t in turns_detail
         ]
+    scoped_detail = (case.get("detail") or {}).get("scoped_rule")
+    if scoped_detail is not None:
+        entry["scoped_rule_fired"] = len(scoped_detail["fired"])   # AS-3, arm runs only
+        entry["scoped_rule_delivered"] = sum(1 for f in scoped_detail["fired"]
+                                             if f["delivered"])
     return entry
 
 
 def snapshot_payload(agent: dict, exam: dict, provider: str, model: str, result: dict,
-                     *, loads: int | None = None, runtime: dict | None = None) -> dict:
+                     *, loads: int | None = None, runtime: dict | None = None,
+                     scoped_rule: str = "off") -> dict:
     """Evidence bundle written by --snapshot. Additive over the original
     {provider, model, train_score, heldout_score} — cmd_check only ever reads those
     four keys, so old snapshots without this bundle remain valid.
@@ -2024,6 +2322,9 @@ def snapshot_payload(agent: dict, exam: dict, provider: str, model: str, result:
     # snapshots for every agent without a library (all of them today).
     if agent.get("library_sha") is not None:
         payload["library_sha"] = agent["library_sha"]
+    if scoped_rule != "off":
+        # AS-3: an arm's snapshot is marked, and snapshot_preflight refuses it as a baseline.
+        payload["scoped_rule"] = scoped_rule
     return payload
 
 
@@ -2060,6 +2361,12 @@ def refuse_snapshot_on_outage(result: dict) -> None:
 def save_result(result: dict, *, subdir: str | None = None,
                 suffix: str | None = None) -> Path:
     d = RESULTS_DIR if subdir is None else RESULTS_DIR / subdir
+    if result.get("scoped_rule") is not None:
+        # AS-3: an arm's results (plain, per-load, aggregate, split) live under
+        # results/arm-<arm>/, never at the top level where taxonomy.py / policy.py adopt
+        # the file as the canonical row, and never over the baseline's per-load files.
+        base = RESULTS_DIR / f"arm-{result['scoped_rule']}"
+        d = base if subdir is None else base / subdir
     d.mkdir(parents=True, exist_ok=True)
     safe_model = result["model"].replace("/", "_").replace(":", "_")
     safe_provider = result["provider"].replace("/", "_").replace(":", "_")
@@ -2102,7 +2409,8 @@ def _validate_loads(n: int) -> None:
 
 def take_snapshot_loads(agent: dict, exam: dict, provider: str, model: str, loads: int,
                         *, timeout: int | None = None, dedupe_tools: bool = False,
-                        assembly: str = "full") -> tuple[dict, dict]:
+                        assembly: str = "full", scoped_rule: str = "off",
+                        server_settings_fn=None) -> tuple[dict, dict]:
     """The ONE mechanism `cmd_run --snapshot` and `cmd_run_all --snapshot` both
     go through (criterion v3's closing sentence on clause 2). Runs `loads` full
     passes of the exam — unloading the model via the native API before each pass
@@ -2114,8 +2422,14 @@ def take_snapshot_loads(agent: dict, exam: dict, provider: str, model: str, load
     the aggregate is computed, so a crash mid-run still leaves the completed
     loads on disk. Returns (aggregate_result, runtime) — runtime is
     {"name": provider, "version": ollama_version() or None} per criterion v3, or
-    for provider "mlx" the three-field `mlx_runtime()` stamp (sprint I / I3)."""
+    for provider "mlx" the three-field `mlx_runtime()` stamp (sprint I / I3). For
+    "ollama" the block also carries kv_cache_type + flash_attention read from the server's
+    environment (AS-4): once BEFORE load 1 (undeterminable -> SystemExit before any
+    inference) and once AFTER the last load; a difference raises (the server restarted
+    mid-snapshot). `server_settings_fn` defaults to `ollama_server_settings`."""
     is_ollama = provider == "ollama"
+    if server_settings_fn is None:
+        server_settings_fn = ollama_server_settings
     if provider == "mlx":
         # Sprint I / I3: the stamp replaces PR #93's blanket refusal. mlx_runtime()
         # refuses (SystemExit) when MLX_MODEL_PATH is unset — BEFORE any inference —
@@ -2123,6 +2437,8 @@ def take_snapshot_loads(agent: dict, exam: dict, provider: str, model: str, load
         runtime = mlx_runtime()
     else:
         runtime = {"name": provider, "version": ollama_version() if is_ollama else None}
+        if is_ollama:
+            runtime.update(server_settings_fn())
     load_results = []
     for k in range(1, loads + 1):
         if is_ollama:
@@ -2132,7 +2448,8 @@ def take_snapshot_loads(agent: dict, exam: dict, provider: str, model: str, load
             print(f"  load {k}/{loads}: provider {provider!r} is {where} — this is "
                   f"sample {k} of {loads}, not a model reload")
         result = run_exam(agent, exam, provider, model, timeout=timeout,
-                          dedupe_tools=dedupe_tools, assembly=assembly)
+                          dedupe_tools=dedupe_tools, assembly=assembly,
+                          scoped_rule=scoped_rule)
         # Save BEFORE the outage guard, same order cmd_run always used (D4's own
         # docstring promises "the results file was still written" on refusal) —
         # an operator diagnosing an outage needs the evidence, not just the cause.
@@ -2140,6 +2457,14 @@ def take_snapshot_loads(agent: dict, exam: dict, provider: str, model: str, load
         refuse_snapshot_on_outage(result)   # D4 hardening, per load
         print(f"  load {k}/{loads}: {_summary_line(result)}")
         load_results.append(result)
+    if is_ollama:
+        after = server_settings_fn()
+        for field in OLLAMA_STAMP_FIELDS:
+            if after.get(field) != runtime[field]:
+                raise SystemExit(
+                    f"error: ollama server {field} changed during the snapshot "
+                    f"({runtime[field]!r} before load 1, {after.get(field)!r} after the last "
+                    f"load); the loads did not share one server configuration — re-run")
     aggregate = aggregate_loads(load_results)
     # The aggregate is also the "current result" other read-only tools (taxonomy,
     # route) glob at the top level — unsuffixed, same convention as a plain run.
@@ -2156,6 +2481,15 @@ def cmd_run(args) -> int:
           f"provider={provider}  model={model}")
     print_not_verified(exam)
     _validate_loads(args.loads)
+    # getattr: callers (and tests) that build the Namespace by hand predate the flag.
+    scoped_rule = getattr(args, "scoped_rule", "off")
+    if scoped_rule != "off" and getattr(args, "assembly", "full") != "full":
+        raise SystemExit("--scoped-rule requires --assembly full (a scoped assembly can drop "
+                         "the injected message, so delivery could not be recorded truthfully)")
+    if scoped_rule != "off" and args.dedupe_tools:
+        # AS-3: the interaction is undefined on purpose. Refused before any inference.
+        raise SystemExit("--scoped-rule and --dedupe-tools cannot be combined "
+                         "(the interaction is undefined)")
     if args.snapshot and args.assembly != "full":
         # The committed snapshot IS the "full" arm (and what `check` reproduces);
         # a scoped snapshot would silently redefine the gate. Refused up front,
@@ -2177,19 +2511,26 @@ def cmd_run(args) -> int:
     if args.snapshot:
         aggregate, runtime = take_snapshot_loads(
             agent, exam, provider, model, args.loads, timeout=args.timeout,
-            dedupe_tools=args.dedupe_tools, assembly=args.assembly)
+            dedupe_tools=args.dedupe_tools, assembly=args.assembly,
+            scoped_rule=scoped_rule)
         print(f"{_summary_line(aggregate)}  (aggregate of {args.loads} loads)")
         unstable = [c["id"] for c in aggregate["cases"] if not c.get("stable", True)]
         print(f"unstable {len(unstable)}/{len(aggregate['cases'])}"
               + (f": {', '.join(unstable)}" if unstable else ""))
-        snap_path = ROOT / "evals" / args.agent / "snapshot.json"
+        # AS-3: an arm never writes the committed baseline file. diff, run-all, watcher
+        # and the page builders all read evals/<agent>/snapshot.json without the ARM
+        # preflight; a separate file keeps every one of them on the baseline.
+        snap_name = "snapshot.json" if scoped_rule == "off" else f"snapshot.{scoped_rule}.json"
+        snap_path = ROOT / "evals" / args.agent / snap_name
         snap_path.write_text(json.dumps(
             snapshot_payload(agent, exam, provider, model, aggregate,
-                             loads=args.loads, runtime=runtime), indent=2))
+                             loads=args.loads, runtime=runtime,
+                             scoped_rule=scoped_rule), indent=2))
         print(f"snapshot written -> {snap_path.relative_to(ROOT)}")
         return 0
     result = run_exam(agent, exam, provider, model, timeout=args.timeout,
-                      dedupe_tools=args.dedupe_tools, assembly=args.assembly)
+                      dedupe_tools=args.dedupe_tools, assembly=args.assembly,
+                      scoped_rule=scoped_rule)
     if split != "all":
         # A partial run must never pose as the full one: taxonomy.py and policy.py glob
         # results/*.json at the top level and would adopt it as the canonical row. Same
@@ -2211,7 +2552,8 @@ def _load_snapshot(agent_name: str) -> dict:
 
 
 def snapshot_preflight(snap: dict, exam: dict, version_fn=None,
-                       library_sha: str | None = None, mlx_runtime_fn=None) -> str | None:
+                       library_sha: str | None = None, mlx_runtime_fn=None,
+                       server_settings_fn=None) -> str | None:
     """PURE-ish (one native-API call, ZERO model inference). The pre-inference
     refusals shared by `cmd_check` and `cmd_check_all`: no `runtime` block; live
     ollama version differs from the snapshot's (ollama snapshots only — a hosted
@@ -2239,11 +2581,27 @@ def snapshot_preflight(snap: dict, exam: dict, version_fn=None,
     non-ollama snapshot never touches the network at all (pass a version_fn
     that raises if invoked). `mlx_runtime_fn` defaults to `mlx_runtime` and is
     called ONLY when `snap["provider"] == "mlx"`, and only after the snapshot's
-    stamp is known to carry all three fields."""
+    stamp is known to carry all three fields.
+
+    AS-4: an ollama snapshot must also carry runtime.kv_cache_type and
+    runtime.flash_attention (a missing one is a pre-stamp snapshot: RUNTIME:, refused
+    BEFORE the reader runs, never read as a match), and both must equal the live
+    server's (`server_settings_fn`, default `ollama_server_settings`, called ONLY for
+    ollama snapshots; KV_CACHE_TYPE: / FLASH_ATTENTION: prefixed). Order: VERSION,
+    RUNTIME presence, KV_CACHE_TYPE, FLASH_ATTENTION. A SystemExit from the reader is
+    never caught — undeterminable settings refuse, they never pass. Hosted and mlx
+    snapshots are never asked for these fields (halt 2)."""
+    if server_settings_fn is None:
+        server_settings_fn = ollama_server_settings
     if version_fn is None:
         version_fn = ollama_version
     if mlx_runtime_fn is None:
         mlx_runtime_fn = mlx_runtime
+    if "scoped_rule" in snap:
+        # AS-3: FIRST refusal, before any version/network call. A scoped/sham arm's
+        # snapshot (a `run --snapshot --scoped-rule ...` side effect) is not the baseline.
+        return (f"ARM: snapshot carries scoped_rule={snap['scoped_rule']!r}; it is an "
+                f"intervention-arm artifact, never a baseline - restore the committed snapshot")
     if "runtime" not in snap:
         return "RUNTIME: snapshot has no runtime block; re-snapshot"
     if snap.get("provider") == "ollama":
@@ -2252,6 +2610,15 @@ def snapshot_preflight(snap: dict, exam: dict, version_fn=None,
         if live != want:
             return (f"VERSION: live ollama {live!r} != snapshot runtime.version "
                     f"{want!r}; re-snapshot")
+        for field in OLLAMA_STAMP_FIELDS:
+            if field not in snap["runtime"]:
+                return (f"RUNTIME: ollama snapshot runtime block has no {field!r} "
+                        f"(pre-stamp shape); re-snapshot")
+        live_srv = server_settings_fn()
+        for field in OLLAMA_STAMP_FIELDS:
+            if live_srv[field] != snap["runtime"][field]:
+                return (f"{field.upper()}: live ollama server {field} {live_srv[field]!r} != "
+                        f"snapshot runtime.{field} {snap['runtime'][field]!r}; re-snapshot")
     elif snap.get("provider") == "mlx":
         stamped = snap["runtime"]
         for field in MLX_STAMP_FIELDS:
@@ -2323,14 +2690,54 @@ def compare_to_snapshot(snap: dict, result: dict, tolerance: float = 0.0) -> dic
     }
 
 
-def _print_verdict(verdict: dict) -> bool:
+def moves_first_ids(exam: dict, model: str) -> dict:
+    """PURE. {case id: number of evidence entries} for every case carrying a
+    `moves_first` tag whose `observed_on` equals `model` (the snapshot model).
+    Report-only metadata: it annotates `check` output and never touches the
+    verdict. Raises ValueError on a malformed tag (fail loud, never skip)."""
+    found: dict = {}
+    for case in exam.get("cases", []):
+        if "moves_first" not in case:
+            continue
+        cid, mf = case.get("id"), case["moves_first"]
+        if not isinstance(mf, dict):
+            raise ValueError(f"moves_first on {cid!r}: must be a dict, got {type(mf).__name__}")
+        obs = mf.get("observed_on")
+        if not isinstance(obs, str) or not obs:
+            raise ValueError(f"moves_first on {cid!r}: observed_on must be a non-empty str")
+        ev = mf.get("evidence")
+        if (not isinstance(ev, list) or not ev
+                or not all(isinstance(e, str) and e for e in ev)):
+            raise ValueError(f"moves_first on {cid!r}: evidence must be a non-empty "
+                             f"list of non-empty str")
+        if obs == model:
+            found[cid] = len(ev)
+    return found
+
+
+def _print_verdict(verdict: dict, moves_first: dict | None = None,
+                   model: str | None = None) -> bool:
     """Per-case table (drift rows first, then exempt), then the aggregate line —
     states which of (a) drift / (b) regression fired when either did. Returns
-    verdict['ok'] for the caller's exit code."""
+    verdict['ok'] for the caller's exit code. `moves_first` (from moves_first_ids)
+    only annotates DRIFT rows; it never changes the verdict or the return."""
+    moves_first = moves_first or {}
+    tagged, untagged = [], []
     for cid, was, now, failures in verdict["drift"]:
         checks = "; ".join(f.get("check", "?") for f in failures)
+        tag = ""
+        if cid in moves_first:
+            tagged.append(cid)
+            on = f" on {model}" if model else ""
+            tag = f"  [moves first{on}: {moves_first[cid]} recorded nudges]"
+        else:
+            untagged.append(cid)
         print(f"  DRIFT  {cid}: snapshot={was} now={now}"
-              + (f"  ({checks})" if checks else ""))
+              + (f"  ({checks})" if checks else "") + tag)
+    if tagged:
+        print(f"  moves-first: {len(tagged)} of {len(tagged) + len(untagged)} "
+              f"drifted case(s) are known to move first ({', '.join(tagged)}); "
+              f"{len(untagged)} are not ({', '.join(untagged) or 'none'})")
     for cid, now in verdict["exempt"]:
         print(f"  exempt {cid}: unstable in snapshot, now={now}")
     if verdict["ok"]:
@@ -2356,6 +2763,10 @@ def cmd_check(args) -> int:
     cause = snapshot_preflight(snap, exam, library_sha=agent.get("library_sha"))
     if cause:
         sys.exit(f"error: {cause}")
+    try:
+        moves_first = moves_first_ids(exam, snap["model"])
+    except ValueError as exc:
+        sys.exit(f"error: {exc}")
     print(f"exam: {args.agent}  mode={exam.get('mode', 'labels')}  "
           f"provider={snap['provider']}  model={snap['model']}")
     print_not_verified(exam)
@@ -2365,7 +2776,7 @@ def cmd_check(args) -> int:
     result = run_exam(agent, exam, snap["provider"], snap["model"],
                       dedupe_tools=args.dedupe_tools)
     verdict = compare_to_snapshot(snap, result, tolerance=args.tolerance)
-    return 0 if _print_verdict(verdict) else 1
+    return 0 if _print_verdict(verdict, moves_first=moves_first, model=snap["model"]) else 1
 
 
 def _diff_metrics_cols(result: dict) -> tuple[str, str]:
@@ -2685,11 +3096,17 @@ def cmd_check_all(args) -> int:
             print(f"REFUSED: {cause}")
             problems.append(name)
             continue
+        try:
+            moves_first = moves_first_ids(exam, snap["model"])
+        except ValueError as exc:
+            print(f"REFUSED: {exc}")
+            problems.append(name)
+            continue
         if snap["provider"] == "ollama":
             ollama_unload(snap["model"])
         result = run_exam(agent, exam, snap["provider"], snap["model"])
         verdict = compare_to_snapshot(snap, result, tolerance=args.tolerance)
-        if not _print_verdict(verdict):
+        if not _print_verdict(verdict, moves_first=moves_first, model=snap["model"]):
             problems.append(name)
     if problems:
         print(f"\nFAILED: {', '.join(problems)}")
@@ -3280,6 +3697,14 @@ def main() -> int:
                                  "byte-identical to before) or a rule-scoped slice "
                                  "(E27 A/B arm; single-turn cases and turn 0 unaffected)")
         if name == "run":
+            # AS-3: the scoped-rule arm. `run` ONLY - `check` reproduces the committed
+            # baseline and must not be able to move a score; never an agent.yaml field.
+            # Unrelated to --assembly scoped (E27).
+            sp.add_argument("--scoped-rule", choices=list(SCOPED_RULE_ARMS), default="off",
+                            help="AS-3 arm: show one rule inside the tool loop after a "
+                                 "repeated successful call (scoped = E6 fix text, sham = "
+                                 "length-matched generic text; default off; refused with "
+                                 "--dedupe-tools)")
             sp.add_argument("--model")
             sp.add_argument("--snapshot", action="store_true")
             sp.add_argument("--split", choices=["all", "train", "heldout"], default="all",

@@ -5,11 +5,19 @@ the repo-radar ledger where the model has a row, else list_rates.json (OpenRoute
 pass^k column: the local champion row carries pass^3 from its snapshot (cases passed on all 3 loads); every single-pass hosted row
 says "1 run" until the three same-day repeats exist. The heading counts the candidates that competed and how many sit within one
 case of the best (the tie band) — the selection-bias denominator (pickup note 2 Oct, arXiv 2609.25848).
+"resists injection" column (M1, 2026-10-08; LAST column, helpers in injection_column.py): joins a row's own per-case records (the committed snapshot.json for the
+local champion, a results/*.json file for every other row) to the `"class": "injection"` cases in that exam's
+cases.json, BY ID, and prints k/m over whichever of those ids the row's own case list actually carries. No id match
+at all -> "—", never "0/2" (a row that never ran the new cases has no verdict to report, not a verdict of zero).
+This lane performs no re-snapshot, so every row's cell is "—" at merge time — see the PR body.
 Deterministic, no inference. Run from the repo root: python3 docs/probes/matrix-2026-09-27/build_tables.py"""
 import json, glob, os, csv, collections
 DEATHS = {}; exam_ctx = [None]
 ROOT = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(ROOT, "..", "..", ".."))
+import sys; sys.path.insert(0, ROOT)
+from injection_column import injection_ids_for, injection_cell  # noqa: E402  (pure helpers, pinned by evals/test_injection_cases.py)
+
 LEDGER = os.path.expanduser("~/code/Michiel-DK/repo-radar/data/prices/ledger.tsv")
 rates = {r["id"]: (float(r["prompt_per_m"]), float(r["completion_per_m"]), "ledger " + r["date"]) for r in csv.DictReader(open(LEDGER), delimiter="\t")}
 for k, v in json.load(open(os.path.join(ROOT, "list_rates.json"))).items():
@@ -43,20 +51,31 @@ def row(d, model_label, can, rate_key, note=""):
         p, q, tag = rates[rate_key]; x = (mt['prompt_tokens']*p + mt['completion_tokens']*q)/1e6/len(cs)*1e4; cost = (f"{x:,.2f}" if x < 10 else f"{x:,.0f}") + f" ({tag.split()[0]})"
     elif rate_key == "local": cost = "≈0"
     return dict(model=model_label, can=can, held=sum(1 for c in h if c["passed"]), n=len(h), wall=(sum(walls)/len(walls)/1000 if walls else None),
-                out=(mt.get("completion_tokens", 0)/len(cs) if mt else None), dead=dead, cost=cost, note=note)
+                out=(mt.get("completion_tokens", 0)/len(cs) if mt else None), dead=dead, cost=cost, note=note,
+                inj=injection_cell(cs, injection_ids_for(exam_ctx[0])))
 
 def load_rows(exam):
-    exam_ctx[0] = exam; rows = []
+    exam_ctx[0] = exam; rows = []; sat_ids = set()   # held-out ids the HOSTED rows actually sat: the comparable set for the local row
     for f in glob.glob(os.path.join(ROOT, "results", f"{exam}__*.json")):
         d = json.load(open(f)); m = d["model"]; rows.append(row(d, m, CAN.get(m, "?"), m, "unpinned" if m.startswith(("deepseek", "google", "mistralai", "qwen", "openai/gpt-oss")) else "pinned"))
+        sat_ids.update(c["id"] for c in d["cases"] if c.get("split") == "heldout")
     if exam == "call-fields":
         for f in glob.glob(os.path.join(REPO, "docs/probes/call-fields-2026-09-25/results/hosted-*-2026-09-25*.json")):
             if "-2026-09-25.json" in f and ("glm" in f or "kimi" in f): continue  # 1024-budget first passes superseded by the reruns
             d = json.load(open(f)); m = d["model"]; rows.append(row(d, m, CAN.get(m, "?"), m, "unpinned" if "small" in f else "pinned"))
+            sat_ids.update(c["id"] for c in d["cases"] if c.get("split") == "heldout")
     # local champion from the committed snapshot + its results file
     snap = os.path.join(REPO, "evals", exam, "snapshot.json")
     if os.path.exists(snap):
-        s = json.load(open(snap)); hc = [c for c in s["cases"] if c["split"] == "heldout"]
+        s = json.load(open(snap)); inj_ids = set(injection_ids_for(exam))
+        # The held-out SCORE and its denominator are computed on the case set every row shares — the injection cases
+        # (M1) are excluded here and reported ONLY in the "resists injection" column. Otherwise a re-sat local row carries
+        # two more held-out cases than the hosted rows and raw counts are ranked across different denominators
+        # (PR #102 refuter: the page printed "11/10"). The snapshot itself keeps every case.
+        # The comparable set is the held-out ids the hosted rows SAT (PR #102 excluded injection ids only; M3's plain write cases
+        # re-opened the gap: 18/21 vs 18). Cases added after the matrix — injection, write, whatever comes next — are scored in the
+        # snapshot and in their own columns, never in a denominator the hosted rows do not share.
+        hc = [c for c in s["cases"] if c["split"] == "heldout" and (c["id"] in sat_ids if sat_ids else c["id"] not in inj_ids)]
         rf = os.path.join(REPO, "results", f"{exam}__ollama__{LOCAL[exam].replace(':','_').replace('/','_')}.json")
         wall = out = None
         if os.path.exists(rf):
@@ -64,7 +83,12 @@ def load_rows(exam):
             ws = [c.get("detail", {}).get("metrics", {}).get("wall_ms") for c in d["cases"]]; ws = [w for w in ws if w]
             wall = sum(ws)/len(ws)/1000 if ws else None; out = mt.get("completion_tokens", 0)/len(d["cases"]) if mt else None
         p3 = sum(1 for c in hc if c["passed"] and c.get("stable", True))
-        r = dict(model=f"{s['model']} (local champion, 3-load snapshot {s['date'][:10]})", can="local machine", held=sum(1 for c in hc if c["passed"]), n=len(hc), wall=wall, out=out, dead=0, cost="≈0", note="snapshot", passk=f"pass^3 {p3}/{len(hc)}")
+        # "resists injection" for the local champion is joined against the COMMITTED
+        # snapshot's own cases (s["cases"], not the results file) — the snapshot is
+        # what this lane's PR body means by "the committed snapshot has zero entries
+        # for the 6 new ids at merge time", so this cell is "—" today by construction.
+        inj = injection_cell(s["cases"], injection_ids_for(exam))
+        r = dict(model=f"{s['model']} (local champion, 3-load snapshot {s['date'][:10]})", can="local machine", held=sum(1 for c in hc if c["passed"]), n=len(hc), wall=wall, out=out, dead=0, cost="≈0", note="snapshot", passk=f"pass^3 {p3}/{len(hc)}", inj=inj)
         if os.path.exists(rf) and r["wall"] is None:
             rr = row(json.load(open(rf)), r["model"], "local machine", "local", "snapshot"); r["wall"], r["out"] = rr["wall"], rr["out"]
         rows.append(r)
@@ -76,12 +100,12 @@ for exam in ORDER:
     n = rows[0]["n"]
     best = max(r["held"] for r in rows); band = sum(1 for r in rows if r["held"] >= best - 1)
     print(f"\n### {TITLE[exam]} (`{exam}`, {n} held-out cases; {len(rows)} candidates competed, {band} within one case of the best)\n")
-    print("| model | can run on | heldout | pass^k | s/call | out tok/call | died | $/10k (rate) | run |")
-    print("|---|---|---|---|---|---|---|---|---|")
+    print("| model | can run on | heldout | pass^k | s/call | out tok/call | died | $/10k (rate) | run | resists injection |")   # the new column is LAST: scripts/build_results_page.py unpacks the first 9 cells by position
+    print("|---|---|---|---|---|---|---|---|---|---|")
     for r in sorted(rows, key=lambda r: (-r["held"], (r["wall"] or 99))):
         pk = r.get("passk", "1 run")
-        print(f"| {r['model']} | {r['can']} | **{r['held']}**/{r['n']} | {pk} | {r['wall']:.1f} | {r['out']:.0f} | {r['dead']} | {r['cost']} | {r['note']} |" if r["wall"] is not None else
-              f"| {r['model']} | {r['can']} | **{r['held']}**/{r['n']} | {pk} | | | {r['dead']} | {r['cost']} | {r['note']} |")
+        wall_txt = f"{r['wall']:.1f}" if r["wall"] is not None else ""; out_txt = f"{r['out']:.0f}" if r["out"] is not None else ""   # a --snapshot aggregate carries wall_ms per case but no metrics_totals (sprint-map 23 Sep): wall without out is a real shape
+        print(f"| {r['model']} | {r['can']} | **{r['held']}**/{r['n']} | {pk} | {wall_txt} | {out_txt} | {r['dead']} | {r['cost']} | {r['note']} | {r['inj']} |")
 
 print("\n### Deaths by recorded cause (arm → {cause: count}); a death is a failed case with no parseable answer\n")
 for (exam, m), d in sorted(DEATHS.items()):

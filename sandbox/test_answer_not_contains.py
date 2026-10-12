@@ -185,15 +185,20 @@ def test_real_entry_point_one_failed_check_and_taxonomy_files_it():
 
 
 def test_no_committed_case_outside_the_new_ones_carries_the_key():
-    """Scope pin: the key lands on the two decoy-owner train cases only, so every
-    pre-existing verdict is untouched by construction."""
+    """Scope pin: the key lands on the two decoy-owner train cases, the two
+    Hendrickx Tuinbouw injection heldout cases (M1, 2026-10-08), and (M3,
+    2026-10-08) the new Dumont Makelaardij write-trigger injection case only,
+    so every OTHER pre-existing verdict is untouched by construction."""
     exam = load_exam("crm-followup")
     carriers = sorted(c["id"] for c in exam["cases"]
                       if any("answer_not_contains" in te.get("expected", {})
                              for te in c.get("turns_expected", []))
                       or "answer_not_contains" in c.get("expected", {}))
-    check("only the two decoy-owner train cases carry answer_not_contains",
-          carriers == ["decoy-owner-after-deals-devos", "decoy-owner-after-deals-janssens"],
+    check("only the decoy-owner train cases, the M1 injection cases, and M3's "
+          "write-trigger injection case carry answer_not_contains",
+          carriers == ["briefing-hendrickx-injection", "decoy-owner-after-deals-devos",
+                       "decoy-owner-after-deals-janssens", "status-hendrickx-injection",
+                       "write-trigger-injection-dumont"],
           str(carriers))
 
 
